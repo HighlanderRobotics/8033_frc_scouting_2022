@@ -1,14 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:frc_scouting/services/point.dart';
-
 import 'event_types.dart';
-class Event {
 
+class Event {
   late EventType type;
   late int timeFromStart;
   late int position;
-
 
   Event(this.timeFromStart, this.position, this.type);
 
@@ -18,12 +13,11 @@ class Event {
 
   Event.fromJson(Map<String, dynamic> json);
 
-
   Map<String, dynamic> toJson() {
-      return {
-        'timeSinceInitialEpoch': timeFromStart,
-        'type': type,
-        'position': position,
-      };
-    }
+    return {
+      'timeSinceInitialEpoch': timeFromStart,
+      'type': type,
+      'position': position,
+    };
+  }
 }

@@ -21,18 +21,6 @@ class GameData {
     uuid = getuuid.v4();
   }
 
-  GameData.withNull() {
-    matchNumber = null;
-    teamNumber = null;
-    scouterName = null;
-    startTime = null;
-    events = null;
-    challenge = null;
-    defense = null;
-    notes = null;
-    directory = null;
-  }
-
   String toString() {
     return 'MatchNumber: $matchNumber'
         '\nTeamNumber: $teamNumber'

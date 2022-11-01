@@ -35,11 +35,10 @@ class DataEntryScreen extends StatelessWidget {
             ElevatedButton(
               child: const Text('Add Dummy Event'),
               onPressed: () {
-                c.insertEvent(Event(
+                c.addEvent(Event(
                     timeSince: rng.nextInt(100),
                     type: EventType.shotSuccess,
                     position: 2));
-                c.update();
               },
             ),
             ElevatedButton(

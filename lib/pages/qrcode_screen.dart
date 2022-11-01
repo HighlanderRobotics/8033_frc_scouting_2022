@@ -18,21 +18,21 @@
 //   late List<String> jsonData;
 //   final GlobalKey globalKey = GlobalKey();
 
-//   void saveData() async {
-//     String path = gameData.directory.path;
-//     print('Path: $path');
+  // void saveData() async {
+  //   String path = gameData.directory.path;
+  //   print('Path: $path');
 
-//     for (int i = 0; i < jsonData.length; i++) {
-//       var filePath = path + '/${gameData.uuid.toString()}_$i.txt';
+  //   for (int i = 0; i < jsonData.length; i++) {
+  //     var filePath = path + '/${gameData.uuid.toString()}_$i.txt';
 
-//       File file = File(filePath);
-//       file.writeAsString('${jsonData.elementAt(i)}');
-//     }
+  //     File file = File(filePath);
+  //     file.writeAsString('${jsonData.elementAt(i)}');
+  //   }
 
-//     // TODO: Toast popup
-//     print('Saved');
-//     isDataSaved = true;
-//   }
+  //   // TODO: Toast popup
+  //   print('Saved');
+  //   isDataSaved = true;
+  // }
 
 //   @override
 //   void initState() {
