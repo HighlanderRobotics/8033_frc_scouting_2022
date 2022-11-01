@@ -4,19 +4,19 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../services/game_data.dart';
 
 class FRCQrCodeView extends StatefulWidget {
-  final GameData gameData;
+  final GameData matchData;
   final List<String> jsonData;
   final bool isDataSaved;
 
   const FRCQrCodeView(
       {super.key,
-      required this.gameData,
+      required this.matchData,
       required this.jsonData,
       required this.isDataSaved});
 
   @override
   State<FRCQrCodeView> createState() => _FRCQrCodeViewState(
-      gameData: this.gameData,
+      gameData: this.matchData,
       jsonData: this.jsonData,
       isDataSaved: this.isDataSaved);
 }
@@ -98,7 +98,7 @@ class _FRCQrCodeViewState extends State<FRCQrCodeView> {
             qrCodeHeaderRow("Match Number: ", gameData.matchNumber.toString()),
             qrCodeHeaderRow("Team Number: ", gameData.teamNumber.toString()),
             qrCodeHeaderRow(
-                "Number of events: ", gameData.events.events.length.toString()),
+                "Number of events: ", gameData.events!.events.length.toString()),
           ]),
         ),
       ],

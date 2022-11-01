@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter/services.dart';
+import 'package:frc_scouting/getx_screens/home_screen.dart';
+import 'package:get/get.dart';
 
 class Loading extends StatefulWidget {
   const Loading({Key? key}) : super(key: key);
@@ -10,15 +12,12 @@ class Loading extends StatefulWidget {
 }
 
 class _LoadingState extends State<Loading> {
-
   void getData() async {
     // Waits for screen to build?
     // TODO: Get any api data and load preset data from cloud here
     await Future.delayed(Duration(milliseconds: 1), () {});
 
-
-
-    Navigator.pushReplacementNamed((context), '/home');
+    Get.to(() => HomeScreen());
   }
 
   @override
@@ -46,7 +45,9 @@ class _LoadingState extends State<Loading> {
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 25,),
+          SizedBox(
+            height: 25,
+          ),
           Center(
             child: SpinKitFadingCube(
               color: Colors.white,

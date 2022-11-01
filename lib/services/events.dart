@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:frc_scouting/services/event.dart';
 
 class Events {
-
   late Map<String, dynamic> events;
   late List<Event> eventsAsList;
 
