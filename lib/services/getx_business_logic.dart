@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 
 import '../getx_screens/home_screen.dart';
-import 'event_types.dart';
+import 'event.dart';
+import 'match_data.dart';
 
 class BusinessLogicController extends GetxController {
   var matchData = MatchData().obs;
@@ -113,64 +113,4 @@ class MatchesFormat {
   int numberOfInvalidFiles;
 
   MatchesFormat(this.validMatches, this.numberOfInvalidFiles);
-}
-
-class MatchData {
-  var uuid = const Uuid().v4();
-  var matchNumber = 0.obs;
-  var teamNumber = 0.obs;
-  var scouterId = 0.obs;
-  var startTime = 0;
-  var events = <Event>[].obs;
-  var didDefense = false.obs;
-  var notes = "".obs;
-  var challengeResult = "Climbing Challenge".obs;
-  var isSaved = false.obs;
-
-  MatchData();
-
-  MatchData.fromJson(Map<String, dynamic> json) {
-    uuid = json['uuid'];
-    matchNumber = RxInt(json['matchNumber']);
-    teamNumber = RxInt(json['teamNumber']);
-    scouterId = RxInt(json['scouterId']);
-    startTime = json['startTime'];
-    events =
-        RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
-    didDefense = RxBool(json['didDefense']);
-    notes = RxString(json['notes']);
-    challengeResult = RxString(json['challengeResult']);
-  }
-
-  Map<String, dynamic> toJson() => {
-        'uuid': uuid,
-        'matchNumber': matchNumber.value,
-        'teamNumber': teamNumber.value,
-        'scouterId': scouterId.value,
-        'startTime': startTime,
-        'events': events.map((event) => event.toJson()).toList(),
-        'notes': notes.value,
-        'didDefense': didDefense.value,
-        'challengeResult': challengeResult.value,
-      };
-}
-
-class Event {
-  var timeSince = 0;
-  var type = EventType.shotSuccess;
-  var position = 0;
-
-  Event({required this.timeSince, required this.type, required this.position});
-
-  Map<String, dynamic> toJson() => {
-        'timeSince': timeSince,
-        'type': type.toString(),
-        'position': position,
-      };
-
-  Event.fromJson(Map<String, dynamic> json) {
-    timeSince = json['timeSince'];
-    type = EventType.values.firstWhere((e) => e.toString() == json['type']);
-    position = json['position'];
-  }
 }

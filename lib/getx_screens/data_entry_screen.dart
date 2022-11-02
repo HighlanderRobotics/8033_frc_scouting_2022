@@ -3,6 +3,7 @@ import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:get/get.dart';
 import 'dart:math';
 
+import '../services/event.dart';
 import '../services/event_types.dart';
 import '../services/getx_business_logic.dart';
 
