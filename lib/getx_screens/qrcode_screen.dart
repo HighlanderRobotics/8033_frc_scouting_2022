@@ -6,15 +6,15 @@ import 'package:qr_flutter/qr_flutter.dart';
 class QrCodeScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
   var pageNumber = 0.obs;
-  late final List<String> QrCodes;
+  late final List<String> matchQrCodes;
+
+  QrCodeScreen({required this.matchQrCodes});
 
   void nextPage() => pageNumber.value =
-      (pageNumber.value < QrCodes.length - 1) ? pageNumber.value + 1 : 0;
+      (pageNumber.value < matchQrCodes.length - 1) ? pageNumber.value + 1 : 0;
 
   @override
   Widget build(BuildContext context) {
-    QrCodes = c.matchData.value.separateEventsToQrCodes();
-
     return Scaffold(
         appBar: AppBar(title: Text("QR Code")),
         body: Padding(
@@ -23,7 +23,7 @@ class QrCodeScreen extends StatelessWidget {
             () => ListView(
               children: [
                 QrImage(
-                    data: QrCodes[pageNumber.value],
+                    data: matchQrCodes[pageNumber.value],
                     version: QrVersions.auto,
                     errorCorrectionLevel: QrErrorCorrectLevel.L,
                     gapless: false,
@@ -35,14 +35,18 @@ class QrCodeScreen extends StatelessWidget {
                         ),
                       );
                     }),
-                Center(
-                  child: Text(
-                      "Page ${pageNumber.value + 1} out of ${QrCodes.length}"),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Center(
+                    child: Text(
+                        "Page ${pageNumber.value + 1} out of ${matchQrCodes.length}"),
+                  ),
                 ),
-                ElevatedButton(
-                  child: Text("Next"),
-                  onPressed: () => nextPage(),
-                ),
+                if (matchQrCodes.length > 1)
+                  ElevatedButton(
+                    onPressed: nextPage,
+                    child: const Text("Next Page"),
+                  ),
                 ElevatedButton(
                   child: Text("Done"),
                   onPressed: () => c.reset(),

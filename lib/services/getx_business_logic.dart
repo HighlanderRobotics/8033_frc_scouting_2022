@@ -10,6 +10,12 @@ import 'event_types.dart';
 
 class BusinessLogicController extends GetxController {
   var matchData = MatchData().obs;
+  late Directory directory;
+
+  void onInit() async {
+    directory = await getApplicationDocumentsDirectory();
+    super.onInit();
+  }
 
   void addEvent(Event event) {
     matchData.value.events.add(event);
@@ -19,6 +25,30 @@ class BusinessLogicController extends GetxController {
     if (challenge != "Climbing Challenge") {
       matchData.value.challengeResult.value = challenge;
     }
+  }
+
+  List<File> getFilesInDirectoryMask() {
+    final List<FileSystemEntity> entities = directory.listSync().toList();
+    return entities.whereType<File>().toList();
+  }
+
+  bool _isFileValid(File file) {
+    return file.uri.pathSegments.last.substring(0, 4).contains("frc-");
+  }
+
+  List<MatchData> getMatches() {
+    final List<File> files = getFilesInDirectoryMask();
+    final List<MatchData> matches = [];
+
+    for (var file in files) {
+      if (_isFileValid(file)) {
+        final String contents = file.readAsStringSync();
+        final MatchData match = MatchData.fromJson(jsonDecode(contents));
+        matches.add(match);
+      }
+    }
+
+    return matches;
   }
 
   void reset() {
@@ -41,16 +71,18 @@ class MatchData {
 
   MatchData();
 
-  MatchData.fromJson(Map<String, dynamic> json)
-      : uuid = json['uuid'].obs,
-        matchNumber = json['matchNumber'],
-        teamNumber = json['teamNumber'],
-        scouterName = json['scouterName'],
-        startTime = json['startTime'],
-        events = json['events'].map((e) => Event.fromJSON(e)).toList().obs,
-        didDefense = json['didDefense'].obs,
-        notes = json['notes'].obs,
-        challengeResult = json['challengeResult'].obs;
+  MatchData.fromJson(Map<String, dynamic> json) {
+    uuid = json['uuid'];
+    matchNumber = json['matchNumber'];
+    teamNumber = json['teamNumber'];
+    scouterName = json['scouterName'];
+    startTime = json['startTime'];
+    events =
+        RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
+    didDefense = RxBool(json['didDefense']);
+    notes = RxString(json['notes']);
+    challengeResult = RxString(json['challengeResult']);
+  }
 
   Map<String, dynamic> toJson() => {
         'uuid': uuid,
@@ -88,9 +120,6 @@ class MatchData {
   }
 
   Future<void> saveMatchData() async {
-    // Check if file already exists - if it does - check if it containd the exact same content
-    // If it doesn't write the file
-
     if (!(isSaved.value)) {
       await _writeToFile();
     }
@@ -102,7 +131,7 @@ class MatchData {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path;
 
-    var filePath = path + "/$uuid.json";
+    var filePath = path + "/frc-$uuid.json";
     print("Writing to file: $filePath");
     File file = File(filePath);
     file.writeAsString(jsonEncode(toJson()));
@@ -111,9 +140,11 @@ class MatchData {
 }
 
 class Event {
-  int timeSince;
-  EventType type;
-  int position;
+  var timeSince = 0;
+  var type = EventType.shotSuccess;
+  var position = 0;
+
+  Event({required this.timeSince, required this.type, required this.position});
 
   Map<String, dynamic> toJson() => {
         'timeSince': timeSince,
@@ -121,16 +152,11 @@ class Event {
         'position': position,
       };
 
-  // String toJsonString() {
-  //   return '{"timeSince": $timeSince, "type": "$type", "position": $position}';
-  // }
-
-  Event.fromJSON(Map<String, dynamic> json)
-      : timeSince = json['timeSince'],
-        type = json['type'],
-        position = json['position'];
-
-  Event({required this.timeSince, required this.type, required this.position});
+  Event.fromJson(Map<String, dynamic> json) {
+    timeSince = json['timeSince'];
+    type = EventType.values.firstWhere((e) => e.toString() == json['type']);
+    position = json['position'];
+  }
 }
 
 // extension ParseToString on Event {

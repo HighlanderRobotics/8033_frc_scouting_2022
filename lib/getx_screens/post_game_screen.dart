@@ -68,8 +68,10 @@ class PostGameScreen extends StatelessWidget {
               child: const Text("Go to QR Code"),
               onPressed: () async {
                 await c.matchData.value.saveMatchData();
-      
-                Get.to(() => QrCodeScreen());
+
+                Get.to(() => QrCodeScreen(
+                      matchQrCodes: c.matchData.value.separateEventsToQrCodes(),
+                    ));
               },
             )
           ],
