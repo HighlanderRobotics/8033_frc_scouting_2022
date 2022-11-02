@@ -58,12 +58,22 @@ class PostGameScreen extends StatelessWidget {
                         climbingChallenges[0]
                     ? null
                     : () async {
-                        await c.saveMatchData(c.matchData.value);
+                        if (!c.isPostGameDataValid()) {
+                          Get.snackbar(
+                            "Invalid Post Game Data",
+                            "Please select a climbing challenge",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        } else {
+                          await c.saveMatchData(c.matchData.value);
 
-                        Get.to(() => QrCodeScreen(
+                          Get.to(() {
+                            return QrCodeScreen(
                               matchQrCodes:
                                   c.separateEventsToQrCodes(c.matchData.value),
-                            ));
+                            );
+                          });
+                        }
                       },
                 child: const Text("Show QR Code"),
               ),

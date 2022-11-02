@@ -25,6 +25,9 @@ class BusinessLogicController extends GetxController {
         matchData.value.teamNumber.value != 0;
   }
 
+  bool isPostGameDataValid() =>
+      matchData.value.challengeResult.value != "Climbing Challenge";
+
   void addEvent(Event event) {
     matchData.value.events.add(event);
   }
@@ -36,7 +39,7 @@ class BusinessLogicController extends GetxController {
   }
 
   Future<void> saveMatchData(MatchData matchData) async {
-    if (!(matchData.isSaved.value)) {
+    if (!matchData.isSaved.value) {
       await _writeToFile(matchData);
     }
 
@@ -72,7 +75,7 @@ class BusinessLogicController extends GetxController {
         final String contents = file.readAsStringSync();
         final MatchData match = MatchData.fromJson(jsonDecode(contents));
         matches.validMatches.add(match);
-      } else if (!(file.uri.pathSegments.last.startsWith("."))) {
+      } else if (!file.uri.pathSegments.last.startsWith(".")) {
         matches.numberOfInvalidFiles++;
       }
     }
