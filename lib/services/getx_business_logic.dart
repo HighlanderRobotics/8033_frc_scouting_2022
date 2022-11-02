@@ -12,9 +12,16 @@ class BusinessLogicController extends GetxController {
   var matchData = MatchData().obs;
   late Directory directory;
 
+  @override
   void onInit() async {
     directory = await getApplicationDocumentsDirectory();
     super.onInit();
+  }
+
+  bool isHeaderDataValid() {
+    return matchData.value.scouterId.value != 0 &&
+        matchData.value.matchNumber.value != 0 &&
+        matchData.value.teamNumber.value != 0;
   }
 
   void addEvent(Event event) {
@@ -27,79 +34,55 @@ class BusinessLogicController extends GetxController {
     }
   }
 
-  List<File> getFilesInDirectoryMask() {
-    final List<FileSystemEntity> entities = directory.listSync().toList();
-    return entities.whereType<File>().toList();
+  Future<void> saveMatchData(MatchData matchData) async {
+    if (!(matchData.isSaved.value)) {
+      await _writeToFile(matchData);
+    }
+
+    return;
+  }
+
+  Future<void> _writeToFile(MatchData matchData) async {
+    Directory directory = await getApplicationDocumentsDirectory();
+    String path = directory.path;
+
+    var filePath = "$path/frc-${matchData.uuid}.json";
+    print("Writing to file: $filePath");
+    File file = File(filePath);
+    file.writeAsString(jsonEncode(matchData.toJson()));
+    print("Successfully wrote to file: $filePath");
+  }
+
+  List<FileSystemEntity> getFilesInDirectoryMask() {
+    return directory.listSync().toList();
   }
 
   bool _isFileValid(File file) {
     return file.uri.pathSegments.last.substring(0, 4).contains("frc-");
   }
 
-  List<MatchData> getMatches() {
-    final List<File> files = getFilesInDirectoryMask();
-    final List<MatchData> matches = [];
+  MatchesFormat getMatches() {
+    final List<FileSystemEntity> allFiles = getFilesInDirectoryMask();
+    final List<File> files = allFiles.whereType<File>().toList();
+    var matches = MatchesFormat([], 0);
 
     for (var file in files) {
       if (_isFileValid(file)) {
         final String contents = file.readAsStringSync();
         final MatchData match = MatchData.fromJson(jsonDecode(contents));
-        matches.add(match);
+        matches.validMatches.add(match);
+      } else {
+        matches.numberOfInvalidFiles++;
       }
     }
 
     return matches;
   }
 
-  void reset() {
-    matchData.value = MatchData();
-    Get.offAll(() => HomeScreen());
-  }
-}
-
-class MatchData {
-  var uuid = const Uuid().v4();
-  var matchNumber = 0;
-  var teamNumber = 0;
-  var scouterName = 0;
-  var startTime = 0;
-  var events = <Event>[].obs;
-  var didDefense = false.obs;
-  var notes = "".obs;
-  var challengeResult = "Climbing Challenge".obs;
-  var isSaved = false.obs;
-
-  MatchData();
-
-  MatchData.fromJson(Map<String, dynamic> json) {
-    uuid = json['uuid'];
-    matchNumber = json['matchNumber'];
-    teamNumber = json['teamNumber'];
-    scouterName = json['scouterName'];
-    startTime = json['startTime'];
-    events =
-        RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
-    didDefense = RxBool(json['didDefense']);
-    notes = RxString(json['notes']);
-    challengeResult = RxString(json['challengeResult']);
-  }
-
-  Map<String, dynamic> toJson() => {
-        'uuid': uuid,
-        'matchNumber': matchNumber,
-        'teamNumber': teamNumber,
-        'scouterName': scouterName,
-        'startTime': startTime,
-        'events': events.map((event) => event.toJson()).toList(),
-        'notes': notes.value,
-        'didDefense': didDefense.value,
-        'challengeResult': challengeResult.value,
-      };
-
-  List<String> separateEventsToQrCodes() {
+  List<String> separateEventsToQrCodes(MatchData matchData) {
     List<String> qrCodes = [];
     final numberOfQrCodes = (6900 / 3000).ceil();
-    var jsonString = jsonEncode(toJson());
+    var jsonString = jsonEncode(matchData.toJson());
     const qrCodeLimit = 2500;
 
     print("jsonString length: ${jsonString.length}");
@@ -119,24 +102,57 @@ class MatchData {
     return qrCodes;
   }
 
-  Future<void> saveMatchData() async {
-    if (!(isSaved.value)) {
-      await _writeToFile();
-    }
+  void reset() {
+    matchData.value = MatchData();
+    Get.offAll(() => HomeScreen());
+  }
+}
 
-    return;
+class MatchesFormat {
+  List<MatchData> validMatches;
+  int numberOfInvalidFiles;
+
+  MatchesFormat(this.validMatches, this.numberOfInvalidFiles);
+}
+
+class MatchData {
+  var uuid = const Uuid().v4();
+  var matchNumber = 0.obs;
+  var teamNumber = 0.obs;
+  var scouterId = 0.obs;
+  var startTime = 0;
+  var events = <Event>[].obs;
+  var didDefense = false.obs;
+  var notes = "".obs;
+  var challengeResult = "Climbing Challenge".obs;
+  var isSaved = false.obs;
+
+  MatchData();
+
+  MatchData.fromJson(Map<String, dynamic> json) {
+    uuid = json['uuid'];
+    matchNumber = RxInt(json['matchNumber']);
+    teamNumber = RxInt(json['teamNumber']);
+    scouterId = RxInt(json['scouterId']);
+    startTime = json['startTime'];
+    events =
+        RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
+    didDefense = RxBool(json['didDefense']);
+    notes = RxString(json['notes']);
+    challengeResult = RxString(json['challengeResult']);
   }
 
-  Future<void> _writeToFile() async {
-    Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path;
-
-    var filePath = path + "/frc-$uuid.json";
-    print("Writing to file: $filePath");
-    File file = File(filePath);
-    file.writeAsString(jsonEncode(toJson()));
-    print("Successfully wrote to file: $filePath");
-  }
+  Map<String, dynamic> toJson() => {
+        'uuid': uuid,
+        'matchNumber': matchNumber.value,
+        'teamNumber': teamNumber.value,
+        'scouterId': scouterId.value,
+        'startTime': startTime,
+        'events': events.map((event) => event.toJson()).toList(),
+        'notes': notes.value,
+        'didDefense': didDefense.value,
+        'challengeResult': challengeResult.value,
+      };
 }
 
 class Event {
@@ -158,19 +174,3 @@ class Event {
     position = json['position'];
   }
 }
-
-// extension ParseToString on Event {
-//   String toShortString() {
-//     return toString().split('.').last;
-//   }
-// }
-
-// enum ClimbingChallenge {
-//   climbingChallenge,
-//   didntClimb,
-//   failedClimb,
-//   bottomBar,
-//   middleBar,
-//   highBar,
-//   traverse
-// }

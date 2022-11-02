@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/qrcode_screen.dart';
 import 'package:get/get.dart';
-import 'package:uuid/uuid.dart';
 
 import '../services/getx_business_logic.dart';
 
@@ -64,16 +63,22 @@ class PostGameScreen extends StatelessWidget {
             //     value: c.matchData.value.challengeResult,
             //   ),
             // ),
-            ElevatedButton(
-              child: const Text("Go to QR Code"),
-              onPressed: () async {
-                await c.matchData.value.saveMatchData();
+            Obx(
+              () => ElevatedButton(
+                child: const Text("Show QR Code"),
+                onPressed: c.matchData.value.challengeResult ==
+                        climbingChallenges[0]
+                    ? null
+                    : () async {
+                        await c.saveMatchData(c.matchData.value);
 
-                Get.to(() => QrCodeScreen(
-                      matchQrCodes: c.matchData.value.separateEventsToQrCodes(),
-                    ));
-              },
-            )
+                        Get.to(() => QrCodeScreen(
+                              matchQrCodes:
+                                  c.separateEventsToQrCodes(c.matchData.value),
+                            ));
+                      },
+              ),
+            ),
           ],
         ),
       ),

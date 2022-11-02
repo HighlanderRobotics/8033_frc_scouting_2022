@@ -29,37 +29,63 @@ class HomeScreen extends StatelessWidget {
                   decoration: const InputDecoration(hintText: "Scouter ID"),
                   controller: scouterIdTxtFieldController,
                   keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    c.matchData.value.scouterId.value =
+                        int.tryParse(value) ?? 0;
+                  },
                 ),
                 TextField(
                   decoration: const InputDecoration(hintText: "Match Number"),
                   controller: matchTxtFieldController,
                   keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    c.matchData.value.matchNumber.value =
+                        int.tryParse(value) ?? 0;
+                  },
                 ),
                 TextField(
                   decoration: const InputDecoration(hintText: "Team Number"),
                   controller: teamNumberTxtFieldController,
                   keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    c.matchData.value.teamNumber.value =
+                        int.tryParse(value) ?? 0;
+                  },
                 ),
               ],
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              c.matchData.value.scouterName =
-                  int.parse(scouterIdTxtFieldController.text);
-              c.matchData.value.matchNumber =
-                  int.parse(matchTxtFieldController.text);
-              c.matchData.value.teamNumber =
-                  int.parse(teamNumberTxtFieldController.text);
-              Get.to(() => DataEntryScreen());
-            },
-            child: const Text("Start"),
+          Obx(
+            () => ElevatedButton(
+              onPressed: !c.isHeaderDataValid()
+                  ? null
+                  : () {
+                      c.matchData.value.scouterId.value =
+                          int.parse(scouterIdTxtFieldController.text);
+                      c.matchData.value.matchNumber.value =
+                          int.parse(matchTxtFieldController.text);
+                      c.matchData.value.teamNumber.value =
+                          int.parse(teamNumberTxtFieldController.text);
+                      Get.to(() => DataEntryScreen());
+                    },
+              child: const Text("Start"),
+            ),
           ),
           ElevatedButton(
             child: const Text("View Previous Matches"),
-            onPressed: () => Get.to(
-              () => PreviousMatchesScreen(),
-            ),
+            onPressed: () {
+              final matches = c.getMatches();
+              if (matches.numberOfInvalidFiles > 0) {
+                Get.snackbar(
+                  "Invalid Files",
+                  "There were ${matches.numberOfInvalidFiles} invalid files found",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+              Get.to(
+                () => PreviousMatchesScreen(matches: c.getMatches()),
+              );
+            },
           )
         ],
       ),

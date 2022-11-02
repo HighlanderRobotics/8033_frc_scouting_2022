@@ -17,7 +17,7 @@ class DataEntryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var rng = Random();
 
-    // FIXME: This is a hack to get the match data to update.
+    // TODO: does nothing
     Future.delayed(const Duration(seconds: 2), () => move);
 
     return Scaffold(

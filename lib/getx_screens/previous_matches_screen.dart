@@ -1,51 +1,65 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:frc_scouting/getx_screens/qrcode_screen.dart';
 import 'package:get/get.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
-import '../services/game_data.dart';
+import 'qrcode_screen.dart';
 import '../services/getx_business_logic.dart';
 
 class PreviousMatchesScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
-  late final List<MatchData> matches;
+  late final MatchesFormat matches;
+
+  PreviousMatchesScreen({required this.matches});
 
   @override
   Widget build(BuildContext context) {
-    matches = c.getMatches();
     print("Files Directory: ${c.directory.path}");
-    print("Number of valid matches: ${matches.length}");
+    print(
+        "Number of valid matches: ${matches.validMatches.length} out of ${matches.validMatches.length + matches.numberOfInvalidFiles}");
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Previous Matches"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: ListView.builder(
-          itemCount: matches.length,
-          itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () => Get.to(
-                () => QrCodeScreen(
-                  matchQrCodes: matches[index].separateEventsToQrCodes(),
-                ),
+      body: matches.validMatches.isNotEmpty
+          ? previousMatchesListView()
+          : noMatchesView(),
+    );
+  }
+
+  Widget previousMatchesListView() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: ListView.builder(
+        itemCount: matches.validMatches.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () => Get.to(
+              () => QrCodeScreen(
+                matchQrCodes:
+                    c.separateEventsToQrCodes(matches.validMatches[index]),
               ),
-              child: Card(
-                child: ListTile(
-                  title:
-                      Text("Match: ${matches[index].matchNumber.toString()}"),
-                  subtitle:
-                      Text("Team: ${matches[index].teamNumber.toString()}"),
-                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
-                ),
+            ),
+            child: Card(
+              child: ListTile(
+                title: Text(
+                    "Match: ${matches.validMatches[index].matchNumber.toString()}"),
+                subtitle: Text(
+                    "Team: ${matches.validMatches[index].teamNumber.toString()}"),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget noMatchesView() {
+    return const Center(
+      child: Text(
+        "No matches found",
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }

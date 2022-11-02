@@ -48,7 +48,7 @@ class QrCodeScreen extends StatelessWidget {
                     child: const Text("Next Page"),
                   ),
                 ElevatedButton(
-                  child: Text("Done"),
+                  child: const Text("Done"),
                   onPressed: () => c.reset(),
                 ),
               ],
