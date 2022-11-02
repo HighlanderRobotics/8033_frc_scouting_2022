@@ -50,22 +50,10 @@ class PostGameScreen extends StatelessWidget {
                 value: c.matchData.value.challengeResult.value,
               ),
             ),
-            // Obx(
-            //   () => DropdownButton(
-            //     items: [
-            //       for (String challenge in climbingChallenges)
-            //         DropdownMenuItem(
-            //           value: challenge,
-            //           child: Text(challenge),
-            //         ),
-            //     ],
-            //     onChanged: dropdownButtonValueDidChange,
-            //     value: c.matchData.value.challengeResult,
-            //   ),
-            // ),
             Obx(
               () => ElevatedButton(
-                child: const Text("Show QR Code"),
+                // not sure why this is happening
+                // ignore: unrelated_type_equality_checks
                 onPressed: c.matchData.value.challengeResult ==
                         climbingChallenges[0]
                     ? null
@@ -77,6 +65,7 @@ class PostGameScreen extends StatelessWidget {
                                   c.separateEventsToQrCodes(c.matchData.value),
                             ));
                       },
+                child: const Text("Show QR Code"),
               ),
             ),
           ],

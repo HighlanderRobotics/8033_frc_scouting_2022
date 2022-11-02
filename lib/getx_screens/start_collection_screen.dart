@@ -10,18 +10,19 @@ class StartCollectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Start Collection')),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Get.to(DataEntryScreen());
-              },
-              child: const Text('Start Collection'),
-            )
-          ],
-        ));
+      appBar: AppBar(title: const Text('Start Collection')),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Get.to(DataEntryScreen());
+            },
+            child: const Text('Start Collection'),
+          )
+        ],
+      ),
+    );
   }
 }
