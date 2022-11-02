@@ -21,6 +21,7 @@ class PreviousMatchesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Previous Matches"),
+        automaticallyImplyLeading: false,
       ),
       body: matches.validMatches.isNotEmpty
           ? previousMatchesListView()

@@ -24,6 +24,7 @@ class PostGameScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Post Game"),
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: Column(

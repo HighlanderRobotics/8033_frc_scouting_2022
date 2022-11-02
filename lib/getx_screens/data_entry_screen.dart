@@ -24,6 +24,7 @@ class DataEntryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Data Entry'),
+        automaticallyImplyLeading: false,
       ),
       body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
