@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../getx_screens/home_screen.dart';
 import 'event.dart';
 import 'match_data.dart';
+import 'previous_match.dart';
 
 class BusinessLogicController extends GetxController {
   var matchData = MatchData().obs;
@@ -61,17 +62,17 @@ class BusinessLogicController extends GetxController {
     return file.uri.pathSegments.last.substring(0, 4).contains("frc-");
   }
 
-  MatchesFormat getMatches() {
+  MatchInfo getMatches() {
     final List<FileSystemEntity> allFiles = getFilesInDirectoryMask();
     final List<File> files = allFiles.whereType<File>().toList();
-    var matches = MatchesFormat([], 0);
+    var matches = MatchInfo([], 0);
 
     for (var file in files) {
       if (_isFileValid(file)) {
         final String contents = file.readAsStringSync();
         final MatchData match = MatchData.fromJson(jsonDecode(contents));
         matches.validMatches.add(match);
-      } else {
+      } else if (!(file.uri.pathSegments.last.startsWith("."))) {
         matches.numberOfInvalidFiles++;
       }
     }
@@ -81,18 +82,14 @@ class BusinessLogicController extends GetxController {
 
   List<String> separateEventsToQrCodes(MatchData matchData) {
     List<String> qrCodes = [];
-    final numberOfQrCodes = (6900 / 3000).ceil();
     var jsonString = jsonEncode(matchData.toJson());
     const qrCodeLimit = 2500;
 
     print("jsonString length: ${jsonString.length}");
 
-    var counter = 0;
-
     while (jsonString.length > qrCodeLimit) {
       qrCodes.add(jsonString.substring(0, qrCodeLimit));
       jsonString = jsonString.replaceRange(0, qrCodeLimit, "");
-      counter++;
     }
 
     qrCodes.add(jsonString);
@@ -103,14 +100,7 @@ class BusinessLogicController extends GetxController {
   }
 
   void reset() {
-    matchData.value = MatchData();
+    matchData = MatchData().obs;
     Get.offAll(() => HomeScreen());
   }
-}
-
-class MatchesFormat {
-  List<MatchData> validMatches;
-  int numberOfInvalidFiles;
-
-  MatchesFormat(this.validMatches, this.numberOfInvalidFiles);
 }

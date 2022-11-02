@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc_scouting/services/previous_match.dart';
 import 'package:get/get.dart';
 
 import 'qrcode_screen.dart';
@@ -7,7 +8,7 @@ import '../services/getx_business_logic.dart';
 class PreviousMatchesScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
-  late final MatchesFormat matches;
+  late final MatchInfo matches;
 
   PreviousMatchesScreen({required this.matches});
 
