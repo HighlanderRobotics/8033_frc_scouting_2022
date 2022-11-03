@@ -14,14 +14,13 @@ class PreviousMatchesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Files Directory: ${c.directory.path}");
+    print("Files Directory: ${c.documentsHelper.directory.path}");
     print(
         "Number of valid matches: ${matches.validMatches.length} out of ${matches.validMatches.length + matches.numberOfInvalidFiles}");
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Previous Matches"),
-        automaticallyImplyLeading: false,
       ),
       body: matches.validMatches.isNotEmpty
           ? previousMatchesListView()

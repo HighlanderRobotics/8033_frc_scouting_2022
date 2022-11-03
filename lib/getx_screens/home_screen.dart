@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frc_scouting/getx_screens/data_entry_screen.dart';
+import 'package:frc_scouting/getx_screens/game_screen.dart';
 import 'package:frc_scouting/getx_screens/previous_matches_screen.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
@@ -66,7 +66,7 @@ class HomeScreen extends StatelessWidget {
                           int.parse(matchTxtFieldController.text);
                       c.matchData.value.teamNumber.value =
                           int.parse(teamNumberTxtFieldController.text);
-                      Get.to(() => DataEntryScreen());
+                      Get.to(() => GameScreen());
                     },
               child: const Text("Start"),
             ),
@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
           ElevatedButton(
             child: const Text("View Previous Matches"),
             onPressed: () {
-              final matches = c.getMatches();
+              final matches = c.documentsHelper.getMatches();
               if (matches.numberOfInvalidFiles > 0) {
                 Get.snackbar(
                   "Invalid Files",
@@ -83,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                 );
               }
               Get.to(
-                () => PreviousMatchesScreen(matches: c.getMatches()),
+                () => PreviousMatchesScreen(matches: c.documentsHelper.getMatches()),
               );
             },
           )

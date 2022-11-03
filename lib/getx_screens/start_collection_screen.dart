@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
-import 'data_entry_screen.dart';
+import 'game_screen.dart';
 
 class StartCollectionScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
@@ -20,7 +20,7 @@ class StartCollectionScreen extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-              Get.to(DataEntryScreen());
+              Get.to(GameScreen());
             },
             child: const Text('Start Collection'),
           )

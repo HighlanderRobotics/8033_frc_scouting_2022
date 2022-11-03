@@ -66,7 +66,7 @@ class PostGameScreen extends StatelessWidget {
                             snackPosition: SnackPosition.BOTTOM,
                           );
                         } else {
-                          await c.saveMatchData(c.matchData.value);
+                          await c.documentsHelper.saveMatchData(c.matchData.value);
 
                           Get.to(() {
                             return QrCodeScreen(
