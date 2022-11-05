@@ -50,15 +50,14 @@ class PostGameScreen extends StatelessWidget {
                 onChanged: (String? newValue) {
                   c.updateClimbingChallenge(newValue!);
                 },
-                value: c.matchData.value.challengeResult.value,
+                value: c.matchData.challengeResult.value,
               ),
             ),
             Obx(
               () => ElevatedButton(
                 // not sure why this is happening
                 // ignore: unrelated_type_equality_checks
-                onPressed: c.matchData.value.challengeResult ==
-                        climbingChallenges[0]
+                onPressed: c.matchData.challengeResult == climbingChallenges[0]
                     ? null
                     : () async {
                         if (!c.isPostGameDataValid()) {
@@ -69,7 +68,7 @@ class PostGameScreen extends StatelessWidget {
                           );
                         } else {
                           if (await c.documentsHelper
-                              .saveMatchData(c.matchData.value)) {
+                              .saveMatchData(c.matchData)) {
                             Get.snackbar(
                               "Upload Successful",
                               "Match has uploaded to cloud",
@@ -80,7 +79,8 @@ class PostGameScreen extends StatelessWidget {
                           Get.to(() {
                             return QrCodeScreen(
                               matchQrCodes:
-                                  c.separateEventsToQrCodes(c.matchData.value),
+                                  c.separateEventsToQrCodes(c.matchData),
+                              canGoBack: false,
                             );
                           });
                         }

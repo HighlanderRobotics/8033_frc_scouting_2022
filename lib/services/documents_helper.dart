@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -18,7 +19,7 @@ class DocumentsHelper {
 
     // TODO: try to upload to Firebase
 
-    matchData.hasSavedToCloud.value = true;
+    matchData.hasSavedToCloud.value = Random().nextBool();
 
     return matchData.hasSavedToCloud.value;
     // return true;
@@ -50,8 +51,13 @@ class DocumentsHelper {
     for (var file in files) {
       if (_isFileValid(file)) {
         final String contents = file.readAsStringSync();
-        final MatchData match = MatchData.fromJson(jsonDecode(contents));
-        matches.validMatches.add(match);
+        try {
+          final MatchData match = MatchData.fromJson(jsonDecode(contents));
+          matches.validMatches.add(match);
+        } catch (e) {
+          print("Error parsing file: ${file.uri.pathSegments.last} Invalid Format");
+          matches.numberOfInvalidFiles++;
+        }
       } else if (!file.uri.pathSegments.last.startsWith(".")) {
         matches.numberOfInvalidFiles++;
       }

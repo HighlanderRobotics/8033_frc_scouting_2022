@@ -2,21 +2,27 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
+import 'package:frc_scouting/services/event_key.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
 import 'documents_helper.dart';
-import 'event.dart';
 import 'match_data.dart';
 
-class BusinessLogicController extends GetxController {
-  var matchData = MatchData().obs;
-  final DocumentsHelper documentsHelper = DocumentsHelper();
+enum MatchListFilter { date, hasUploaded }
 
-  bool isHeaderDataValid() {
-    return matchData.value.scouterId.value != 0 &&
-        matchData.value.matchNumber.value != 0 &&
-        matchData.value.teamNumber.value != 0;
+class BusinessLogicController extends GetxController {
+  late EventKey selectedEvent;
+  late MatchData matchData;
+  final DocumentsHelper documentsHelper = DocumentsHelper();
+  var matchFilterType = MatchListFilter.date.obs;
+
+  @override
+  void onInit() {
+    selectedEvent = EventKey.chezyChamps2022;
+    matchData = MatchData(eventKey: selectedEvent);
+
+    super.onInit();
   }
 
   void setPortraitOrientation() {
@@ -48,16 +54,18 @@ class BusinessLogicController extends GetxController {
     );
   }
 
-  bool isPostGameDataValid() =>
-      matchData.value.challengeResult.value != "Climbing Challenge";
-
-  void addEvent(Event event) {
-    matchData.value.events.add(event);
+  bool isHeaderDataValid() {
+    return matchData.scouterId.value != 0 &&
+        matchData.matchNumber.value != 0 &&
+        matchData.teamNumber.value != 0;
   }
+
+  bool isPostGameDataValid() =>
+      matchData.challengeResult.value != "Climbing Challenge";
 
   void updateClimbingChallenge(String challenge) {
     if (challenge != "Climbing Challenge") {
-      matchData.value.challengeResult.value = challenge;
+      matchData.challengeResult.value = challenge;
     }
   }
 
@@ -81,12 +89,12 @@ class BusinessLogicController extends GetxController {
   }
 
   void reset() {
-    matchData = MatchData().obs;
+    matchData = MatchData(eventKey: selectedEvent);
     Get.offAll(() => HomeScreen());
   }
 
   Future<void> startGameScreenTimer() async {
-    matchData.value.startTime = DateTime.now().millisecondsSinceEpoch;
+    matchData.startTime = DateTime.now().millisecondsSinceEpoch;
 
     await Future.delayed(
       const Duration(seconds: 5),

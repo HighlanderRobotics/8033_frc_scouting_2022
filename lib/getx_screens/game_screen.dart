@@ -1,12 +1,8 @@
-import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:get/get.dart';
 import '../services/getx_business_logic.dart';
-import '../services/size_utils.dart';
-import 'dart:ui' as ui show Image;
 
 class GameScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
