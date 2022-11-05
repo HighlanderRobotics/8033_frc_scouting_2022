@@ -13,7 +13,7 @@ class MatchData {
   var didDefense = false.obs;
   var notes = "".obs;
   var challengeResult = "Climbing Challenge".obs;
-  var isSaved = false.obs;
+  var hasSavedToCloud = false.obs;
 
   MatchData();
 

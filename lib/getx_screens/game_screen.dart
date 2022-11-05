@@ -21,6 +21,8 @@ class GameScreen extends StatelessWidget {
 
     var size = Size(0, 0).obs;
 
+    c.setLandscapeOrientation();
+
     return Scaffold(
       body: SafeArea(
         child: OrientationBuilder(

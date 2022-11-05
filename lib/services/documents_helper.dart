@@ -13,12 +13,15 @@ class DocumentsHelper {
     getApplicationDocumentsDirectory().then((value) => directory = value);
   }
 
-  Future<void> saveMatchData(MatchData matchData) async {
-    if (!matchData.isSaved.value) {
-      await _writeToFile(matchData);
-    }
+  Future<bool> saveMatchData(MatchData matchData) async {
+    await _writeToFile(matchData);
 
-    return;
+    // TODO: try to upload to Firebase
+
+    matchData.hasSavedToCloud.value = true;
+
+    return matchData.hasSavedToCloud.value;
+    // return true;
   }
 
   Future<void> _writeToFile(MatchData matchData) async {

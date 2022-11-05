@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +17,35 @@ class BusinessLogicController extends GetxController {
     return matchData.value.scouterId.value != 0 &&
         matchData.value.matchNumber.value != 0 &&
         matchData.value.teamNumber.value != 0;
+  }
+
+  void setPortraitOrientation() {
+    SystemChrome.setPreferredOrientations(
+      [
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ],
+    );
+  }
+
+  void setLandscapeOrientation() {
+    SystemChrome.setPreferredOrientations(
+      [
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ],
+    );
+  }
+
+  void resetOrientation() {
+    SystemChrome.setPreferredOrientations(
+      [
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ],
+    );
   }
 
   bool isPostGameDataValid() =>

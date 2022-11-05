@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter/services.dart';
 
 class QrCodeScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
@@ -15,6 +16,8 @@ class QrCodeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    c.setPortraitOrientation();
+
     return Scaffold(
         appBar: AppBar(
           title: const Text("QR Code"),
@@ -25,19 +28,21 @@ class QrCodeScreen extends StatelessWidget {
           child: Obx(
             () => ListView(
               children: [
-                QrImage(
-                    data: matchQrCodes[pageNumber.value],
-                    version: QrVersions.auto,
-                    errorCorrectionLevel: QrErrorCorrectLevel.L,
-                    gapless: false,
-                    errorStateBuilder: (cxt, err) {
-                      return const Center(
-                        child: Text(
-                          "Uh oh! Something went wrong...",
-                          textAlign: TextAlign.center,
-                        ),
-                      );
-                    }),
+                SafeArea(
+                  child: QrImage(
+                      data: matchQrCodes[pageNumber.value],
+                      version: QrVersions.auto,
+                      errorCorrectionLevel: QrErrorCorrectLevel.L,
+                      gapless: false,
+                      errorStateBuilder: (cxt, err) {
+                        return const Center(
+                          child: Text(
+                            "Uh oh! Something went wrong...",
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Center(
@@ -52,7 +57,10 @@ class QrCodeScreen extends StatelessWidget {
                   ),
                 ElevatedButton(
                   child: const Text("Done"),
-                  onPressed: () => c.reset(),
+                  onPressed: () {
+                    Get.closeCurrentSnackbar();
+                    c.reset();
+                  },
                 ),
               ],
             ),

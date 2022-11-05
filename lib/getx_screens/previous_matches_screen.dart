@@ -29,29 +29,35 @@ class PreviousMatchesScreen extends StatelessWidget {
   }
 
   Widget previousMatchesListView() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: ListView.builder(
-        itemCount: matches.validMatches.length,
-        itemBuilder: (context, index) {
-          return InkWell(
-            onTap: () => Get.to(
-              () => QrCodeScreen(
-                matchQrCodes:
-                    c.separateEventsToQrCodes(matches.validMatches[index]),
+    return WillPopScope(
+      onWillPop: () {
+        Get.closeCurrentSnackbar();
+        return Future.value(true);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ListView.builder(
+          itemCount: matches.validMatches.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () => Get.to(
+                () => QrCodeScreen(
+                  matchQrCodes:
+                      c.separateEventsToQrCodes(matches.validMatches[index]),
+                ),
               ),
-            ),
-            child: Card(
-              child: ListTile(
-                title: Text(
-                    "Match: ${matches.validMatches[index].matchNumber.toString()}"),
-                subtitle: Text(
-                    "Team: ${matches.validMatches[index].teamNumber.toString()}"),
-                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+              child: Card(
+                child: ListTile(
+                  title: Text(
+                      "Match: ${matches.validMatches[index].matchNumber.toString()}"),
+                  subtitle: Text(
+                      "Team: ${matches.validMatches[index].teamNumber.toString()}"),
+                  trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

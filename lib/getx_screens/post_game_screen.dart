@@ -21,6 +21,8 @@ class PostGameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    c.resetOrientation();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Post Game"),
@@ -66,7 +68,14 @@ class PostGameScreen extends StatelessWidget {
                             snackPosition: SnackPosition.BOTTOM,
                           );
                         } else {
-                          await c.documentsHelper.saveMatchData(c.matchData.value);
+                          if (await c.documentsHelper
+                              .saveMatchData(c.matchData.value)) {
+                            Get.snackbar(
+                              "Upload Successful",
+                              "Match has uploaded to cloud",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
 
                           Get.to(() {
                             return QrCodeScreen(
