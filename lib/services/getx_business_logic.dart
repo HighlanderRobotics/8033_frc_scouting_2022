@@ -57,7 +57,7 @@ class BusinessLogicController extends GetxController {
 
   Future<void> startGameScreenTimer() async {
     await Future.delayed(
-      const Duration(seconds: 115),
+      const Duration(seconds: 5),
       () => Get.to(
         PostGameScreen(),
       ),
