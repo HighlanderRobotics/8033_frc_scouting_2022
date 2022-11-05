@@ -17,7 +17,7 @@ class GameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // c.startGameScreenTimer();
+    c.startGameScreenTimer();
 
     var size = Size(0, 0).obs;
 

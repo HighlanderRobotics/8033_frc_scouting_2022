@@ -56,6 +56,8 @@ class BusinessLogicController extends GetxController {
   }
 
   Future<void> startGameScreenTimer() async {
+    matchData.value.startTime = DateTime.now().millisecondsSinceEpoch;
+
     await Future.delayed(
       const Duration(seconds: 5),
       () => Get.to(
