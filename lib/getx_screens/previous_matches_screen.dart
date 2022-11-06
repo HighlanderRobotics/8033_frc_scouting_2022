@@ -24,6 +24,8 @@ class PreviousMatchesScreen extends StatelessWidget {
 
     filteredMatches.value = matches.validMatches;
 
+    c.resetOrientation();
+
     filterSearchResultsAndUpdateList("");
 
     return Scaffold(
@@ -114,8 +116,31 @@ class PreviousMatchesScreen extends StatelessWidget {
       ),
       child: Card(
         child: ListTile(
-          title: Text("Match: ${element.matchNumber.toString()}"),
-          subtitle: Text("Team: ${element.teamNumber.toString()}"),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          leading: const Icon(Icons.qr_code),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Match: ${element.matchNumber.toString()}"),
+                  Text(
+                    "Team: ${element.teamNumber.toString()}",
+                    style: TextStyle(fontSize: 15, color: Colors.grey.shade800),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(element.hasSavedToCloud.isTrue
+                      ? Icons.cloud_done
+                      : Icons.cloud_off),
+                ],
+              ),
+            ],
+          ),
           trailing: const Icon(Icons.arrow_forward_ios_rounded),
         ),
       ),

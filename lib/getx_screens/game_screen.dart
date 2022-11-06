@@ -1,39 +1,36 @@
-import 'package:image_size_getter/image_size_getter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
+import 'package:frc_scouting/services/event_types.dart';
 import 'package:get/get.dart';
+import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
 
 class GameScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
+  var robotIsImmobile = false.obs;
+
   void move() {
     Get.to(() => PostGameScreen());
   }
+
+  final GlobalKey _parentKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     c.startGameScreenTimer();
 
-    var size = Size(0, 0).obs;
-
-    c.setLandscapeOrientation();
-
     return Scaffold(
-      body: SafeArea(
-        child: OrientationBuilder(
-          builder: ((context, orientation) {
-            return Expanded(
-              child: paintWidget(),
-            );
-          }),
-        ),
-      ),
+      body: paintWidget(context),
     );
   }
 
-  Container paintWidget() {
+  Container paintWidget(BuildContext context) {
     return Container(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      alignment: Alignment.center,
       decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/gameboard_cropped.png'),
@@ -41,71 +38,102 @@ class GameScreen extends StatelessWidget {
         ),
       ),
       child: Stack(
-        fit: StackFit.expand,
+        key: _parentKey,
         children: [
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              shape: CircleBorder(),
+          InkWell(
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
             ),
-            child: Text("HI"),
-          )
+            onTap: () => c.addEvent(EventType.shotSuccess, 3),
+            onLongPress: () => c.addEvent(EventType.shotMiss, 3),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: createCustomEventWidget(0, BoxShape.circle, 250, 250),
+          ),
+          Positioned(
+            top: 70,
+            left: 70,
+            child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
+          ),
+          Positioned(
+            bottom: 70,
+            right: 70,
+            child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
+          ),
+          Positioned(
+            bottom: 10,
+            left: 0,
+            child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
+          ),
+          Positioned(
+            top: 10,
+            right: 0,
+            child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
+          ),
+          draggableFloatingActionButtonWidget(),
         ],
       ),
     );
-    // return CustomPaint(
-    //   foregroundPainter: GameScreenPainter(),
-    //   child: Image.asset('assets/gameboard_cropped.png'),
-    // );
+  }
+
+  Widget draggableFloatingActionButtonWidget() {
+    return Obx(
+      () => DraggableFloatingActionButton(
+        initialOffset: const Offset(120, 70),
+        parentKey: _parentKey,
+        onPressed: () {
+          c.addEvent(EventType.robotBecomesImmobile, 5);
+          robotIsImmobile.toggle();
+        },
+        child: Container(
+          width: 90,
+          height: 90,
+          decoration: ShapeDecoration(
+            shadows: [
+              BoxShadow(
+                color: Colors.grey.shade300,
+                blurRadius: 10,
+                spreadRadius: 5,
+              ),
+            ],
+            shape: const CircleBorder(),
+            color: Colors.amber.shade50,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(robotIsImmobile.isTrue
+                  ? CupertinoIcons.heart_slash
+                  : CupertinoIcons.heart),
+              Text(
+                robotIsImmobile.isTrue ? "Robot\nBroke" : "Robot\nMobile",
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  InkWell createCustomEventWidget(
+      int position, BoxShape boxShape, double width, double height) {
+    return InkWell(
+      child: Container(
+        width: width,
+        height: height,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: boxShape,
+          color: Colors.red.withOpacity(0),
+        ),
+      ),
+      onTap: () => c.addEvent(EventType.shotSuccess, position),
+      onLongPress: () => c.addEvent(EventType.shotMiss, position),
+    );
   }
 }
-
-// class GameScreenPainter extends CustomPainter {
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     var paint = Paint();
-//     paint.color = Colors.red.withOpacity(0.7);
-
-//     _drawFourShape(canvas,
-//         left_top: const Offset(209, 122),
-//         right_top: const Offset(165, 230),
-//         right_bottom: const Offset(165, 375),
-//         left_bottom: const Offset(220, 320),
-//         middle_bottom: const Offset(230, 245),
-//         size: size,
-//         paint: paint);
-//   }
-
-//   void _drawFourShape(Canvas canvas,
-//       {Offset? left_top,
-//       Offset? right_top,
-//       Offset? right_bottom,
-//       Offset? left_bottom,
-//       Offset? middle_bottom,
-//       Size? size,
-//       paint}) {
-//     left_top = _convertLogicSize(left_top, size);
-//     right_top = _convertLogicSize(right_top, size);
-//     right_bottom = _convertLogicSize(right_bottom, size);
-//     left_bottom = _convertLogicSize(left_bottom, size);
-//     middle_bottom = _convertLogicSize(middle_bottom, size);
-
-//     var path1 = Path()
-//       ..moveTo(left_top.dx, left_top.dy)
-//       ..lineTo(right_top.dx, right_top.dy)
-//       ..lineTo(right_bottom.dx, right_bottom.dy)
-//       ..lineTo(left_bottom.dx, left_bottom.dy)
-//       ..lineTo(middle_bottom.dx, middle_bottom.dy);
-
-//     canvas.drawPath(path1, paint);
-//   }
-
-//   Offset _convertLogicSize(Offset? off, Size? size) {
-//     return Offset(SizeUtil.getAxisX(off!.dx), SizeUtil.getAxisY(off.dy));
-//   }
-
-//   @override
-//   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-//     return false;
-//   }
-// }

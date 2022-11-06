@@ -6,7 +6,7 @@ import 'event.dart';
 
 class MatchData {
   var uuid = const Uuid().v4();
-  late Rx<EventKey> eventKey;
+  late Rx<CompetitionKey> competitionKey;
   var matchNumber = 0.obs;
   var teamNumber = 0.obs;
   var scouterId = 0.obs;
@@ -17,13 +17,14 @@ class MatchData {
   var challengeResult = "Climbing Challenge".obs;
   var hasSavedToCloud = false.obs;
 
-  MatchData({required EventKey eventKey}) : eventKey = eventKey.obs;
+  MatchData({required CompetitionKey competitionKey})
+      : competitionKey = competitionKey.obs;
 
   MatchData.fromJson(Map<String, dynamic> json) {
     try {
       uuid = json['uuid'];
-      eventKey = Rx(
-          EventKey.values.firstWhere((e) => e.eventCode == json['eventKey']));
+      competitionKey = Rx(CompetitionKey.values
+          .firstWhere((e) => e.eventCode == json['competitionKey']));
       matchNumber = RxInt(json['matchNumber']);
       teamNumber = RxInt(json['teamNumber']);
       scouterId = RxInt(json['scouterId']);
@@ -41,7 +42,7 @@ class MatchData {
 
   Map<String, dynamic> toJson() => {
         'uuid': uuid,
-        'eventKey': eventKey.value.eventCode,
+        'competitionKey': competitionKey.value.eventCode,
         'matchNumber': matchNumber.value,
         'teamNumber': teamNumber.value,
         'scouterId': scouterId.value,

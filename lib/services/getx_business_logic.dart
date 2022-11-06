@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:frc_scouting/services/event_key.dart';
@@ -7,22 +8,28 @@ import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
 import 'documents_helper.dart';
+import 'event.dart';
+import 'event_types.dart';
 import 'match_data.dart';
 
 enum MatchListFilter { date, hasUploaded }
 
 class BusinessLogicController extends GetxController {
-  late EventKey selectedEvent;
+  late CompetitionKey selectedEvent;
   late MatchData matchData;
   final DocumentsHelper documentsHelper = DocumentsHelper();
   var matchFilterType = MatchListFilter.date.obs;
 
   @override
   void onInit() {
-    selectedEvent = EventKey.chezyChamps2022;
-    matchData = MatchData(eventKey: selectedEvent);
+    selectedEvent = CompetitionKey.chezyChamps2022;
+    matchData = MatchData(competitionKey: selectedEvent);
 
     super.onInit();
+  }
+
+  Orientation get currentOrientation {
+    return Get.mediaQuery.orientation;
   }
 
   void setPortraitOrientation() {
@@ -60,6 +67,15 @@ class BusinessLogicController extends GetxController {
         matchData.teamNumber.value != 0;
   }
 
+  void addEvent(EventType eventType, int position) {
+    final event = Event(
+        timeSince: DateTime.now().millisecondsSinceEpoch - matchData.startTime,
+        type: EventType.shotSuccess,
+        position: position);
+    matchData.events.add(event);
+    event.printEvent();
+  }
+
   bool isPostGameDataValid() =>
       matchData.challengeResult.value != "Climbing Challenge";
 
@@ -89,7 +105,7 @@ class BusinessLogicController extends GetxController {
   }
 
   void reset() {
-    matchData = MatchData(eventKey: selectedEvent);
+    matchData = MatchData(competitionKey: selectedEvent);
     Get.offAll(() => HomeScreen());
   }
 

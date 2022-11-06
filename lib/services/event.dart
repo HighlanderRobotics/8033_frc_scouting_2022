@@ -18,4 +18,8 @@ class Event {
     type = EventType.values.firstWhere((e) => e.toString() == json['type']);
     position = json['position'];
   }
+
+  void printEvent() {
+    print('Event: $type, $position, $timeSince');
+  }
 }
