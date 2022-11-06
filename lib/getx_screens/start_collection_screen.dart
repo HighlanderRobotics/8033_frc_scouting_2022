@@ -20,7 +20,7 @@ class StartCollectionScreen extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-              Get.to(GameScreen());
+              Get.to(() => GameScreen());
             },
             child: const Text('Start Collection'),
           )
