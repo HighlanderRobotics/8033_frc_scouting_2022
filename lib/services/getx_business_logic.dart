@@ -11,6 +11,7 @@ import 'documents_helper.dart';
 import 'event.dart';
 import 'event_types.dart';
 import 'match_data.dart';
+import 'scouters.dart';
 
 enum MatchListFilter { date, hasUploaded }
 
@@ -19,11 +20,13 @@ class BusinessLogicController extends GetxController {
   late MatchData matchData;
   final DocumentsHelper documentsHelper = DocumentsHelper();
   var matchFilterType = MatchListFilter.date.obs;
+  final scoutersHelper = ScoutersHelper();
 
   @override
-  void onInit() {
+  void onInit() async {
     selectedEvent = CompetitionKey.chezyChamps2022;
     matchData = MatchData(competitionKey: selectedEvent);
+    await scoutersHelper.getAllScouters();
 
     super.onInit();
   }
