@@ -11,6 +11,8 @@ class HomeScreen extends StatelessWidget {
   final matchTxtFieldController = TextEditingController();
   final scouterIdTxtFieldController = TextEditingController();
   final teamNumberTxtFieldController = TextEditingController();
+
+  var selectedEvent = CompetitionKey.chezyChamps2022.obs;
   var selectedScouterId = RxInt(-1);
 
   @override
@@ -34,10 +36,17 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text("Choose the FRC Event"),
                       DropdownButton(
                         items: [
-                          for (CompetitionKey competitionKey in competitionKeys)
+                          const DropdownMenuItem(
+                            value: -1,
+                            child: Text(
+                              "Choose FRC Event",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          for (CompetitionKey competitionKey
+                              in CompetitionKey.values)
                             DropdownMenuItem(
                               onTap: () => c.selectedEvent = competitionKey,
                               value: competitionKey,
@@ -64,15 +73,13 @@ class HomeScreen extends StatelessWidget {
                                   for (Scouter scouter
                                       in c.scoutersHelper.scouters)
                                     DropdownMenuItem(
+                                      onTap: () => selectedScouterId.value =
+                                          scouter.scouterId,
                                       value: scouter.scouterId,
                                       child: Text(scouter.scouterName),
                                     ),
                                 ],
-                                onChanged: (value) {
-                                  if (value is int) {
-                                    selectedScouterId.value = value;
-                                  }
-                                },
+                                onChanged: (_) {},
                                 value: selectedScouterId.value,
                               ),
                             ),

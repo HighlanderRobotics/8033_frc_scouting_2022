@@ -17,7 +17,3 @@ extension CompetitionKeyExtension on CompetitionKey {
     }
   }
 }
-
-List<CompetitionKey> competitionKeys = [
-  CompetitionKey.chezyChamps2022,
-];
