@@ -10,7 +10,7 @@ class GameScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
   var robotIsMobile = true.obs;
-  late double circleHeight;
+  var circleHeight = 0.0.obs;
 
   void move() {
     Get.to(() => PostGameScreen());
@@ -21,63 +21,67 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     c.startGameScreenTimer();
-    circleHeight = MediaQuery.of(context).size.height * 0.8791907514;
+    circleHeight.value = MediaQuery.of(context).size.height * 0.8791907514;
 
     return Scaffold(
-      body: paintWidget(context),
+      body: SafeArea(
+        child: paintWidget(context),
+      ),
     );
   }
 
   Container paintWidget(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/gameboard_cropped.png'),
-          alignment: Alignment.center,
-        ),
-      ),
-      child: Stack(
-        key: _parentKey,
-        children: [
-          InkWell(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-            ),
-            onTap: () => c.addEvent(EventType.shotSuccess, 3),
-            onLongPress: () => c.addEvent(EventType.shotMiss, 3),
-          ),
-          Align(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/gameboard_cropped.png'),
             alignment: Alignment.center,
-            child: createCustomEventWidget(0, BoxShape.circle, circleHeight, circleHeight),
           ),
-          Positioned(
-            top: 70,
-            left: 70,
-            child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
+        ),
+        child: Obx(
+          () => Stack(
+            key: _parentKey,
+            children: [
+              InkWell(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                ),
+                onTap: () => c.addEvent(EventType.shotSuccess, 3),
+                onLongPress: () => c.addEvent(EventType.shotMiss, 3),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: createCustomEventWidget(
+                    0, BoxShape.circle, circleHeight.value, circleHeight.value),
+              ),
+              Positioned(
+                top: 70,
+                left: 70,
+                child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
+              ),
+              Positioned(
+                bottom: 70,
+                right: 70,
+                child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
+              ),
+              Positioned(
+                bottom: 10,
+                left: 0,
+                child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
+              ),
+              Positioned(
+                top: 10,
+                right: 0,
+                child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
+              ),
+              draggableFloatingActionButtonWidget(),
+            ],
           ),
-          Positioned(
-            bottom: 70,
-            right: 70,
-            child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
-          ),
-          Positioned(
-            bottom: 10,
-            left: 0,
-            child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
-          ),
-          Positioned(
-            top: 10,
-            right: 0,
-            child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
-          ),
-          draggableFloatingActionButtonWidget(),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget draggableFloatingActionButtonWidget() {
