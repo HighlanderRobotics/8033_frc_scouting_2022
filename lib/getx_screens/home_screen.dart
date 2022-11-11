@@ -35,15 +35,9 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const Text("Choose FRC Event"),
                       DropdownButton(
                         items: [
-                          const DropdownMenuItem(
-                            value: -1,
-                            child: Text(
-                              "Choose FRC Event",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
                           for (CompetitionKey competitionKey
                               in CompetitionKey.values)
                             DropdownMenuItem(
@@ -52,7 +46,7 @@ class HomeScreen extends StatelessWidget {
                               child: Text(competitionKey.stringValue),
                             ),
                         ],
-                        onChanged: (value) {},
+                        onChanged: (_) {},
                         value: CompetitionKey.chezyChamps2022,
                       ),
                       Padding(
