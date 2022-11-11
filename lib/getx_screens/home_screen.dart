@@ -9,7 +9,6 @@ import '../services/scouters.dart';
 
 class HomeScreen extends StatelessWidget {
   final matchTxtFieldController = TextEditingController();
-  final scouterIdTxtFieldController = TextEditingController();
   final teamNumberTxtFieldController = TextEditingController();
 
   var selectedEvent = CompetitionKey.chezyChamps2022.obs;
@@ -111,8 +110,6 @@ class HomeScreen extends StatelessWidget {
                           onPressed: !c.isHeaderDataValid()
                               ? null
                               : () async {
-                                  c.matchData.scouterId.value = int.parse(
-                                      scouterIdTxtFieldController.text);
                                   c.matchData.matchNumber.value =
                                       int.parse(matchTxtFieldController.text);
                                   c.matchData.teamNumber.value = int.parse(

@@ -9,7 +9,8 @@ import '../services/getx_business_logic.dart';
 class GameScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
-  var robotIsImmobile = false.obs;
+  var robotIsMobile = true.obs;
+  late double circleHeight;
 
   void move() {
     Get.to(() => PostGameScreen());
@@ -20,6 +21,7 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     c.startGameScreenTimer();
+    circleHeight = MediaQuery.of(context).size.height * 0.8791907514;
 
     return Scaffold(
       body: paintWidget(context),
@@ -50,7 +52,7 @@ class GameScreen extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.center,
-            child: createCustomEventWidget(0, BoxShape.circle, 250, 250),
+            child: createCustomEventWidget(0, BoxShape.circle, circleHeight, circleHeight),
           ),
           Positioned(
             top: 70,
@@ -81,11 +83,11 @@ class GameScreen extends StatelessWidget {
   Widget draggableFloatingActionButtonWidget() {
     return Obx(
       () => DraggableFloatingActionButton(
-        initialOffset: const Offset(120, 70),
+        initialOffset: const Offset(0, 0),
         parentKey: _parentKey,
         onPressed: () {
           c.addEvent(EventType.robotBecomesImmobile, 5);
-          robotIsImmobile.toggle();
+          robotIsMobile.toggle();
         },
         child: Container(
           width: 90,
@@ -104,11 +106,11 @@ class GameScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(robotIsImmobile.isTrue
-                  ? CupertinoIcons.heart_slash
-                  : CupertinoIcons.heart),
+              Icon(robotIsMobile.isTrue
+                  ? CupertinoIcons.heart
+                  : CupertinoIcons.heart_slash),
               Text(
-                robotIsImmobile.isTrue ? "Robot\nBroke" : "Robot\nMobile",
+                robotIsMobile.isTrue ? "Robot\nMobile" : "Robot\nBroke",
                 style: const TextStyle(
                   fontSize: 14,
                 ),

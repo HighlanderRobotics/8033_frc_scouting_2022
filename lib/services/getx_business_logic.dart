@@ -65,9 +65,7 @@ class BusinessLogicController extends GetxController {
   }
 
   bool isHeaderDataValid() {
-    return matchData.scouterId.value != 0 &&
-        matchData.matchNumber.value != 0 &&
-        matchData.teamNumber.value != 0;
+    return matchData.matchNumber.value != 0 && matchData.teamNumber.value != 0;
   }
 
   void addEvent(EventType eventType, int position) {
