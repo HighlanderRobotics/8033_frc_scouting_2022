@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:frc_scouting/services/event_types.dart';
@@ -32,12 +33,17 @@ class GameScreen extends StatelessWidget {
     print(
         "Top to DecorationImage Height: ${calculateDeviceVerticalEdgeToBoxDecorationHeight()}");
 
+    c.startGameScreenTimer();
+
     return Scaffold(
       body: paintWidget(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => move(),
+        onPressed: () => {},
         mini: true,
-        child: const Icon(Icons.arrow_forward),
+        child: GestureDetector(
+          child: const Icon(Icons.arrow_forward),
+          onLongPress: () => move(),
+        ),
       ),
     );
   }
@@ -99,12 +105,20 @@ class GameScreen extends StatelessWidget {
           Positioned(
             bottom: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
             left: 0,
-            child: createCustomEventWidget(2, BoxShape.rectangle, calculateBoxDecorationHeight() * 0.4, calculateBoxDecorationHeight() * 0.4),
+            child: createCustomEventWidget(
+                2,
+                BoxShape.rectangle,
+                calculateBoxDecorationHeight() * 0.4,
+                calculateBoxDecorationHeight() * 0.4),
           ),
           Positioned(
             top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
             right: 0,
-            child: createCustomEventWidget(2, BoxShape.rectangle, calculateBoxDecorationHeight() * 0.4, calculateBoxDecorationHeight() * 0.4),
+            child: createCustomEventWidget(
+                2,
+                BoxShape.rectangle,
+                calculateBoxDecorationHeight() * 0.4,
+                calculateBoxDecorationHeight() * 0.4),
           ),
           draggableFloatingActionButtonWidget(),
         ],
@@ -163,7 +177,7 @@ class GameScreen extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: boxShape,
-          color: Colors.red.withOpacity(0),
+          color: Colors.red.withOpacity(0.4),
         ),
       ),
       onTap: () => c.addEvent(EventType.shotSuccess, position),

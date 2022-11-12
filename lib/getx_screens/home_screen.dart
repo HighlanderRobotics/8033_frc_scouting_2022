@@ -101,7 +101,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       Obx(
                         () => ElevatedButton(
-                          onPressed: !c.isHeaderDataValid()
+                          onPressed: !c.isHeaderDataValid(selectedScouterId.value)
                               ? null
                               : () async {
                                   c.matchData.matchNumber.value =

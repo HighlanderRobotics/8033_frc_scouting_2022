@@ -64,14 +64,14 @@ class BusinessLogicController extends GetxController {
     );
   }
 
-  bool isHeaderDataValid() {
-    return matchData.matchNumber.value != 0 && matchData.teamNumber.value != 0;
+  bool isHeaderDataValid(int selectedScouterId) {
+    return matchData.matchNumber.value != 0 && matchData.teamNumber.value != 0 && selectedScouterId != 1;
   }
 
   void addEvent(EventType eventType, int position) {
     final event = Event(
         timeSince: DateTime.now().millisecondsSinceEpoch - matchData.startTime,
-        type: EventType.shotSuccess,
+        type: eventType,
         position: position);
     matchData.events.add(event);
     event.printEvent();
@@ -114,7 +114,7 @@ class BusinessLogicController extends GetxController {
     matchData.startTime = DateTime.now().millisecondsSinceEpoch;
 
     await Future.delayed(
-      const Duration(seconds: 5),
+      const Duration(seconds: 125),
       () => Get.to(
         PostGameScreen(),
       ),

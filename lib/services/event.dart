@@ -1,9 +1,9 @@
 import 'event_types.dart';
 
 class Event {
-  var timeSince = 0;
-  var type = EventType.shotSuccess;
-  var position = 0;
+  late int timeSince;
+  late EventType type;
+  late int position;
 
   Event({required this.timeSince, required this.type, required this.position});
 
@@ -20,6 +20,6 @@ class Event {
   }
 
   void printEvent() {
-    print('Event: $type, $position, $timeSince');
+    print('Event: $type, $position, ${timeSince}ms');
   }
 }
