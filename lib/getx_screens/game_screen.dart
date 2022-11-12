@@ -163,7 +163,7 @@ class GameScreen extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: boxShape,
-          color: Colors.red.withOpacity(0.7),
+          color: Colors.red.withOpacity(0),
         ),
       ),
       onTap: () => c.addEvent(EventType.shotSuccess, position),
