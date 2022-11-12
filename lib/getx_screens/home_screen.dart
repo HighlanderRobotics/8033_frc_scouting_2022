@@ -5,11 +5,14 @@ import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
 import '../services/event_key.dart';
+import '../services/scouters.dart';
 
 class HomeScreen extends StatelessWidget {
   final matchTxtFieldController = TextEditingController();
-  final scouterIdTxtFieldController = TextEditingController();
   final teamNumberTxtFieldController = TextEditingController();
+
+  var selectedEvent = CompetitionKey.chezyChamps2022.obs;
+  var selectedScouterId = RxInt(-1);
 
   @override
   Widget build(BuildContext context) {
@@ -32,32 +35,46 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text("Choose the FRC Event"),
+                      const Text("Choose FRC Event"),
                       DropdownButton(
                         items: [
-                          for (CompetitionKey competitionKey in competitionKeys)
+                          for (CompetitionKey competitionKey
+                              in CompetitionKey.values)
                             DropdownMenuItem(
                               onTap: () => c.selectedEvent = competitionKey,
                               value: competitionKey,
                               child: Text(competitionKey.stringValue),
                             ),
                         ],
-                        onChanged: (value) {},
+                        onChanged: (_) {},
                         value: CompetitionKey.chezyChamps2022,
                       ),
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Column(
                           children: [
-                            TextField(
-                              decoration:
-                                  const InputDecoration(hintText: "Scouter ID"),
-                              controller: scouterIdTxtFieldController,
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                c.matchData.scouterId.value =
-                                    int.tryParse(value) ?? 0;
-                              },
+                            Obx(
+                              () => DropdownButton(
+                                items: [
+                                  const DropdownMenuItem(
+                                    value: -1,
+                                    child: Text(
+                                      "Choose Your Name",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
+                                  for (Scouter scouter
+                                      in c.scoutersHelper.scouters)
+                                    DropdownMenuItem(
+                                      onTap: () => selectedScouterId.value =
+                                          scouter.scouterId,
+                                      value: scouter.scouterId,
+                                      child: Text(scouter.scouterName),
+                                    ),
+                                ],
+                                onChanged: (_) {},
+                                value: selectedScouterId.value,
+                              ),
                             ),
                             TextField(
                               decoration: const InputDecoration(
@@ -87,8 +104,6 @@ class HomeScreen extends StatelessWidget {
                           onPressed: !c.isHeaderDataValid()
                               ? null
                               : () async {
-                                  c.matchData.scouterId.value = int.parse(
-                                      scouterIdTxtFieldController.text);
                                   c.matchData.matchNumber.value =
                                       int.parse(matchTxtFieldController.text);
                                   c.matchData.teamNumber.value = int.parse(
