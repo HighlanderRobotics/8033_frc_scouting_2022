@@ -10,78 +10,106 @@ class GameScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
   var robotIsMobile = true.obs;
-  var circleHeight = 0.0.obs;
-
   void move() {
     Get.to(() => PostGameScreen());
   }
 
   final GlobalKey _parentKey = GlobalKey();
 
+  double calculateBoxDecorationHeight() {
+    return (Get.mediaQuery.size.width * 662) / 1328;
+  }
+
+  double calculateDeviceVerticalEdgeToBoxDecorationHeight() {
+    return (Get.mediaQuery.size.height - calculateBoxDecorationHeight()) / 2;
+  }
+
   @override
   Widget build(BuildContext context) {
-    c.startGameScreenTimer();
-    circleHeight.value = MediaQuery.of(context).size.height * 0.8791907514;
+    print("width: ${Get.mediaQuery.size.width}");
+    print("height: ${Get.mediaQuery.size.height}");
+    print("DecorationImage Height: ${calculateBoxDecorationHeight()}");
+    print(
+        "Top to DecorationImage Height: ${calculateDeviceVerticalEdgeToBoxDecorationHeight()}");
 
     return Scaffold(
-      body: SafeArea(
-        child: paintWidget(context),
+      body: paintWidget(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => move(),
+        mini: true,
+        child: const Icon(Icons.arrow_forward),
       ),
     );
   }
 
-  Container paintWidget(BuildContext context) {
+  Container paintWidget() {
     return Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/gameboard_cropped.png'),
-            alignment: Alignment.center,
-          ),
+      width: Get.mediaQuery.size.width,
+      height: Get.mediaQuery.size.height,
+      alignment: Alignment.center,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/gameboard_cropped.png'),
+          alignment: Alignment.center,
+          fit: BoxFit.fitWidth,
         ),
-        child: Obx(
-          () => Stack(
-            key: _parentKey,
-            children: [
-              InkWell(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                ),
-                onTap: () => c.addEvent(EventType.shotSuccess, 3),
-                onLongPress: () => c.addEvent(EventType.shotMiss, 3),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: createCustomEventWidget(
-                    0, BoxShape.circle, circleHeight.value, circleHeight.value),
-              ),
-              Positioned(
-                top: 70,
-                left: 70,
-                child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
-              ),
-              Positioned(
-                bottom: 70,
-                right: 70,
-                child: createCustomEventWidget(1, BoxShape.rectangle, 100, 100),
-              ),
-              Positioned(
-                bottom: 10,
-                left: 0,
-                child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
-              ),
-              Positioned(
-                top: 10,
-                right: 0,
-                child: createCustomEventWidget(2, BoxShape.rectangle, 120, 120),
-              ),
-              draggableFloatingActionButtonWidget(),
-            ],
+      ),
+      child: Stack(
+        key: _parentKey,
+        children: [
+          InkWell(
+            child: SizedBox(
+              width: Get.mediaQuery.size.width,
+              height: Get.mediaQuery.size.height,
+            ),
+            onTap: () => c.addEvent(EventType.shotSuccess, 3),
+            onLongPress: () => c.addEvent(EventType.shotMiss, 3),
           ),
-        ));
+          Align(
+            alignment: Alignment.center,
+            child: createCustomEventWidget(
+              0,
+              BoxShape.circle,
+              calculateBoxDecorationHeight() * 0.9,
+              calculateBoxDecorationHeight() * 0.9,
+            ),
+          ),
+          Positioned(
+            top: calculateDeviceVerticalEdgeToBoxDecorationHeight() +
+                (calculateBoxDecorationHeight() * 0.20),
+            left: Get.mediaQuery.size.width * 0.15,
+            child: createCustomEventWidget(
+              1,
+              BoxShape.rectangle,
+              calculateBoxDecorationHeight() * 0.25,
+              calculateBoxDecorationHeight() * 0.25,
+            ),
+          ),
+          Positioned(
+            bottom: calculateDeviceVerticalEdgeToBoxDecorationHeight() +
+                (calculateBoxDecorationHeight() * 0.20),
+            right: Get.mediaQuery.size.width * 0.15,
+            child: createCustomEventWidget(
+              1,
+              BoxShape.rectangle,
+              calculateBoxDecorationHeight() * 0.25,
+              calculateBoxDecorationHeight() * 0.25,
+            ),
+          ),
+          Positioned(
+            bottom: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
+            left: 0,
+            child: createCustomEventWidget(2, BoxShape.rectangle, calculateBoxDecorationHeight() * 0.4, calculateBoxDecorationHeight() * 0.4),
+          ),
+          Positioned(
+            top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
+            right: 0,
+            child: createCustomEventWidget(2, BoxShape.rectangle, calculateBoxDecorationHeight() * 0.4, calculateBoxDecorationHeight() * 0.4),
+          ),
+          draggableFloatingActionButtonWidget(),
+        ],
+      ),
+    );
   }
 
   Widget draggableFloatingActionButtonWidget() {
