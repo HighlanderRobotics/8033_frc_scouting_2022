@@ -7,7 +7,6 @@ import '../services/getx_business_logic.dart';
 
 class PostGameScreen extends StatelessWidget {
   List<String> climbingChallenges = [
-    "Climbing Challenge",
     "Didn't Climb",
     "Failed Climb",
     "Bottom Bar",
@@ -20,23 +19,33 @@ class PostGameScreen extends StatelessWidget {
 
   final BusinessLogicController c = Get.find();
 
+  var selectedDefenseRating = 0.obs;
+
   @override
   Widget build(BuildContext context) {
     c.resetOrientation();
 
     return Scaffold(
       appBar: scoutingAppBar("Post Game"),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text("Select Climbing Challenge"),
+            const Text(
+              "Select Climbing Challenge",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             Obx(
               () => DropdownButton(
-                hint: Text(
-                  climbingChallenges[0],
-                ),
                 items: [
+                  const DropdownMenuItem(
+                    value: "Climbing Challenge",
+                    child: Text(
+                      "Climbing Challenge",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
                   for (var challenge in climbingChallenges)
                     DropdownMenuItem(
                       value: challenge,
@@ -45,17 +54,44 @@ class PostGameScreen extends StatelessWidget {
                       ),
                     ),
                 ],
-                onChanged: (String? newValue) {
-                  c.updateClimbingChallenge(newValue!);
-                },
+                onChanged: (newValue) =>
+                    c.updateClimbingChallenge(newValue as String),
                 value: c.matchData.challengeResult.value,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 10.0),
+              child: Text(
+                "Defense Rating",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (int radioNumber in [1, 2, 3, 4, 5])
+                    Obx(
+                      () => Column(
+                        children: [
+                          Radio(
+                              value: radioNumber,
+                              groupValue: selectedDefenseRating.value,
+                              onChanged: (value) =>
+                                  selectedDefenseRating.value = radioNumber),
+                          Text("$radioNumber")
+                        ],
+                      ),
+                    ),
+                ],
               ),
             ),
             Obx(
               () => ElevatedButton(
                 // not sure why this is happening
                 // ignore: unrelated_type_equality_checks
-                onPressed: c.matchData.challengeResult == climbingChallenges[0]
+                onPressed: c.matchData.challengeResult == "Climbing Challenge"
                     ? null
                     : () async {
                         if (!c.isPostGameDataValid()) {
