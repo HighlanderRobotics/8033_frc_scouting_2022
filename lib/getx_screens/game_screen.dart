@@ -11,7 +11,7 @@ class GameScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
   var robotIsMobile = true.obs;
-  
+
   void move() {
     Get.to(() => PostGameScreen());
   }
@@ -34,7 +34,7 @@ class GameScreen extends StatelessWidget {
     print(
         "Top to DecorationImage Height: ${calculateDeviceVerticalEdgeToBoxDecorationHeight()}");
 
-    c.startGameScreenTimer();
+    // c.startGameScreenTimer();
     c.setLandscapeOrientation();
 
     return Scaffold(
@@ -131,37 +131,33 @@ class GameScreen extends StatelessWidget {
   Widget draggableFloatingActionButtonWidget() {
     return Obx(
       () => DraggableFloatingActionButton(
-        initialOffset: const Offset(0, 0),
+        initialOffset: const Offset(10, 10),
         parentKey: _parentKey,
         onPressed: () {
           c.addEvent(EventType.robotBecomesImmobile, 5);
           robotIsMobile.toggle();
         },
         child: Container(
-          width: 90,
-          height: 90,
+          width: 50,
+          height: 50,
           decoration: ShapeDecoration(
             shadows: [
               BoxShadow(
-                color: Colors.grey.shade300,
-                blurRadius: 10,
-                spreadRadius: 5,
+                color: Colors.orange.shade300,
+                blurRadius: 15,
+                spreadRadius: 1,
               ),
             ],
             shape: const CircleBorder(),
-            color: Colors.amber.shade50,
+            color: Colors.orange.shade200,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(robotIsMobile.isTrue
-                  ? CupertinoIcons.heart
-                  : CupertinoIcons.heart_slash),
-              Text(
-                robotIsMobile.isTrue ? "Robot\nMobile" : "Robot\nBroke",
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
+              Image.asset(
+                robotIsMobile.isTrue
+                    ? "assets/robotEnabledIcon.png"
+                    : "assets/robotDisabledIcon.png",
               )
             ],
           ),
