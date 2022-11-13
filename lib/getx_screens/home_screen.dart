@@ -35,20 +35,6 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text("Choose FRC Event"),
-                      DropdownButton(
-                        items: [
-                          for (CompetitionKey competitionKey
-                              in CompetitionKey.values)
-                            DropdownMenuItem(
-                              onTap: () => c.selectedEvent = competitionKey,
-                              value: competitionKey,
-                              child: Text(competitionKey.stringValue),
-                            ),
-                        ],
-                        onChanged: (_) {},
-                        value: CompetitionKey.chezyChamps2022,
-                      ),
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Column(
@@ -101,7 +87,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                       Obx(
                         () => ElevatedButton(
-                          onPressed: !c.isHeaderDataValid(selectedScouterId.value)
+                          onPressed: !c
+                                  .isHeaderDataValid(selectedScouterId.value)
                               ? null
                               : () async {
                                   c.matchData.matchNumber.value =

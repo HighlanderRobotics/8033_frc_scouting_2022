@@ -11,6 +11,7 @@ class GameScreen extends StatelessWidget {
   final BusinessLogicController c = Get.find();
 
   var robotIsMobile = true.obs;
+  
   void move() {
     Get.to(() => PostGameScreen());
   }
@@ -34,6 +35,7 @@ class GameScreen extends StatelessWidget {
         "Top to DecorationImage Height: ${calculateDeviceVerticalEdgeToBoxDecorationHeight()}");
 
     c.startGameScreenTimer();
+    c.setLandscapeOrientation();
 
     return Scaffold(
       body: paintWidget(),
