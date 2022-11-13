@@ -91,9 +91,6 @@ flutter:
     - family: Effra
       fonts:
         - asset: fonts/effra.ttf
-    - family: Open Sans
-      fonts:
-        - asset: fonts/open-sans.ttf
   # fonts:
   #   - family: Schyler
   #     fonts:
