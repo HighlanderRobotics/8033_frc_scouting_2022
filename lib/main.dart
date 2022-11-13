@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 void main() {
   runApp(
     GetMaterialApp(
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      theme: ThemeData(primarySwatch: Colors.deepPurple, fontFamily: "Open Sans"),
       home: HomeScreen(),
     ),
   );

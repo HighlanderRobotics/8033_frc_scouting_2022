@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc_scouting/custom_widgets/frc_app_bar.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -19,10 +20,7 @@ class QrCodeScreen extends StatelessWidget {
     c.setPortraitOrientation();
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("QR Code"),
-          automaticallyImplyLeading: canGoBack,
-        ),
+        appBar: scoutingAppBar("QR Code", hideBackButton: canGoBack),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Obx(

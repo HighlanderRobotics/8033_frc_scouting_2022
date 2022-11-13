@@ -4,6 +4,7 @@ import 'package:frc_scouting/getx_screens/previous_matches_screen.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
+import '../custom_widgets/frc_app_bar.dart';
 import '../services/event_key.dart';
 import '../services/scouters.dart';
 
@@ -21,9 +22,7 @@ class HomeScreen extends StatelessWidget {
     c.resetOrientation();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scouting App 2022'),
-      ),
+      appBar: scoutingAppBar('Scouting App 2022'),
       body: Column(
         children: [
           Expanded(

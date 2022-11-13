@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc_scouting/custom_widgets/frc_app_bar.dart';
 import 'package:frc_scouting/services/match_data.dart';
 import 'package:frc_scouting/services/previous_match.dart';
 import 'package:get/get.dart';
@@ -29,12 +30,7 @@ class PreviousMatchesScreen extends StatelessWidget {
     filterSearchResultsAndUpdateList("");
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Previous Matches"),
-        actions: [
-          filterDropDown(),
-        ],
-      ),
+      appBar: scoutingAppBar("Previous Matches", actions: [filterDropDown()]),
       body: matches.validMatches.isNotEmpty
           ? previousMatchesListView()
           : noMatchesView(),
@@ -116,7 +112,8 @@ class PreviousMatchesScreen extends StatelessWidget {
       ),
       child: Card(
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           leading: const Icon(Icons.qr_code),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

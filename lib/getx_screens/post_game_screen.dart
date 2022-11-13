@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frc_scouting/custom_widgets/frc_app_bar.dart';
 import 'package:frc_scouting/getx_screens/qrcode_screen.dart';
 import 'package:get/get.dart';
 
@@ -24,10 +25,7 @@ class PostGameScreen extends StatelessWidget {
     c.resetOrientation();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Post Game"),
-        automaticallyImplyLeading: false,
-      ),
+      appBar: scoutingAppBar("Post Game"),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
