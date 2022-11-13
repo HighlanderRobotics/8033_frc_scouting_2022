@@ -7,7 +7,6 @@ import '../services/getx_business_logic.dart';
 
 class PostGameScreen extends StatelessWidget {
   List<String> climbingChallenges = [
-    "Climbing Challenge",
     "Didn't Climb",
     "Failed Climb",
     "Bottom Bar",
@@ -20,75 +19,130 @@ class PostGameScreen extends StatelessWidget {
 
   final BusinessLogicController c = Get.find();
 
+  var selectedDefenseRating = 0.obs;
+
   @override
   Widget build(BuildContext context) {
     c.resetOrientation();
 
     return Scaffold(
       appBar: scoutingAppBar("Post Game"),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text("Select Climbing Challenge"),
-            Obx(
-              () => DropdownButton(
-                hint: Text(
-                  climbingChallenges[0],
-                ),
-                items: [
-                  for (var challenge in climbingChallenges)
-                    DropdownMenuItem(
-                      value: challenge,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: SafeArea(
+          child: Obx(
+            (() => Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Select Climbing Challenge",
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    climbingChallengeDropdown(),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10.0),
                       child: Text(
-                        challenge,
+                        "Defense Rating",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
-                ],
-                onChanged: (String? newValue) {
-                  c.updateClimbingChallenge(newValue!);
-                },
-                value: c.matchData.challengeResult.value,
-              ),
-            ),
-            Obx(
-              () => ElevatedButton(
-                // not sure why this is happening
-                // ignore: unrelated_type_equality_checks
-                onPressed: c.matchData.challengeResult == climbingChallenges[0]
-                    ? null
-                    : () async {
-                        if (!c.isPostGameDataValid()) {
-                          Get.snackbar(
-                            "Invalid Post Game Data",
-                            "Please select a climbing challenge",
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        } else {
-                          if (await c.documentsHelper
-                              .saveMatchData(c.matchData)) {
-                            Get.snackbar(
-                              "Upload Successful",
-                              "Match has uploaded to cloud",
-                              snackPosition: SnackPosition.BOTTOM,
-                            );
-                          }
-
-                          Get.to(() {
-                            return QrCodeScreen(
-                              matchQrCodes:
-                                  c.separateEventsToQrCodes(c.matchData),
-                              canGoBack: false,
-                            );
-                          });
-                        }
-                      },
-                child: const Text("Show QR Code"),
-              ),
-            ),
-          ],
+                    defenseRatingRadioButtons(),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: Get.mediaQuery.size.width * 0.03),
+                      child: TextField(
+                        decoration: const InputDecoration(hintText: "Notes"),
+                        maxLines: null,
+                        controller: notesController,
+                      ),
+                    ),
+                    showQrCodeButton(),
+                  ],
+                )),
+          ),
         ),
       ),
+    );
+  }
+
+  Padding defenseRatingRadioButtons() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (int radioNumber in [1, 2, 3, 4, 5])
+            Column(
+              children: [
+                Radio(
+                    value: radioNumber,
+                    groupValue: selectedDefenseRating.value,
+                    onChanged: (value) =>
+                        selectedDefenseRating.value = radioNumber),
+                Text("$radioNumber")
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  DropdownButton<String> climbingChallengeDropdown() {
+    return DropdownButton(
+      items: [
+        const DropdownMenuItem(
+          value: "Climbing Challenge",
+          child: Text(
+            "Climbing Challenge",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+        for (var challenge in climbingChallenges)
+          DropdownMenuItem(
+            value: challenge,
+            child: Text(
+              challenge,
+            ),
+          ),
+      ],
+      onChanged: (newValue) => c.updateClimbingChallenge(newValue as String),
+      value: c.matchData.challengeResult.value,
+    );
+  }
+
+  ElevatedButton showQrCodeButton() {
+    return ElevatedButton(
+      onPressed: c.matchData.challengeResult.value == "Climbing Challenge"
+          ? null
+          : () async {
+              if (!c.isPostGameDataValid()) {
+                Get.snackbar(
+                  "Invalid Post Game Data",
+                  "Please select a climbing challenge",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              } else {
+                if (await c.documentsHelper.saveMatchData(c.matchData)) {
+                  Get.snackbar(
+                    "Upload Successful",
+                    "Match has uploaded to cloud",
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+
+                if (selectedDefenseRating.value == 0 && notesController.text.isNotEmpty) {
+                  Get.to(() {
+                    return QrCodeScreen(
+                      matchQrCodes: c.separateEventsToQrCodes(c.matchData),
+                      canGoBack: false,
+                    );
+                  });
+                }
+              }
+            },
+      child: const Text("Show QR Code"),
     );
   }
 }
