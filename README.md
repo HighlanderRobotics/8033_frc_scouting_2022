@@ -1,5 +1,8 @@
 # 8033 FRC Scouting for 2022
 
+# Note from Barry B Benson
+This branch is purely for testing the app works with the rest service, Jacob is free to integrate sending data however he likes, its for testing purposes
+
 ## TODO
 - Create Presets Class
 - ~~save data to JSON file on disk, even if closed app~~

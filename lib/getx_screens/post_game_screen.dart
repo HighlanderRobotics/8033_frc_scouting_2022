@@ -124,15 +124,8 @@ class PostGameScreen extends StatelessWidget {
                   snackPosition: SnackPosition.BOTTOM,
                 );
               } else {
-                if (await c.documentsHelper.saveMatchData(c.matchData)) {
-                  Get.snackbar(
-                    "Upload Successful",
-                    "Match has uploaded to cloud",
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-
-                if (selectedDefenseRating.value == 0 && notesController.text.isNotEmpty) {
+                // I think it meant to be !=
+                if (selectedDefenseRating.value != 0 && notesController.text.isNotEmpty) {
                   Get.to(() {
                     return QrCodeScreen(
                       matchQrCodes: c.separateEventsToQrCodes(c.matchData),
