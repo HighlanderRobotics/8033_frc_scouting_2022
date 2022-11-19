@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:frc_scouting/services/event_key.dart';
+import 'package:frc_scouting/services/game_screen_positions.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
@@ -11,7 +12,7 @@ import 'documents_helper.dart';
 import 'event.dart';
 import 'event_types.dart';
 import 'match_data.dart';
-import 'scouters.dart';
+import 'scouters_helper.dart';
 
 enum MatchListFilter { date, hasUploaded }
 
@@ -65,10 +66,12 @@ class BusinessLogicController extends GetxController {
   }
 
   bool isHeaderDataValid(int selectedScouterId) {
-    return matchData.matchNumber.value != 0 && matchData.teamNumber.value != 0 && selectedScouterId != 1;
+    return matchData.matchNumber.value != 0 &&
+        matchData.teamNumber.value != 0 &&
+        selectedScouterId != -1;
   }
 
-  void addEvent(EventType eventType, int position) {
+  void addEvent(EventType eventType, GameScreenPosition position) {
     final event = Event(
         timeSince: DateTime.now().millisecondsSinceEpoch - matchData.startTime,
         type: eventType,

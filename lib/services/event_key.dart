@@ -1,6 +1,4 @@
-enum CompetitionKey {
-  chezyChamps2022,
-}
+enum CompetitionKey { chezyChamps2022 }
 
 extension CompetitionKeyExtension on CompetitionKey {
   String get stringValue {

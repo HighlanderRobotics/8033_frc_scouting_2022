@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:frc_scouting/services/event_types.dart';
+import 'package:frc_scouting/services/game_screen_positions.dart';
 import 'package:get/get.dart';
 import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
@@ -19,7 +21,7 @@ class GameScreen extends StatelessWidget {
   final GlobalKey _parentKey = GlobalKey();
 
   double calculateBoxDecorationHeight() {
-    return (Get.mediaQuery.size.width * 662) / 1328;
+    return (Get.mediaQuery.size.width * 1620) / 3240;
   }
 
   double calculateDeviceVerticalEdgeToBoxDecorationHeight() {
@@ -55,12 +57,13 @@ class GameScreen extends StatelessWidget {
       width: Get.mediaQuery.size.width,
       height: Get.mediaQuery.size.height,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/gameboard_cropped.png'),
+      decoration: BoxDecoration(
+        image: const DecorationImage(
+          image: AssetImage('assets/field22.png'),
           alignment: Alignment.center,
           fit: BoxFit.fitWidth,
         ),
+        color: Colors.grey[850],
       ),
       child: Stack(
         key: _parentKey,
@@ -70,57 +73,72 @@ class GameScreen extends StatelessWidget {
               width: Get.mediaQuery.size.width,
               height: Get.mediaQuery.size.height,
             ),
-            onTap: () => c.addEvent(EventType.shotSuccess, 3),
-            onLongPress: () => c.addEvent(EventType.shotMiss, 3),
+            onTap: () {
+              c.addEvent(EventType.shotSuccess, GameScreenPosition.field);
+              HapticFeedback.lightImpact();
+            },
+            onLongPress: () {
+              c.addEvent(EventType.shotMiss, GameScreenPosition.field);
+              HapticFeedback.heavyImpact();
+            },
           ),
           Align(
             alignment: Alignment.center,
             child: createCustomEventWidget(
-              0,
+              GameScreenPosition.hub,
               BoxShape.circle,
-              calculateBoxDecorationHeight() * 0.9,
-              calculateBoxDecorationHeight() * 0.9,
+              calculateBoxDecorationHeight(),
+              calculateBoxDecorationHeight(),
             ),
           ),
-          Positioned(
-            top: calculateDeviceVerticalEdgeToBoxDecorationHeight() +
-                (calculateBoxDecorationHeight() * 0.20),
-            left: Get.mediaQuery.size.width * 0.15,
+          Align(
+            alignment: Alignment.center,
             child: createCustomEventWidget(
-              1,
-              BoxShape.rectangle,
-              calculateBoxDecorationHeight() * 0.25,
-              calculateBoxDecorationHeight() * 0.25,
+              GameScreenPosition.tarmac,
+              BoxShape.circle,
+              calculateBoxDecorationHeight() * 0.5,
+              calculateBoxDecorationHeight() * 0.5,
             ),
           ),
           Positioned(
-            bottom: calculateDeviceVerticalEdgeToBoxDecorationHeight() +
-                (calculateBoxDecorationHeight() * 0.20),
-            right: Get.mediaQuery.size.width * 0.15,
-            child: createCustomEventWidget(
-              1,
-              BoxShape.rectangle,
-              calculateBoxDecorationHeight() * 0.25,
-              calculateBoxDecorationHeight() * 0.25,
-            ),
-          ),
-          Positioned(
-            bottom: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
+            top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
             left: 0,
             child: createCustomEventWidget(
-                2,
+                GameScreenPosition.fieldEnd,
                 BoxShape.rectangle,
                 calculateBoxDecorationHeight() * 0.4,
-                calculateBoxDecorationHeight() * 0.4),
+                Get.mediaQuery.size.height -
+                    (calculateDeviceVerticalEdgeToBoxDecorationHeight() * 2)),
           ),
           Positioned(
             top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
             right: 0,
             child: createCustomEventWidget(
-                2,
+                GameScreenPosition.fieldEnd,
                 BoxShape.rectangle,
                 calculateBoxDecorationHeight() * 0.4,
-                calculateBoxDecorationHeight() * 0.4),
+                Get.mediaQuery.size.height -
+                    (calculateDeviceVerticalEdgeToBoxDecorationHeight() * 2)),
+          ),
+          Positioned(
+            top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
+            left: Get.mediaQuery.size.width * 0.14,
+            child: createCustomEventWidget(
+              GameScreenPosition.launchpad,
+              BoxShape.rectangle,
+              calculateBoxDecorationHeight() * 0.25,
+              calculateBoxDecorationHeight() * 0.5,
+            ),
+          ),
+          Positioned(
+            bottom: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
+            right: Get.mediaQuery.size.width * 0.14,
+            child: createCustomEventWidget(
+              GameScreenPosition.launchpad,
+              BoxShape.rectangle,
+              calculateBoxDecorationHeight() * 0.25,
+              calculateBoxDecorationHeight() * 0.5,
+            ),
           ),
           draggableFloatingActionButtonWidget(),
         ],
@@ -129,17 +147,19 @@ class GameScreen extends StatelessWidget {
   }
 
   Widget draggableFloatingActionButtonWidget() {
+    const radius = 50.0;
+
     return Obx(
       () => DraggableFloatingActionButton(
         initialOffset: const Offset(10, 10),
         parentKey: _parentKey,
         onPressed: () {
-          c.addEvent(EventType.robotBecomesImmobile, 5);
+          c.addEvent(EventType.robotBecomesImmobile, GameScreenPosition.none);
           robotIsMobile.toggle();
         },
         child: Container(
-          width: 50,
-          height: 50,
+          width: radius,
+          height: radius,
           decoration: ShapeDecoration(
             shadows: [
               BoxShadow(
@@ -166,20 +186,30 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  InkWell createCustomEventWidget(
-      int position, BoxShape boxShape, double width, double height) {
+  InkWell createCustomEventWidget(GameScreenPosition position,
+      BoxShape boxShape, double width, double height) {
     return InkWell(
       child: Container(
         width: width,
         height: height,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: boxShape,
-          color: Colors.purple.withOpacity(0.4),
+        decoration: ShapeDecoration(
+          shape: boxShape == BoxShape.circle
+              ? const CircleBorder()
+              : const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+          color: Colors.deepPurple.withOpacity(0.5),
         ),
       ),
-      onTap: () => c.addEvent(EventType.shotSuccess, position),
-      onLongPress: () => c.addEvent(EventType.shotMiss, position),
+      onTap: () {
+        c.addEvent(EventType.shotSuccess, position);
+        HapticFeedback.lightImpact();
+      },
+      onLongPress: () {
+        c.addEvent(EventType.shotMiss, position);
+        HapticFeedback.heavyImpact();
+      },
     );
   }
 }

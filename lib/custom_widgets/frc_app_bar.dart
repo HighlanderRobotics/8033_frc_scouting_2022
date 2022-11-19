@@ -5,9 +5,6 @@ AppBar scoutingAppBar(String title,
   return AppBar(
     title: Text(
       title,
-      style: const TextStyle(
-        fontFamily: "Effra",
-      ),
     ),
     actions: actions,
   );

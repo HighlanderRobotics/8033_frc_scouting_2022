@@ -19,7 +19,7 @@ class PostGameScreen extends StatelessWidget {
 
   final BusinessLogicController c = Get.find();
 
-  var selectedDefenseRating = 0.obs;
+  var selectedDefenseRating = "None".obs;
 
   @override
   Widget build(BuildContext context) {
@@ -73,15 +73,15 @@ class PostGameScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          for (int radioNumber in [1, 2, 3, 4, 5])
+          for (String radioElement in ["None", "1", "2", "3", "4", "5"])
             Column(
               children: [
                 Radio(
-                    value: radioNumber,
+                    value: radioElement,
                     groupValue: selectedDefenseRating.value,
                     onChanged: (value) =>
-                        selectedDefenseRating.value = radioNumber),
-                Text("$radioNumber")
+                        selectedDefenseRating.value = radioElement),
+                Text(radioElement)
               ],
             ),
         ],
@@ -131,15 +131,12 @@ class PostGameScreen extends StatelessWidget {
                     snackPosition: SnackPosition.BOTTOM,
                   );
                 }
-
-                if (selectedDefenseRating.value == 0 && notesController.text.isNotEmpty) {
-                  Get.to(() {
-                    return QrCodeScreen(
-                      matchQrCodes: c.separateEventsToQrCodes(c.matchData),
-                      canGoBack: false,
-                    );
-                  });
-                }
+                Get.to(() {
+                  return QrCodeScreen(
+                    matchQrCodes: c.separateEventsToQrCodes(c.matchData),
+                    canGoBack: false,
+                  );
+                });
               }
             },
       child: const Text("Show QR Code"),

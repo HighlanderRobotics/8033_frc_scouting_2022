@@ -30,39 +30,58 @@ class PreviousMatchesScreen extends StatelessWidget {
     filterSearchResultsAndUpdateList("");
 
     return Scaffold(
-      appBar: scoutingAppBar("Previous Matches", actions: [filterDropDown()]),
+      appBar: scoutingAppBar("Previous Matches"),
       body: matches.validMatches.isNotEmpty
           ? previousMatchesListView()
           : noMatchesView(),
     );
   }
 
-  DropdownButtonHideUnderline filterDropDown() {
-    return DropdownButtonHideUnderline(
-      child: Obx(
-        () => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: DropdownButton(
-            items: const [
-              DropdownMenuItem(
-                value: MatchListFilter.date,
-                child: Text("Date"),
-              ),
-              DropdownMenuItem(
-                value: MatchListFilter.hasUploaded,
-                child: Text("Uploaded"),
-              ),
-            ],
-            onChanged: (value) {
-              if (value is MatchListFilter) {
-                c.matchFilterType.value = value;
-              }
-            },
-            value: c.matchFilterType.value,
+  PopupMenuButton filterDropDown() {
+    return PopupMenuButton(
+      icon: const Icon(Icons.filter_list),
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          child: ListTile(
+            leading: Icon(Icons.today),
+            title: Text('Date'),
           ),
         ),
-      ),
+
+        const PopupMenuItem(
+          child: ListTile(
+            leading: Icon(Icons.cloud_done),
+            title: Text('Uploaded'),
+          ),
+        ),
+      ],
     );
+
+    // return DropdownButtonHideUnderline(
+    //   child: Obx(
+    //     () => Padding(
+    //       padding: const EdgeInsets.all(8.0),
+    //       child: DropdownButton(
+    //         items: const [
+    //           DropdownMenuItem(
+    //             value: MatchListFilter.date,
+    //             child: Text("Date"),
+    //           ),
+    //           DropdownMenuItem(
+    //             value: MatchListFilter.hasUploaded,
+    //             child: Text("Uploaded"),
+    //           ),
+    //         ],
+    //         onChanged: (value) {
+    //           if (value is MatchListFilter) {
+    //             c.matchFilterType.value = value;
+    //           }
+    //         },
+    //         value: c.matchFilterType.value,
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 
   Widget previousMatchesListView() {
@@ -75,16 +94,17 @@ class PreviousMatchesScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10),
             child: TextField(
               onChanged: (value) => filterSearchResultsAndUpdateList(value),
               controller: txtEditingController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                   labelText: "Search",
                   hintText: "Search",
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20.0)))),
+                  suffixIcon: filterDropDown(),
+                  prefixIcon: const Icon(Icons.search),
+                  border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)))),
             ),
           ),
           Expanded(

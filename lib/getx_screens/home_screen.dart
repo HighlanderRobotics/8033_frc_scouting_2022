@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 import '../custom_widgets/frc_app_bar.dart';
 import '../services/event_key.dart';
-import '../services/scouters.dart';
+import '../services/scouters_helper.dart';
 
 class HomeScreen extends StatelessWidget {
   final matchTxtFieldController = TextEditingController();
@@ -39,26 +39,17 @@ class HomeScreen extends StatelessWidget {
                         child: Column(
                           children: [
                             Obx(
-                              () => DropdownButton(
-                                items: [
-                                  const DropdownMenuItem(
-                                    value: -1,
-                                    child: Text(
-                                      "Choose Your Name",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                  for (Scouter scouter
-                                      in c.scoutersHelper.scouters)
-                                    DropdownMenuItem(
-                                      onTap: () => selectedScouterId.value =
-                                          scouter.scouterId,
-                                      value: scouter.scouterId,
-                                      child: Text(scouter.scouterName),
-                                    ),
+                              () => Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  chooseScouterNameDropdownButton(c),
+                                  IconButton(
+                                    icon: const Icon(Icons.refresh,
+                                        color: Colors.grey),
+                                    onPressed: () =>
+                                        c.scoutersHelper.getAllScouters(forceFetch: true),
+                                  )
                                 ],
-                                onChanged: (_) {},
-                                value: selectedScouterId.value,
                               ),
                             ),
                             TextField(
@@ -138,6 +129,29 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  DropdownButton<int> chooseScouterNameDropdownButton(
+      BusinessLogicController c) {
+    return DropdownButton(
+      items: [
+        const DropdownMenuItem(
+          value: -1,
+          child: Text(
+            "Choose Your Name",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+        for (Scouter scouter in c.scoutersHelper.scouters)
+          DropdownMenuItem(
+            onTap: () => selectedScouterId.value = scouter.scouterId,
+            value: scouter.scouterId,
+            child: Text(scouter.scouterName),
+          ),
+      ],
+      onChanged: (_) {},
+      value: selectedScouterId.value,
     );
   }
 }

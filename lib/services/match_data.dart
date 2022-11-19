@@ -34,7 +34,7 @@ class MatchData {
       didDefense = RxBool(json['didDefense']);
       notes = RxString(json['notes']);
       challengeResult = RxString(json['challengeResult']);
-      hasSavedToCloud = RxBool(json['hasSavedToCloud']);
+      hasSavedToCloud = false.obs;
     } on TypeError {
       throw Exception("Invalid JSON");
     }
