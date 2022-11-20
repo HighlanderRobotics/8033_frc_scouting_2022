@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
@@ -10,7 +8,7 @@ import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
 
 class GameScreen extends StatelessWidget {
-  final BusinessLogicController c = Get.find();
+  final BusinessLogicController controller = Get.find();
 
   var robotIsMobile = true.obs;
 
@@ -18,7 +16,7 @@ class GameScreen extends StatelessWidget {
     Get.to(() => PostGameScreen());
   }
 
-  final GlobalKey _parentKey = GlobalKey();
+  final GlobalKey draggableFABParentKey = GlobalKey();
 
   double calculateBoxDecorationHeight() {
     return (Get.mediaQuery.size.width * 1620) / 3240;
@@ -36,17 +34,20 @@ class GameScreen extends StatelessWidget {
     print(
         "Top to DecorationImage Height: ${calculateDeviceVerticalEdgeToBoxDecorationHeight()}");
 
-    // c.startGameScreenTimer();
-    c.setLandscapeOrientation();
+    // controller.startGameScreenTimer();
+    controller.setLandscapeOrientation();
 
     return Scaffold(
       body: paintWidget(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => {},
+        onPressed: null,
         mini: true,
         child: GestureDetector(
           child: const Icon(Icons.arrow_forward),
-          onLongPress: () => move(),
+          onLongPress: () {
+            HapticFeedback.heavyImpact();
+            move();
+          },
         ),
       ),
     );
@@ -66,7 +67,7 @@ class GameScreen extends StatelessWidget {
         color: Colors.grey[850],
       ),
       child: Stack(
-        key: _parentKey,
+        key: draggableFABParentKey,
         children: [
           InkWell(
             child: SizedBox(
@@ -74,11 +75,12 @@ class GameScreen extends StatelessWidget {
               height: Get.mediaQuery.size.height,
             ),
             onTap: () {
-              c.addEvent(EventType.shotSuccess, GameScreenPosition.field);
+              controller.addEvent(
+                  EventType.shotSuccess, GameScreenPosition.field);
               HapticFeedback.lightImpact();
             },
             onLongPress: () {
-              c.addEvent(EventType.shotMiss, GameScreenPosition.field);
+              controller.addEvent(EventType.shotMiss, GameScreenPosition.field);
               HapticFeedback.heavyImpact();
             },
           ),
@@ -141,6 +143,16 @@ class GameScreen extends StatelessWidget {
             ),
           ),
           draggableFloatingActionButtonWidget(),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Team: ${controller.matchData.teamNumber.toString()}",
+                style: const TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -152,9 +164,10 @@ class GameScreen extends StatelessWidget {
     return Obx(
       () => DraggableFloatingActionButton(
         initialOffset: const Offset(10, 10),
-        parentKey: _parentKey,
+        parentKey: draggableFABParentKey,
         onPressed: () {
-          c.addEvent(EventType.robotBecomesImmobile, GameScreenPosition.none);
+          controller.addEvent(
+              EventType.robotBecomesImmobile, GameScreenPosition.none);
           robotIsMobile.toggle();
         },
         child: Container(
@@ -203,11 +216,11 @@ class GameScreen extends StatelessWidget {
         ),
       ),
       onTap: () {
-        c.addEvent(EventType.shotSuccess, position);
+        controller.addEvent(EventType.shotSuccess, position);
         HapticFeedback.lightImpact();
       },
       onLongPress: () {
-        c.addEvent(EventType.shotMiss, position);
+        controller.addEvent(EventType.shotMiss, position);
         HapticFeedback.heavyImpact();
       },
     );

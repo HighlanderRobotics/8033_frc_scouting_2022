@@ -1,28 +1,33 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
-import 'package:frc_scouting/getx_screens/previous_matches_screen.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
-import '../custom_widgets/frc_app_bar.dart';
 import '../services/event_key.dart';
 import '../services/scouters_helper.dart';
+import 'previous_matches_screen.dart';
+import 'scan_qrcode_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final matchTxtFieldController = TextEditingController();
-  final teamNumberTxtFieldController = TextEditingController();
+  final teamTxtFieldController = TextEditingController();
 
   var selectedEvent = CompetitionKey.chezyChamps2022.obs;
   var selectedScouterId = RxInt(-1);
+  var selectedScouterQrCodeId = RxInt(-1);
+
+  late BusinessLogicController controller;
 
   @override
   Widget build(BuildContext context) {
-    final BusinessLogicController c = Get.put(BusinessLogicController());
-
-    c.resetOrientation();
+    controller = Get.put(BusinessLogicController());
+    controller.resetOrientation();
 
     return Scaffold(
-      appBar: scoutingAppBar('Scouting App 2022'),
+      appBar: AppBar(
+        title: const Text("Collection App 2022"),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -42,13 +47,47 @@ class HomeScreen extends StatelessWidget {
                               () => Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  chooseScouterNameDropdownButton(c),
+                                  chooseScouterNameDropdownButton(),
                                   IconButton(
                                     icon: const Icon(Icons.refresh,
                                         color: Colors.grey),
-                                    onPressed: () =>
-                                        c.scoutersHelper.getAllScouters(forceFetch: true),
-                                  )
+                                    onPressed: () {
+                                      selectedScouterId.value = -1;
+                                      controller.scoutersHelper
+                                          .getAllScouters(forceFetch: true);
+                                    },
+                                    tooltip: "Refresh Scouters",
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Obx(
+                              () => Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      "Selected Scouter QR ID: ${selectedScouterQrCodeId.value == -1 ? "None" : selectedScouterQrCodeId.value}",
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(CupertinoIcons.qrcode_viewfinder,
+                                        color:
+                                            selectedScouterQrCodeId.value == -1
+                                                ? Colors.grey
+                                                : Colors.deepPurple),
+                                    onPressed: (() async {
+                                      final qrCodeResult = await Get.to(
+                                          () => ScanQrCodeScreen());
+                                      selectedScouterQrCodeId.value = 2;
+                                      if (int.tryParse(
+                                              qrCodeResult) is String) {
+                                        selectedScouterQrCodeId.value =
+                                            int.parse(qrCodeResult);
+                                      }
+                                    }),
+                                  ),
                                 ],
                               ),
                             ),
@@ -58,37 +97,48 @@ class HomeScreen extends StatelessWidget {
                               controller: matchTxtFieldController,
                               keyboardType: TextInputType.number,
                               onChanged: (value) {
-                                c.matchData.matchNumber.value =
+                                controller.matchData.matchNumber.value =
                                     int.tryParse(value) ?? 0;
+                                try {
+                                  if (controller.matchData.matchNumber.value >
+                                          0 &&
+                                      selectedScouterQrCodeId != -1) {
+                                    teamTxtFieldController.text = controller
+                                        .eventSchedule[controller
+                                                .matchData.matchNumber.value -
+                                            1][selectedScouterQrCodeId.value]
+                                        .toString();
+                                  }
+                                } catch (e) {}
                               },
                             ),
                             TextField(
                               decoration: const InputDecoration(
                                   hintText: "Team Number"),
-                              controller: teamNumberTxtFieldController,
+                              controller: teamTxtFieldController,
                               keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                c.matchData.teamNumber.value =
-                                    int.tryParse(value) ?? 0;
-                              },
+                              onChanged: (value) => controller.matchData
+                                  .teamNumber.value = int.parse(value),
+                              enabled: false,
                             ),
                           ],
                         ),
                       ),
                       Obx(
                         () => ElevatedButton(
-                          onPressed: !c
+                          onPressed: !controller
                                   .isHeaderDataValid(selectedScouterId.value)
                               ? null
                               : () async {
-                                  c.matchData.matchNumber.value =
+                                  controller.matchData.matchNumber.value =
                                       int.parse(matchTxtFieldController.text);
-                                  c.matchData.teamNumber.value = int.parse(
-                                      teamNumberTxtFieldController.text);
+                                  // controller.matchData.teamNumber.value =
+                                  //     int.parse(
+                                  //         teamNumberTxtFieldController.text);
 
-                                  if (c.currentOrientation !=
+                                  if (controller.currentOrientation !=
                                       Orientation.landscape) {
-                                    c.setLandscapeOrientation();
+                                    controller.setLandscapeOrientation();
                                     await Future.delayed(
                                         const Duration(milliseconds: 700));
                                   }
@@ -110,8 +160,13 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(30.0),
               child: ElevatedButton(
                 child: const Text("View Previous Matches"),
-                onPressed: () {
-                  final matches = c.documentsHelper.getMatches();
+                onPressed: () async {
+                  final matches = controller.documentsHelper.getMatches();
+                  Get.to(
+                    () => PreviousMatchesScreen(
+                      matches: matches,
+                    ),
+                  );
                   if (matches.numberOfInvalidFiles > 0) {
                     Get.snackbar(
                       "Ignored Invalid Files",
@@ -119,10 +174,6 @@ class HomeScreen extends StatelessWidget {
                       snackPosition: SnackPosition.BOTTOM,
                     );
                   }
-                  Get.to(
-                    () => PreviousMatchesScreen(
-                        matches: c.documentsHelper.getMatches()),
-                  );
                 },
               ),
             ),
@@ -132,8 +183,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  DropdownButton<int> chooseScouterNameDropdownButton(
-      BusinessLogicController c) {
+  DropdownButton<int> chooseScouterNameDropdownButton() {
     return DropdownButton(
       items: [
         const DropdownMenuItem(
@@ -143,7 +193,7 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(color: Colors.grey),
           ),
         ),
-        for (Scouter scouter in c.scoutersHelper.scouters)
+        for (Scouter scouter in controller.scoutersHelper.scouters)
           DropdownMenuItem(
             onTap: () => selectedScouterId.value = scouter.scouterId,
             value: scouter.scouterId,

@@ -14,7 +14,7 @@ class ScoutersHelper {
   Future getAllScouters({bool forceFetch = false}) async {
     try {
       final localStorageScouters = await _getParsedLocalStorageScouters();
-      
+
       if (forceFetch || localStorageScouters.isEmpty) {
         scouters.value = await _fetchScouters();
         _saveParsedLocalStorageScouters(scouters.toList());
@@ -22,14 +22,15 @@ class ScoutersHelper {
         scouters.value = localStorageScouters;
       }
     } catch (e) {
-      throw Exception(e);
+      print("Error Occured: $e");
     }
   }
 
   // Abstracted function to get the scouters from localStorage
   // Then it parses the JSON and returns a list of Scouter objects
   Future<List<Scouter>> _getParsedLocalStorageScouters() async {
-    final scouterJson = await SharedPreferencesHelper.getString(SharedPreferenceKeys.scouters.toShortString());
+    final scouterJson = await SharedPreferencesHelper.getString(
+        SharedPreferenceKeys.scouters.toShortString());
 
     if (scouterJson.isNotEmpty) {
       return jsonDecode(scouterJson)
@@ -84,5 +85,4 @@ class Scouter {
         "scouterId": scouterId,
         "scouterName": scouterName,
       };
-  
 }

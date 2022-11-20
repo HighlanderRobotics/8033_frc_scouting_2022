@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:frc_scouting/services/event_key.dart';
 import 'package:frc_scouting/services/game_screen_positions.dart';
+import 'package:frc_scouting/services/the_blue_alliance_api.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
@@ -16,18 +17,34 @@ import 'scouters_helper.dart';
 
 enum MatchListFilter { date, hasUploaded }
 
+extension MatchListFilterExtension on MatchListFilter {
+  String get name {
+    switch (this) {
+      case MatchListFilter.date:
+        return "Date";
+      case MatchListFilter.hasUploaded:
+        return "Has Uploaded";
+      default:
+        return "";
+    }
+  }
+}
+
 class BusinessLogicController extends GetxController {
   late CompetitionKey selectedEvent;
   late MatchData matchData;
   final DocumentsHelper documentsHelper = DocumentsHelper();
   var matchFilterType = MatchListFilter.date.obs;
   final scoutersHelper = ScoutersHelper();
+  RxList<List<int>> eventSchedule = RxList<List<int>>([]);
 
   @override
   void onInit() async {
     selectedEvent = CompetitionKey.chezyChamps2022;
     matchData = MatchData(competitionKey: selectedEvent);
     await scoutersHelper.getAllScouters();
+
+    eventSchedule.value = await TheBlueAllianceAPI().getMatchSchedule("2022cc");
 
     super.onInit();
   }
@@ -66,9 +83,7 @@ class BusinessLogicController extends GetxController {
   }
 
   bool isHeaderDataValid(int selectedScouterId) {
-    return matchData.matchNumber.value != 0 &&
-        matchData.teamNumber.value != 0 &&
-        selectedScouterId != -1;
+    return matchData.matchNumber.value != 0 && selectedScouterId != -1;
   }
 
   void addEvent(EventType eventType, GameScreenPosition position) {

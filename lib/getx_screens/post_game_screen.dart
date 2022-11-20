@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frc_scouting/custom_widgets/frc_app_bar.dart';
-import 'package:frc_scouting/getx_screens/qrcode_screen.dart';
+import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
 import 'package:get/get.dart';
 
 import '../services/getx_business_logic.dart';
@@ -17,16 +16,18 @@ class PostGameScreen extends StatelessWidget {
 
   final notesController = TextEditingController();
 
-  final BusinessLogicController c = Get.find();
+  final BusinessLogicController controller = Get.find();
 
   var selectedDefenseRating = "None".obs;
 
   @override
   Widget build(BuildContext context) {
-    c.resetOrientation();
+    controller.resetOrientation();
 
     return Scaffold(
-      appBar: scoutingAppBar("Post Game"),
+      appBar: AppBar(
+        title: const Text("Post Game"),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: SafeArea(
@@ -107,38 +108,42 @@ class PostGameScreen extends StatelessWidget {
             ),
           ),
       ],
-      onChanged: (newValue) => c.updateClimbingChallenge(newValue as String),
-      value: c.matchData.challengeResult.value,
+      onChanged: (newValue) =>
+          controller.updateClimbingChallenge(newValue as String),
+      value: controller.matchData.challengeResult.value,
     );
   }
 
   ElevatedButton showQrCodeButton() {
     return ElevatedButton(
-      onPressed: c.matchData.challengeResult.value == "Climbing Challenge"
-          ? null
-          : () async {
-              if (!c.isPostGameDataValid()) {
-                Get.snackbar(
-                  "Invalid Post Game Data",
-                  "Please select a climbing challenge",
-                  snackPosition: SnackPosition.BOTTOM,
-                );
-              } else {
-                if (await c.documentsHelper.saveMatchData(c.matchData)) {
-                  Get.snackbar(
-                    "Upload Successful",
-                    "Match has uploaded to cloud",
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-                Get.to(() {
-                  return QrCodeScreen(
-                    matchQrCodes: c.separateEventsToQrCodes(c.matchData),
-                    canGoBack: false,
-                  );
-                });
-              }
-            },
+      onPressed:
+          controller.matchData.challengeResult.value == "Climbing Challenge"
+              ? null
+              : () async {
+                  if (!controller.isPostGameDataValid()) {
+                    Get.snackbar(
+                      "Invalid Post Game Data",
+                      "Please select a climbing challenge",
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  } else {
+                    if (await controller.documentsHelper
+                        .saveMatchData(controller.matchData)) {
+                      Get.snackbar(
+                        "Upload Successful",
+                        "Match has uploaded to cloud",
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                    Get.to(() {
+                      return QrCodeScreen(
+                        matchQrCodes:
+                            controller.separateEventsToQrCodes(controller.matchData),
+                        canGoBack: false,
+                      );
+                    });
+                  }
+                },
       child: const Text("Show QR Code"),
     );
   }
