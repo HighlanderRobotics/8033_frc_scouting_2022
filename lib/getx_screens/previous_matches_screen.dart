@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frc_scouting/services/match_data.dart';
 import 'package:frc_scouting/services/previous_match.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import 'view_qrcode_screen.dart';
 import '../services/getx_business_logic.dart';
@@ -54,6 +55,7 @@ class PreviousMatchesScreen extends StatelessWidget {
   PopupMenuItem filterPopupMenuItem(MatchListFilter filter) {
     return PopupMenuItem(
       value: filter,
+      onTap: () => filterSearchResultsAndUpdateList(txtEditingController.text),
       child: ListTile(
         leading: Icon(
             filter == MatchListFilter.date ? Icons.today : Icons.cloud_done),
@@ -104,14 +106,14 @@ class PreviousMatchesScreen extends StatelessWidget {
   }
 
   Widget matchRowView(MatchData element) {
-    return InkWell(
-      onTap: () => Get.to(
-        () => QrCodeScreen(
-          matchQrCodes: controller.separateEventsToQrCodes(element),
-          canGoBack: true,
+    return Card(
+      child: InkWell(
+        onTap: () => Get.to(
+          () => QrCodeScreen(
+            matchQrCodes: controller.separateEventsToQrCodes(element),
+            canGoBack: true,
+          ),
         ),
-      ),
-      child: Card(
         child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -127,19 +129,24 @@ class PreviousMatchesScreen extends StatelessWidget {
                     "Team: ${element.teamNumber.toString()}",
                     style: const TextStyle(fontSize: 15, color: Colors.grey),
                   ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(element.hasSavedToCloud.isTrue
-                      ? Icons.cloud_done
-                      : Icons.cloud_off),
+                  Text(
+                    "Date: ${element.startTime.format()}",
+                    style: const TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
                 ],
               ),
             ],
           ),
-          trailing: const Icon(Icons.arrow_forward_ios_rounded),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(element.hasSavedToCloud.isTrue
+                  ? Icons.cloud_done
+                  : Icons.cloud_off),
+              const SizedBox(width: 10),
+              const Icon(Icons.arrow_forward_ios_rounded),
+            ],
+          ),
         ),
       ),
     );
@@ -170,7 +177,8 @@ class PreviousMatchesScreen extends StatelessWidget {
 
     if (controller.matchFilterType.value == MatchListFilter.date) {
       searchList.sort((a, b) => b.startTime.compareTo(a.startTime));
-    } else if (controller.matchFilterType.value == MatchListFilter.hasUploaded) {
+    } else if (controller.matchFilterType.value ==
+        MatchListFilter.hasUploaded) {
       for (MatchData matchData in searchList) {
         if (matchData.hasSavedToCloud.value) {
           searchList.remove(matchData);
@@ -180,5 +188,17 @@ class PreviousMatchesScreen extends StatelessWidget {
     }
 
     filteredMatches.value = searchList;
+  }
+}
+
+extension DateTimeExtension on DateTime {
+  String format() {
+    if (DateTime.now().difference(this).inDays < 1) {
+      return "Today at ${DateFormat('h:mm a').format(this)}";
+    } else if (DateTime.now().difference(this).inDays < 2) {
+      return "Yesterday at ${DateFormat('h:mm a').format(this)}";
+    } else {
+      return DateFormat('M/d/y').format(this);
+    }
   }
 }

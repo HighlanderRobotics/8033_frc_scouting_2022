@@ -36,6 +36,7 @@ class GameScreen extends StatelessWidget {
 
     // controller.startGameScreenTimer();
     controller.setLandscapeOrientation();
+    controller.startGameScreenTimer();
 
     return Scaffold(
       body: paintWidget(),
