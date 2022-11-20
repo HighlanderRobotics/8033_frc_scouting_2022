@@ -191,10 +191,6 @@ class PreviousMatchesScreen extends StatelessWidget {
         break;
     }
 
-    searchList.forEach((element) {
-      print(element.hasNotSavedToCloud);
-    });
-
     filteredMatches.value = searchList;
     filteredMatches.refresh();
   }
