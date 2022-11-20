@@ -49,7 +49,7 @@ class PreviousMatchesScreen extends StatelessWidget {
         icon: const Icon(Icons.filter_list),
         itemBuilder: (context) => [
           filterPopupMenuItem(MatchFilterType.date),
-          filterPopupMenuItem(MatchFilterType.hasUploaded),
+          filterPopupMenuItem(MatchFilterType.hasNotUploaded),
         ],
       ),
     );
@@ -61,7 +61,7 @@ class PreviousMatchesScreen extends StatelessWidget {
       value: filter,
       child: ListTile(
         leading: Icon(
-            filter == MatchFilterType.date ? Icons.today : Icons.cloud_done),
+            filter == MatchFilterType.date ? Icons.today : Icons.cloud_off),
         title: Text(filter.name),
         trailing: controller.matchFilterType.value == filter
             ? const Icon(Icons.check)
@@ -136,10 +136,6 @@ class PreviousMatchesScreen extends StatelessWidget {
                     "Date: ${element.startTime.format()}",
                     style: const TextStyle(fontSize: 15, color: Colors.grey),
                   ),
-                  Text(
-                    "Uploaded: ${element.hasSavedToCloud}",
-                    style: const TextStyle(fontSize: 15, color: Colors.grey),
-                  ),
                 ],
               ),
             ],
@@ -147,7 +143,7 @@ class PreviousMatchesScreen extends StatelessWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(element.hasSavedToCloud.isTrue
+              Icon(element.hasNotSavedToCloud.isTrue
                   ? Icons.cloud_done
                   : Icons.cloud_off),
               const SizedBox(width: 10),
@@ -185,27 +181,19 @@ class PreviousMatchesScreen extends StatelessWidget {
       case MatchFilterType.date:
         searchList.sort((a, b) => b.startTime.compareTo(a.startTime));
         break;
-      case MatchFilterType.hasUploaded:
+      case MatchFilterType.hasNotUploaded:
         for (MatchData matchData in searchList) {
-          if (matchData.hasSavedToCloud.isFalse) {
+          if (matchData.hasNotSavedToCloud.isFalse) {
             searchList.remove(matchData);
-            searchList.add(matchData);
+            searchList.insert(0, matchData);
           }
         }
         break;
     }
 
-    // if (controller.matchFilterType.value == MatchListFilter.date) {
-    //   searchList.sort((a, b) => b.startTime.compareTo(a.startTime));
-    // } else if (controller.matchFilterType.value ==
-    //     MatchListFilter.hasUploaded) {
-    //   for (MatchData matchData in searchList) {
-    //     if (matchData.hasSavedToCloud.isFalse) {
-    //       searchList.remove(matchData);
-    //       searchList.insert(0, matchData);
-    //     }
-    //   }
-    // }
+    searchList.forEach((element) {
+      print(element.hasNotSavedToCloud);
+    });
 
     filteredMatches.value = searchList;
     filteredMatches.refresh();

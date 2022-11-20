@@ -15,17 +15,17 @@ import 'event_types.dart';
 import 'match_data.dart';
 import 'scouters_helper.dart';
 
-enum MatchFilterType { date, hasUploaded }
+enum MatchFilterType { date, hasNotUploaded }
 
 extension MatchFilterTypeExtension on MatchFilterType {
   String get name {
     switch (this) {
       case MatchFilterType.date:
         return "Date";
-      case MatchFilterType.hasUploaded:
-        return "Has Uploaded";
+      case MatchFilterType.hasNotUploaded:
+        return "Not Uploaded";
       default:
-        return "";
+        return "Unknown";
     }
   }
 }

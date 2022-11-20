@@ -17,7 +17,7 @@ class MatchData {
   var didDefense = false.obs;
   var notes = "".obs;
   var challengeResult = "Climbing Challenge".obs;
-  var hasSavedToCloud = false.obs;
+  var hasNotSavedToCloud = false.obs;
 
   MatchData({required CompetitionKey competitionKey})
       : competitionKey = competitionKey.obs;
@@ -36,7 +36,8 @@ class MatchData {
       didDefense = RxBool(json['didDefense']);
       notes = RxString(json['notes']);
       challengeResult = RxString(json['challengeResult']);
-      hasSavedToCloud = Random().nextBool().obs;
+      hasNotSavedToCloud = Random().nextBool().obs;
+      // TODO: Implement this
     } on TypeError {
       throw Exception("Invalid JSON");
     }
@@ -53,6 +54,6 @@ class MatchData {
         'notes': notes.value,
         'didDefense': didDefense.value,
         'challengeResult': challengeResult.value,
-        'hasSavedToCloud': hasSavedToCloud.value,
+        'hasNotSavedToCloud': hasNotSavedToCloud.value,
       };
 }

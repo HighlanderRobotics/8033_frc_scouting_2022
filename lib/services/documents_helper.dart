@@ -19,9 +19,9 @@ class DocumentsHelper {
 
     // TODO: try to upload to Firebase
 
-    matchData.hasSavedToCloud.value = Random().nextBool();
+    matchData.hasNotSavedToCloud.value = Random().nextBool();
 
-    return matchData.hasSavedToCloud.value;
+    return matchData.hasNotSavedToCloud.value;
     // return true;
   }
 
@@ -55,7 +55,8 @@ class DocumentsHelper {
           final MatchData match = MatchData.fromJson(jsonDecode(contents));
           matches.validMatches.add(match);
         } catch (e) {
-          print("Error parsing file: ${file.uri.pathSegments.last} Invalid Format");
+          print(
+              "Error parsing file: ${file.uri.pathSegments.last} Invalid Format");
           matches.numberOfInvalidFiles++;
         }
       } else if (!file.uri.pathSegments.last.startsWith(".")) {
