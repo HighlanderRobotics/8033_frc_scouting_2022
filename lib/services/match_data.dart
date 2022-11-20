@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:frc_scouting/services/event_key.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
@@ -34,7 +36,7 @@ class MatchData {
       didDefense = RxBool(json['didDefense']);
       notes = RxString(json['notes']);
       challengeResult = RxString(json['challengeResult']);
-      hasSavedToCloud = false.obs;
+      hasSavedToCloud = Random().nextBool().obs;
     } on TypeError {
       throw Exception("Invalid JSON");
     }

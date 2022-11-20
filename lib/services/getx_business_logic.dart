@@ -15,14 +15,14 @@ import 'event_types.dart';
 import 'match_data.dart';
 import 'scouters_helper.dart';
 
-enum MatchListFilter { date, hasUploaded }
+enum MatchFilterType { date, hasUploaded }
 
-extension MatchListFilterExtension on MatchListFilter {
+extension MatchFilterTypeExtension on MatchFilterType {
   String get name {
     switch (this) {
-      case MatchListFilter.date:
+      case MatchFilterType.date:
         return "Date";
-      case MatchListFilter.hasUploaded:
+      case MatchFilterType.hasUploaded:
         return "Has Uploaded";
       default:
         return "";
@@ -34,7 +34,7 @@ class BusinessLogicController extends GetxController {
   late CompetitionKey selectedEvent;
   late MatchData matchData;
   final DocumentsHelper documentsHelper = DocumentsHelper();
-  var matchFilterType = MatchListFilter.date.obs;
+  var matchFilterType = MatchFilterType.date.obs;
   final scoutersHelper = ScoutersHelper();
   RxList<List<int>> eventSchedule = RxList<List<int>>([]);
 

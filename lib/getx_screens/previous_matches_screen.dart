@@ -26,7 +26,7 @@ class PreviousMatchesScreen extends StatelessWidget {
 
     controller.resetOrientation();
 
-    filterSearchResultsAndUpdateList("");
+    filterSearchResultsAndUpdateList();
 
     return Scaffold(
       appBar: AppBar(
@@ -41,24 +41,27 @@ class PreviousMatchesScreen extends StatelessWidget {
   Widget filterPopupMenu() {
     return Obx(
       () => PopupMenuButton(
-        onSelected: (value) => controller.matchFilterType.value = value,
+        onSelected: (value) {
+          controller.matchFilterType.value = value;
+          filterSearchResultsAndUpdateList();
+        },
         initialValue: controller.matchFilterType.value,
         icon: const Icon(Icons.filter_list),
         itemBuilder: (context) => [
-          filterPopupMenuItem(MatchListFilter.date),
-          filterPopupMenuItem(MatchListFilter.hasUploaded),
+          filterPopupMenuItem(MatchFilterType.date),
+          filterPopupMenuItem(MatchFilterType.hasUploaded),
         ],
       ),
     );
   }
 
-  PopupMenuItem filterPopupMenuItem(MatchListFilter filter) {
+  PopupMenuItem filterPopupMenuItem(MatchFilterType filter) {
     return PopupMenuItem(
+      onTap: () {},
       value: filter,
-      onTap: () => filterSearchResultsAndUpdateList(txtEditingController.text),
       child: ListTile(
         leading: Icon(
-            filter == MatchListFilter.date ? Icons.today : Icons.cloud_done),
+            filter == MatchFilterType.date ? Icons.today : Icons.cloud_done),
         title: Text(filter.name),
         trailing: controller.matchFilterType.value == filter
             ? const Icon(Icons.check)
@@ -79,7 +82,7 @@ class PreviousMatchesScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10),
             child: TextField(
-              onChanged: (value) => filterSearchResultsAndUpdateList(value),
+              onChanged: (_) => filterSearchResultsAndUpdateList(),
               controller: txtEditingController,
               decoration: InputDecoration(
                   labelText: "Search",
@@ -133,6 +136,10 @@ class PreviousMatchesScreen extends StatelessWidget {
                     "Date: ${element.startTime.format()}",
                     style: const TextStyle(fontSize: 15, color: Colors.grey),
                   ),
+                  Text(
+                    "Uploaded: ${element.hasSavedToCloud}",
+                    style: const TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
                 ],
               ),
             ],
@@ -161,33 +168,47 @@ class PreviousMatchesScreen extends StatelessWidget {
     );
   }
 
-  void filterSearchResultsAndUpdateList(String query) {
+  void filterSearchResultsAndUpdateList() {
     List<MatchData> searchList = <MatchData>[];
 
-    if (query.isNotEmpty) {
-      for (var element in matches.validMatches) {
-        if (element.matchNumber.value.toString().contains(query) ||
-            element.teamNumber.value.toString().contains(query)) {
-          searchList.add(element);
-        }
-      }
+    if (txtEditingController.text.isNotEmpty) {
+      searchList = matches.validMatches
+          .where((element) => element.matchNumber
+              .toString()
+              .contains(txtEditingController.text))
+          .toList();
     } else {
       searchList = matches.validMatches;
     }
 
-    if (controller.matchFilterType.value == MatchListFilter.date) {
-      searchList.sort((a, b) => b.startTime.compareTo(a.startTime));
-    } else if (controller.matchFilterType.value ==
-        MatchListFilter.hasUploaded) {
-      for (MatchData matchData in searchList) {
-        if (matchData.hasSavedToCloud.value) {
-          searchList.remove(matchData);
-          searchList.insert(0, matchData);
+    switch (controller.matchFilterType.value) {
+      case MatchFilterType.date:
+        searchList.sort((a, b) => b.startTime.compareTo(a.startTime));
+        break;
+      case MatchFilterType.hasUploaded:
+        for (MatchData matchData in searchList) {
+          if (matchData.hasSavedToCloud.isFalse) {
+            searchList.remove(matchData);
+            searchList.add(matchData);
+          }
         }
-      }
+        break;
     }
 
+    // if (controller.matchFilterType.value == MatchListFilter.date) {
+    //   searchList.sort((a, b) => b.startTime.compareTo(a.startTime));
+    // } else if (controller.matchFilterType.value ==
+    //     MatchListFilter.hasUploaded) {
+    //   for (MatchData matchData in searchList) {
+    //     if (matchData.hasSavedToCloud.isFalse) {
+    //       searchList.remove(matchData);
+    //       searchList.insert(0, matchData);
+    //     }
+    //   }
+    // }
+
     filteredMatches.value = searchList;
+    filteredMatches.refresh();
   }
 }
 
