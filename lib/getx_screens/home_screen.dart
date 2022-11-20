@@ -80,11 +80,16 @@ class HomeScreen extends StatelessWidget {
                                     onPressed: (() async {
                                       final qrCodeResult = await Get.to(
                                           () => ScanQrCodeScreen());
-                                      selectedScouterQrCodeId.value = 2;
-                                      if (int.tryParse(
-                                              qrCodeResult) is String) {
+                                      if (qrCodeResult != null &&
+                                          int.tryParse(qrCodeResult)
+                                              is String) {
                                         selectedScouterQrCodeId.value =
                                             int.parse(qrCodeResult);
+                                      } else {
+                                        Get.snackbar("Invalid QR Code",
+                                            "Please scan a valid QR code",
+                                            snackPosition:
+                                                SnackPosition.BOTTOM);
                                       }
                                     }),
                                   ),

@@ -10,7 +10,7 @@ class MatchData {
   var matchNumber = 0.obs;
   var teamNumber = 0.obs;
   var scouterId = 0.obs;
-  var startTime = 0;
+  var startTime = DateTime.now();
   var events = <Event>[].obs;
   var didDefense = false.obs;
   var notes = "".obs;
@@ -28,7 +28,7 @@ class MatchData {
       matchNumber = RxInt(json['matchNumber']);
       teamNumber = RxInt(json['teamNumber']);
       scouterId = RxInt(json['scouterId']);
-      startTime = json['startTime'];
+      startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']);
       events =
           RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
       didDefense = RxBool(json['didDefense']);
@@ -46,7 +46,7 @@ class MatchData {
         'matchNumber': matchNumber.value,
         'teamNumber': teamNumber.value,
         'scouterId': scouterId.value,
-        'startTime': startTime,
+        'startTime': startTime.millisecondsSinceEpoch,
         'events': events.map((event) => event.toJson()).toList(),
         'notes': notes.value,
         'didDefense': didDefense.value,

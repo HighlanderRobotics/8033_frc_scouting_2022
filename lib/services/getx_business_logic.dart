@@ -88,7 +88,8 @@ class BusinessLogicController extends GetxController {
 
   void addEvent(EventType eventType, GameScreenPosition position) {
     final event = Event(
-        timeSince: DateTime.now().millisecondsSinceEpoch - matchData.startTime,
+        timeSince: DateTime.now().millisecondsSinceEpoch -
+            matchData.startTime.millisecondsSinceEpoch,
         type: eventType,
         position: position);
     matchData.events.add(event);
@@ -129,7 +130,7 @@ class BusinessLogicController extends GetxController {
   }
 
   Future<void> startGameScreenTimer() async {
-    matchData.startTime = DateTime.now().millisecondsSinceEpoch;
+    matchData.startTime = DateTime.now();
 
     await Future.delayed(
       const Duration(seconds: 125),
