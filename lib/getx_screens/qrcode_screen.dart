@@ -32,6 +32,7 @@ class QrCodeScreen extends StatelessWidget {
                       version: QrVersions.auto,
                       errorCorrectionLevel: QrErrorCorrectLevel.L,
                       gapless: false,
+                      backgroundColor: Colors.white,
                       errorStateBuilder: (cxt, err) {
                         return const Center(
                           child: Text(
