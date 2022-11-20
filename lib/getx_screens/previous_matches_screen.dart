@@ -125,7 +125,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                   Text("Match: ${element.matchNumber.toString()}"),
                   Text(
                     "Team: ${element.teamNumber.toString()}",
-                    style: TextStyle(fontSize: 15, color: Colors.grey.shade800),
+                    style: const TextStyle(fontSize: 15, color: Colors.grey),
                   ),
                 ],
               ),
