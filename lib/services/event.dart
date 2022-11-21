@@ -9,20 +9,16 @@ class Event {
 
   Event({required this.timeSince, required this.type, required this.position});
 
-  Map<String, dynamic> toJson() => {
-        'timeSince': timeSince,
-        'type': type.toString(),
-        'position': position.positionId,
-      };
+  List<dynamic> toJson() =>
+      [timeSince, type.numericalValue, position.positionId];
 
-  Event.fromJson(Map<String, dynamic> json) {
-    timeSince = json['timeSince'];
-    type = EventType.values.firstWhere((e) => e.toString() == json['type']);
-    position = GameScreenPositionHelper.fromPositionId(json['position']);
+  Event.fromJson(List<dynamic> json) {
+    timeSince = json[0];
+    type = EventType.values[1];
+    position = GameScreenPositionHelper.fromPositionId(json[2]);
   }
 
   void printEvent() {
-    print(
-        'Event: $type, ${position}, ${timeSince}ms');
+    print('Event: $type, $position, ${timeSince}ms');
   }
 }

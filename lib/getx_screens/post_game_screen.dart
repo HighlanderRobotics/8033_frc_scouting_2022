@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
+import 'package:frc_scouting/services/climbing_challenge.dart';
 import 'package:get/get.dart';
 
 import '../services/getx_business_logic.dart';
 
 class PostGameScreen extends StatelessWidget {
-  List<String> climbingChallenges = [
-    "Didn't Climb",
-    "Failed Climb",
-    "Bottom Bar",
-    "Middle Bar",
-    "High Bar",
-    "Traverse",
+  List<ClimbingChallenge> climbingChallenges = [
+    ClimbingChallenge.didntClimb,
+    ClimbingChallenge.failedClimb,
+    ClimbingChallenge.bottomBar,
+    ClimbingChallenge.middleBar,
+    ClimbingChallenge.highBar,
+    ClimbingChallenge.traversal,
   ];
 
   final notesController = TextEditingController();
@@ -55,7 +56,7 @@ class PostGameScreen extends StatelessWidget {
                           vertical: Get.mediaQuery.size.width * 0.03),
                       child: TextField(
                         decoration: const InputDecoration(hintText: "Notes"),
-                        maxLines: null,
+                        maxLines: 3,
                         controller: notesController,
                       ),
                     ),
@@ -93,57 +94,48 @@ class PostGameScreen extends StatelessWidget {
   DropdownButton<String> climbingChallengeDropdown() {
     return DropdownButton(
       items: [
-        const DropdownMenuItem(
-          value: "Climbing Challenge",
-          child: Text(
-            "Climbing Challenge",
-            style: TextStyle(color: Colors.grey),
-          ),
-        ),
         for (var challenge in climbingChallenges)
           DropdownMenuItem(
-            value: challenge,
+            value: challenge.name,
             child: Text(
-              challenge,
+              challenge.name,
             ),
           ),
       ],
-      onChanged: (newValue) =>
-          controller.updateClimbingChallenge(newValue as String),
-      value: controller.matchData.challengeResult.value,
+      onChanged: (newValue) => controller.matchData.challengeResult.value =
+          ClimbingChallengeExtension.fromName(
+              newValue ?? ClimbingChallenge.didntClimb.name),
+      value: controller.matchData.challengeResult.value.name,
     );
   }
 
   ElevatedButton showQrCodeButton() {
     return ElevatedButton(
-      onPressed:
-          controller.matchData.challengeResult.value == "Climbing Challenge"
-              ? null
-              : () async {
-                  if (!controller.isPostGameDataValid()) {
-                    Get.snackbar(
-                      "Invalid Post Game Data",
-                      "Please select a climbing challenge",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  } else {
-                    if (await controller.documentsHelper
-                        .saveMatchData(controller.matchData)) {
-                      Get.snackbar(
-                        "Upload Successful",
-                        "Match has uploaded to cloud",
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
-                    }
-                    Get.to(() {
-                      return QrCodeScreen(
-                        matchQrCodes:
-                            controller.separateEventsToQrCodes(controller.matchData),
-                        canGoBack: false,
-                      );
-                    });
-                  }
-                },
+      onPressed: () async {
+        // if (!controller.isPostGameDataValid()) {
+        //   Get.snackbar(
+        //     "Invalid Post Game Data",
+        //     "Please select a climbing challenge",
+        //     snackPosition: SnackPosition.BOTTOM,
+        //   );
+        // } else {
+        if (await controller.documentsHelper
+            .saveMatchData(controller.matchData)) {
+          Get.snackbar(
+            "Upload Successful",
+            "Match has uploaded to cloud",
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+        Get.to(() {
+          return QrCodeScreen(
+            matchQrCodes:
+                controller.separateEventsToQrCodes(controller.matchData),
+            canGoBack: false,
+          );
+        });
+        // }
+      },
       child: const Text("Show QR Code"),
     );
   }

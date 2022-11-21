@@ -1,10 +1,11 @@
 import 'dart:math';
 
+import 'package:frc_scouting/services/climbing_challenge.dart';
 import 'package:frc_scouting/services/event_key.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
-import 'event.dart';
+import '../event.dart';
 
 class MatchData {
   var uuid = const Uuid().v4();
@@ -16,7 +17,7 @@ class MatchData {
   var events = <Event>[].obs;
   var didDefense = false.obs;
   var notes = "".obs;
-  var challengeResult = "Climbing Challenge".obs;
+  var challengeResult = ClimbingChallenge.didntClimb.obs;
   var hasNotSavedToCloud = false.obs;
 
   MatchData({required CompetitionKey competitionKey})
@@ -35,9 +36,9 @@ class MatchData {
           RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
       didDefense = RxBool(json['didDefense']);
       notes = RxString(json['notes']);
-      challengeResult = RxString(json['challengeResult']);
-      hasNotSavedToCloud = Random().nextBool().obs;
-      // TODO: Implement this
+      challengeResult =
+          ClimbingChallengeExtension.fromName(json['challengeResult']).obs;
+      hasNotSavedToCloud = Random().nextBool().obs; // TODO: Implement this
     } on TypeError {
       throw Exception("Invalid JSON");
     }
@@ -53,7 +54,6 @@ class MatchData {
         'events': events.map((event) => event.toJson()).toList(),
         'notes': notes.value,
         'didDefense': didDefense.value,
-        'challengeResult': challengeResult.value,
-        'hasNotSavedToCloud': hasNotSavedToCloud.value,
+        'challengeResult': challengeResult.value.name,
       };
 }

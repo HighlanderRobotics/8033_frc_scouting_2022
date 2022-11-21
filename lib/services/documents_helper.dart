@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:path_provider/path_provider.dart';
 
-import 'match_data.dart';
+import 'match_data/match_data.dart';
 import 'previous_match.dart';
 
 class DocumentsHelper {

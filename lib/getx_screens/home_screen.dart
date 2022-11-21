@@ -13,10 +13,6 @@ class HomeScreen extends StatelessWidget {
   final matchTxtFieldController = TextEditingController();
   final teamTxtFieldController = TextEditingController();
 
-  var selectedEvent = CompetitionKey.chezyChamps2022.obs;
-  var selectedScouterId = RxInt(-1);
-  var selectedScouterQrCodeId = RxInt(-1);
-
   late BusinessLogicController controller;
 
   @override
@@ -52,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                                     icon: const Icon(Icons.refresh,
                                         color: Colors.grey),
                                     onPressed: () {
-                                      selectedScouterId.value = -1;
+                                      controller.selectedScouterId.value = -1;
                                       controller.scoutersHelper
                                           .getAllScouters(forceFetch: true);
                                     },
@@ -68,23 +64,25 @@ class HomeScreen extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      "Selected Scouter QR ID: ${selectedScouterQrCodeId.value == -1 ? "None" : selectedScouterQrCodeId.value}",
+                                      "Selected Scouter QR ID: ${controller.selectedScouterQrCodeId.value == -1 ? "None" : controller.selectedScouterQrCodeId.value}",
                                     ),
                                   ),
                                   IconButton(
                                     icon: Icon(CupertinoIcons.qrcode_viewfinder,
-                                        color:
-                                            selectedScouterQrCodeId.value == -1
-                                                ? Colors.grey
-                                                : Colors.deepPurple),
+                                        color: controller
+                                                    .selectedScouterQrCodeId
+                                                    .value ==
+                                                -1
+                                            ? Colors.grey
+                                            : Colors.deepPurple),
                                     onPressed: (() async {
                                       final qrCodeResult = await Get.to(
                                           () => ScanQrCodeScreen());
                                       if (qrCodeResult != null &&
                                           int.tryParse(qrCodeResult)
                                               is String) {
-                                        selectedScouterQrCodeId.value =
-                                            int.parse(qrCodeResult);
+                                        controller.selectedScouterQrCodeId
+                                            .value = int.parse(qrCodeResult);
                                       } else {
                                         Get.snackbar("Invalid QR Code",
                                             "Please scan a valid QR code",
@@ -101,20 +99,24 @@ class HomeScreen extends StatelessWidget {
                                   hintText: "Match Number"),
                               controller: matchTxtFieldController,
                               keyboardType: TextInputType.number,
-                              onChanged: (value) {
+                              onChanged: (String value) {
                                 controller.matchData.matchNumber.value =
                                     int.tryParse(value) ?? 0;
                                 try {
                                   if (controller.matchData.matchNumber.value >
                                           0 &&
-                                      selectedScouterQrCodeId != -1) {
+                                      controller
+                                              .selectedScouterQrCodeId.value !=
+                                          -1) {
                                     teamTxtFieldController.text = controller
                                         .eventSchedule[controller
                                                 .matchData.matchNumber.value -
-                                            1][selectedScouterQrCodeId.value]
+                                            1][controller
+                                                .selectedScouterQrCodeId.value -
+                                            1]
                                         .toString();
                                   }
-                                } catch (e) {}
+                                } catch (_) {}
                               },
                             ),
                             TextField(
@@ -122,24 +124,24 @@ class HomeScreen extends StatelessWidget {
                                   hintText: "Team Number"),
                               controller: teamTxtFieldController,
                               keyboardType: TextInputType.number,
-                              onChanged: (value) => controller.matchData
-                                  .teamNumber.value = int.parse(value),
-                              enabled: false,
+                              onChanged: (String value) {
+                                controller.matchData.teamNumber.value =
+                                    int.tryParse(value) ?? 0;
+                              },
                             ),
                           ],
                         ),
                       ),
                       Obx(
                         () => ElevatedButton(
-                          onPressed: !controller
-                                  .isHeaderDataValid(selectedScouterId.value)
+                          onPressed: !controller.isHeaderDataValid(
+                                  controller.selectedScouterId.value)
                               ? null
                               : () async {
                                   controller.matchData.matchNumber.value =
                                       int.parse(matchTxtFieldController.text);
-                                  // controller.matchData.teamNumber.value =
-                                  //     int.parse(
-                                  //         teamNumberTxtFieldController.text);
+                                  controller.matchData.teamNumber.value =
+                                      int.parse(teamTxtFieldController.text);
 
                                   if (controller.currentOrientation !=
                                       Orientation.landscape) {
@@ -200,13 +202,13 @@ class HomeScreen extends StatelessWidget {
         ),
         for (Scouter scouter in controller.scoutersHelper.scouters)
           DropdownMenuItem(
-            onTap: () => selectedScouterId.value = scouter.scouterId,
+            onTap: () => controller.selectedScouterId.value = scouter.scouterId,
             value: scouter.scouterId,
             child: Text(scouter.scouterName),
           ),
       ],
       onChanged: (_) {},
-      value: selectedScouterId.value,
+      value: controller.selectedScouterId.value,
     );
   }
 }
