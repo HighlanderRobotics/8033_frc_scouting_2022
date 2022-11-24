@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,6 +14,9 @@ class ScanQrCodeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      qrCodeSizeIsLarge.toggle();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -77,9 +78,9 @@ class ScanQrCodeScreen extends StatelessWidget {
           Obx(
             () => AnimatedContainer(
               width: Get.mediaQuery.size.width *
-                  (qrCodeSizeIsLarge.value ? 0.8 : 0.7),
+                  (qrCodeSizeIsLarge.isTrue ? 0.8 : 0.7),
               height: Get.mediaQuery.size.width *
-                  (qrCodeSizeIsLarge.value ? 0.8 : 0.7),
+                  (qrCodeSizeIsLarge.isTrue ? 0.8 : 0.7),
               duration: const Duration(milliseconds: 700),
               curve: Curves.easeInOutSine,
               onEnd: () => qrCodeSizeIsLarge.toggle(),
