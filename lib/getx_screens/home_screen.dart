@@ -4,7 +4,6 @@ import 'package:frc_scouting/getx_screens/game_screen.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
-import '../services/event_key.dart';
 import '../services/scouters_helper.dart';
 import 'previous_matches_screen.dart';
 import 'scan_qrcode_screen.dart';

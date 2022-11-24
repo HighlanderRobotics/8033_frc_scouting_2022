@@ -3,7 +3,6 @@ import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-
 class QrCodeScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   var pageNumber = 0.obs;
@@ -31,19 +30,22 @@ class QrCodeScreen extends StatelessWidget {
               children: [
                 SafeArea(
                   child: QrImage(
-                      data: matchQrCodes[pageNumber.value],
-                      version: QrVersions.auto,
-                      errorCorrectionLevel: QrErrorCorrectLevel.L,
-                      gapless: false,
-                      backgroundColor: Colors.white,
-                      errorStateBuilder: (cxt, err) {
-                        return const Center(
-                          child: Text(
-                            "Uh oh! Something went wrong...",
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      }),
+                    foregroundColor:
+                        ColorScheme.fromSwatch(primarySwatch: Colors.deepPurple)
+                            .primary,
+                    data: matchQrCodes[pageNumber.value],
+                    version: QrVersions.auto,
+                    errorCorrectionLevel: QrErrorCorrectLevel.L,
+                    gapless: false,
+                    errorStateBuilder: (cxt, err) {
+                      return const Center(
+                        child: Text(
+                          "Uh oh! Something went wrong...",
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
