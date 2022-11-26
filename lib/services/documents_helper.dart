@@ -17,12 +17,12 @@ class DocumentsHelper {
   Future<bool> saveMatchData(MatchData matchData) async {
     await _writeToFile(matchData);
 
-    // TODO: try to upload to Firebase
+    // TODO: try to upload to Server?
 
+    // TODO: Get saved statuses from server
     matchData.hasNotSavedToCloud.value = Random().nextBool();
 
     return matchData.hasNotSavedToCloud.value;
-    // return true;
   }
 
   Future<void> _writeToFile(MatchData matchData) async {
@@ -65,5 +65,18 @@ class DocumentsHelper {
     }
 
     return matches;
+  }
+
+  Future<void> deleteFile(String uuid) async {
+    String path = directory.path;
+
+    var filePath = "$path/frc-$uuid.json";
+
+    try {
+      final file = await File(filePath).delete();
+      print("Successfully deleted file: ${file.path}");
+    } catch (e) {
+      print("Error deleting file: $filePath");
+    }
   }
 }

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frc_scouting/services/match_data/match_data.dart';
 import 'package:frc_scouting/services/previous_match.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
+import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
+import 'package:implicitly_animated_reorderable_list/transitions.dart';
 
 import 'view_qrcode_screen.dart';
 import '../services/getx_business_logic.dart';
@@ -11,7 +15,7 @@ class PreviousMatchesScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   final txtEditingController = TextEditingController();
 
-  late final MatchInfo matches;
+  MatchInfo matches;
   late final RxList<MatchData> filteredMatches = <MatchData>[].obs;
 
   PreviousMatchesScreen({required this.matches});
@@ -32,7 +36,7 @@ class PreviousMatchesScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Previous Matches"),
       ),
-      body: matches.validMatches.isNotEmpty
+      body: matches.validMatches.isNotEmpty || filteredMatches.isNotEmpty
           ? previousMatchesListView()
           : noMatchesView(),
     );
@@ -95,12 +99,93 @@ class PreviousMatchesScreen extends StatelessWidget {
           ),
           Expanded(
             child: Obx(
-              () => ListView.builder(
-                itemBuilder: (context, index) => matchRowView(
-                  filteredMatches[index],
-                ),
-                itemCount: filteredMatches.length,
+              () => ImplicitlyAnimatedReorderableList<MatchData>(
+                items: filteredMatches.toList(),
+                itemBuilder: (context, animation, item, index) {
+                  return Reorderable(
+                    key: GlobalKey(),
+                    child: SizeFadeTransition(
+                      sizeFraction: 0.7,
+                      curve: Curves.easeInOut,
+                      animation: animation,
+                      child: Dismissible(
+                        key: GlobalKey(),
+                        direction: DismissDirection.endToStart,
+                        onDismissed: (direction) async {
+                          Get.closeAllSnackbars();
+
+                          HapticFeedback.lightImpact();
+
+                          await controller.documentsHelper
+                              .deleteFile(item.uuid);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text("Deleted ${item.matchNumber.value}"),
+                              action: SnackBarAction(
+                                label: "Undo",
+                                onPressed: () {
+                                  controller.documentsHelper
+                                      .saveMatchData(item);
+                                  controller.documentsHelper.getMatches();
+                                  filterSearchResultsAndUpdateList();
+                                },
+                              ),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+
+                          // Get.snackbar(
+                          //   "Match Deleted",
+                          //   "Match ${item.matchNumber} has been deleted",
+                          //   duration: const Duration(seconds: 2),
+                          //   snackPosition: SnackPosition.BOTTOM,
+                          //   backgroundColor: Colors.deepPurple,
+                          //   colorText: Colors.white,
+                          // );
+                        },
+                        background: Container(
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            color: Colors.red,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 5,
+                          ),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: const [
+                                Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 20),
+                                Text(
+                                  "Delete",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        child: matchRowView(
+                          filteredMatches[index],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                areItemsTheSame: (oldItem, newItem) => oldItem == newItem,
+                onReorderFinished: (item, from, to, newItems) => {},
               ),
+              // () => ListView.builder(
+              // itemBuilder: (context, index) => matchRowView(
+              //   filteredMatches[index],
+              // ),
+              //   itemCount: filteredMatches.length,
             ),
           ),
         ]),
@@ -120,23 +205,24 @@ class PreviousMatchesScreen extends StatelessWidget {
         child: ListTile(
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          leading: const Icon(Icons.qr_code),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Match: ${element.matchNumber.toString()}"),
-                  Text(
-                    "Team: ${element.teamNumber.toString()}",
-                    style: const TextStyle(fontSize: 15, color: Colors.grey),
-                  ),
-                  Text(
-                    "Date: ${element.startTime.format()}",
-                    style: const TextStyle(fontSize: 15, color: Colors.grey),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Match: ${element.matchNumber.toString()}"),
+                    Text(
+                      "Team: ${element.teamNumber.toString()}",
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    Text(
+                      element.startTime.format(),
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

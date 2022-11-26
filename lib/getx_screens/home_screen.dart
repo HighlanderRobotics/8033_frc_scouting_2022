@@ -75,6 +75,7 @@ class HomeScreen extends StatelessWidget {
                                             ? Colors.grey
                                             : Colors.deepPurple),
                                     onPressed: (() async {
+                                      Get.closeCurrentSnackbar();
                                       final qrCodeResult = await Get.to(
                                           () => ScanQrCodeScreen());
                                       if (qrCodeResult != null &&
