@@ -56,7 +56,6 @@ class PostGameScreen extends StatelessWidget {
                           vertical: Get.mediaQuery.size.width * 0.03),
                       child: TextField(
                         decoration: const InputDecoration(hintText: "Notes"),
-                        maxLines: 3,
                         controller: notesController,
                       ),
                     ),
@@ -127,14 +126,10 @@ class PostGameScreen extends StatelessWidget {
             snackPosition: SnackPosition.BOTTOM,
           );
         }
-        Get.to(() {
-          return QrCodeScreen(
+        Get.to(() => QrCodeScreen(
             matchQrCodes:
                 controller.separateEventsToQrCodes(controller.matchData),
-            canGoBack: false,
-          );
-        });
-        // }
+            canGoBack: false));
       },
       child: const Text("Show QR Code"),
     );

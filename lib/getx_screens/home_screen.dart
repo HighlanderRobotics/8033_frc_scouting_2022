@@ -4,7 +4,6 @@ import 'package:frc_scouting/getx_screens/game_screen.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
-import '../services/event_key.dart';
 import '../services/scouters_helper.dart';
 import 'previous_matches_screen.dart';
 import 'scan_qrcode_screen.dart';
@@ -76,6 +75,7 @@ class HomeScreen extends StatelessWidget {
                                             ? Colors.grey
                                             : Colors.deepPurple),
                                     onPressed: (() async {
+                                      Get.closeCurrentSnackbar();
                                       final qrCodeResult = await Get.to(
                                           () => ScanQrCodeScreen());
                                       if (qrCodeResult != null &&
@@ -143,6 +143,14 @@ class HomeScreen extends StatelessWidget {
                                   controller.matchData.teamNumber.value =
                                       int.parse(teamTxtFieldController.text);
 
+                                  var previousMatches = controller
+                                      .documentsHelper
+                                      .getPreviousMatches();
+
+                                  // if previousMatchUUIDs contains the current match
+
+                                  // if (previousMatches.validMatches.contains(element))
+
                                   if (controller.currentOrientation !=
                                       Orientation.landscape) {
                                     controller.setLandscapeOrientation();
@@ -168,10 +176,11 @@ class HomeScreen extends StatelessWidget {
               child: ElevatedButton(
                 child: const Text("View Previous Matches"),
                 onPressed: () async {
-                  final matches = controller.documentsHelper.getMatches();
+                  final matches =
+                      controller.documentsHelper.getPreviousMatches();
                   Get.to(
                     () => PreviousMatchesScreen(
-                      matches: matches,
+                      previousMatches: matches,
                     ),
                   );
                   if (matches.numberOfInvalidFiles > 0) {

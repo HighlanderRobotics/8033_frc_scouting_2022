@@ -1,8 +1,8 @@
 import 'match_data/match_data.dart';
 
-class MatchInfo {
+class PreviousMatchesInfo {
   List<MatchData> validMatches;
   int numberOfInvalidFiles;
 
-  MatchInfo(this.validMatches, this.numberOfInvalidFiles);
+  PreviousMatchesInfo(this.validMatches, this.numberOfInvalidFiles);
 }
