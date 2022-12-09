@@ -143,6 +143,14 @@ class HomeScreen extends StatelessWidget {
                                   controller.matchData.teamNumber.value =
                                       int.parse(teamTxtFieldController.text);
 
+                                  var previousMatches = controller
+                                      .documentsHelper
+                                      .getPreviousMatches();
+
+                                  // if previousMatchUUIDs contains the current match
+
+                                  // if (previousMatches.validMatches.contains(element))
+
                                   if (controller.currentOrientation !=
                                       Orientation.landscape) {
                                     controller.setLandscapeOrientation();
@@ -168,10 +176,11 @@ class HomeScreen extends StatelessWidget {
               child: ElevatedButton(
                 child: const Text("View Previous Matches"),
                 onPressed: () async {
-                  final matches = controller.documentsHelper.getMatches();
+                  final matches =
+                      controller.documentsHelper.getPreviousMatches();
                   Get.to(
                     () => PreviousMatchesScreen(
-                      matches: matches,
+                      previousMatches: matches,
                     ),
                   );
                   if (matches.numberOfInvalidFiles > 0) {

@@ -30,9 +30,7 @@ class QrCodeScreen extends StatelessWidget {
               children: [
                 SafeArea(
                   child: QrImage(
-                    foregroundColor:
-                        ColorScheme.fromSwatch(primarySwatch: Colors.deepPurple)
-                            .primary,
+                    foregroundColor: Theme.of(context).colorScheme.onBackground,
                     data: matchQrCodes[pageNumber.value],
                     version: QrVersions.auto,
                     errorCorrectionLevel: QrErrorCorrectLevel.L,

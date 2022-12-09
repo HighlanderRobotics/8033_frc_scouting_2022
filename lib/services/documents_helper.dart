@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:path_provider/path_provider.dart';
 
 import 'match_data/match_data.dart';
-import 'previous_match.dart';
+import 'previous_matches_info.dart';
 
 class DocumentsHelper {
   late Directory directory;
@@ -43,10 +43,10 @@ class DocumentsHelper {
     return file.uri.pathSegments.last.substring(0, 4).contains("frc-");
   }
 
-  MatchInfo getMatches() {
+  PreviousMatchesInfo getPreviousMatches() {
     final List<FileSystemEntity> allFiles = getFilesInDirectoryMask();
     final List<File> files = allFiles.whereType<File>().toList();
-    var matches = MatchInfo([], 0);
+    var matches = PreviousMatchesInfo([], 0);
 
     for (var file in files) {
       if (_isFileValid(file)) {
@@ -54,7 +54,7 @@ class DocumentsHelper {
         try {
           final MatchData match = MatchData.fromJson(jsonDecode(contents));
           matches.validMatches.add(match);
-        } catch (e) {
+        } catch (_) {
           print(
               "Error parsing file: ${file.uri.pathSegments.last} Invalid Format");
           matches.numberOfInvalidFiles++;
@@ -78,5 +78,21 @@ class DocumentsHelper {
     } catch (e) {
       print("Error deleting file: $filePath");
     }
+  }
+
+  List<String> getPreviousMatchUUIDs() {
+    List<String> previousMatchUUIDs = [];
+
+    final List<FileSystemEntity> allFiles = getFilesInDirectoryMask();
+    final List<File> files = allFiles.whereType<File>().toList();
+
+    for (var file in files) {
+      if (_isFileValid(file)) {
+        previousMatchUUIDs.add(file.uri.pathSegments.last
+            .substring(5, file.uri.pathSegments.last.length - 1));
+      }
+    }
+
+    return previousMatchUUIDs;
   }
 }
