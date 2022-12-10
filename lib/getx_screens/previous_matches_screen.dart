@@ -91,7 +91,7 @@ class PreviousMatchesScreen extends StatelessWidget {
             controller: txtEditingController,
             decoration: InputDecoration(
                 labelText: "Search",
-                hintText: "Search",
+                hintText: "Search by Match or Team ",
                 suffixIcon: filterPopupMenu(),
                 prefixIcon: const Icon(Icons.search),
                 border: const OutlineInputBorder(
@@ -107,7 +107,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                   key: GlobalKey(),
                   child: SizeFadeTransition(
                       sizeFraction: 0.7,
-                      curve: Curves.easeOut,
+                      curve: Curves.easeInOut,
                       animation: animation,
                       child: Dismissible(
                         onUpdate: (details) {

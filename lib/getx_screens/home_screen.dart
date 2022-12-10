@@ -79,7 +79,9 @@ class HomeScreen extends StatelessWidget {
                                       final qrCodeResult = await Get.to(
                                           () => ScanQrCodeScreen());
                                       if (qrCodeResult != null &&
-                                          int.tryParse(qrCodeResult) != null) {
+                                          int.tryParse(qrCodeResult) != null &&
+                                          Iterable.generate(6).contains(
+                                              int.parse(qrCodeResult))) {
                                         controller.selectedScouterQrCodeId
                                             .value = int.parse(qrCodeResult);
                                       } else {
