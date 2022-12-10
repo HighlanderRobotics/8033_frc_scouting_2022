@@ -112,8 +112,8 @@ class PreviousMatchesScreen extends StatelessWidget {
                       child: Dismissible(
                         onUpdate: (details) {
                           isDismissThresholdReached.value = details.reached;
-                          
-                          if (details.reached) {
+
+                          if ((details.reached && !details.previousReached) || (!details.reached && details.previousReached)) {
                             HapticFeedback.lightImpact();
                           }
                         },
@@ -166,7 +166,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                                     curve: Curves.bounceOut,
                                     scale: isDismissThresholdReached.isTrue
                                         ? 1.4
-                                        : 1,
+                                        : 0.7,
                                     child: const Icon(Icons.delete),
                                   ),
                                 ),
