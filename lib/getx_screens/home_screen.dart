@@ -5,7 +5,6 @@ import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
 import '../models/scouter.dart';
-import '../services/scouters_helper.dart';
 import 'previous_matches_screen.dart';
 import 'scan_qrcode_screen.dart';
 

@@ -13,7 +13,7 @@ import '../persistence/documents_helper.dart';
 import '../models/event.dart';
 import '../models/event_types.dart';
 import '../models/match_data/match_data.dart';
-import 'scouters_helper.dart';
+import '../helpers/scouters_helper.dart';
 
 enum MatchFilterType { date, hasNotUploaded }
 

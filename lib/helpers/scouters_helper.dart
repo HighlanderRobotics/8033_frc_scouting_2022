@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:frc_scouting/services/shared_preferences_helper.dart';
+import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
 import 'package:get/get.dart';
 
 import '../models/scouter.dart';
-import 'scouting_server_api.dart';
+import '../networking/scouting_server_api.dart';
 
 class ScoutersHelper {
   // A reactive list to hold all the Scouter Objects

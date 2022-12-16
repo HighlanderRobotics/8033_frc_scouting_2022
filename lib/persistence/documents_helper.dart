@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:path_provider/path_provider.dart';
 
 import '../../models/match_data/match_data.dart';
-import '../services/previous_matches_info.dart';
+import '../models/previous_matches_info.dart';
 
 class DocumentsHelper {
   late Directory directory;
