@@ -9,7 +9,7 @@ import '../networking/the_blue_alliance_api.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
-import '../persistence/documents_helper.dart';
+import '../persistence/files_helper.dart';
 import '../models/event.dart';
 import '../models/event_types.dart';
 import '../models/match_data/match_data.dart';
@@ -33,7 +33,7 @@ extension MatchFilterTypeExtension on MatchFilterType {
 class BusinessLogicController extends GetxController {
   late CompetitionKey selectedEvent;
   late MatchData matchData;
-  final DocumentsHelper documentsHelper = DocumentsHelper();
+  final FilesHelper documentsHelper = FilesHelper();
   var matchFilterType = MatchFilterType.date.obs;
   final scoutersHelper = ScoutersHelper();
   RxList<List<int>> eventSchedule = RxList<List<int>>([]);

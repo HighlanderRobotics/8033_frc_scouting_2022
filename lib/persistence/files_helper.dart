@@ -7,10 +7,10 @@ import 'package:path_provider/path_provider.dart';
 import '../../models/match_data/match_data.dart';
 import '../models/previous_matches_info.dart';
 
-class DocumentsHelper {
+class FilesHelper {
   late Directory directory;
 
-  DocumentsHelper() {
+  FilesHelper() {
     getApplicationDocumentsDirectory().then((value) => directory = value);
   }
 
