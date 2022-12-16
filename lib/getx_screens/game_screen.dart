@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
-import 'package:frc_scouting/services/event_types.dart';
-import 'package:frc_scouting/services/game_screen_positions.dart';
+import 'package:frc_scouting/models/game_screen_positions.dart';
 import 'package:get/get.dart';
+import '../models/event_types.dart';
 import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
 

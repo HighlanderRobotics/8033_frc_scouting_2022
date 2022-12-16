@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:frc_scouting/services/shared_preferences_helper.dart';
-import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+
+import '../models/scouter.dart';
+import 'scouting_server_api.dart';
 
 class ScoutersHelper {
   // A reactive list to hold all the Scouter Objects
@@ -16,7 +18,7 @@ class ScoutersHelper {
       final localStorageScouters = await _getParsedLocalStorageScouters();
 
       if (forceFetch || localStorageScouters.isEmpty) {
-        scouters.value = await _fetchScouters();
+        scouters.value = await ScoutingServerAPI.fetchScouters();
         _saveParsedLocalStorageScouters(scouters.toList());
       } else {
         scouters.value = localStorageScouters;
@@ -28,14 +30,19 @@ class ScoutersHelper {
 
   // Abstracted function to get the scouters from localStorage
   // Then it parses the JSON and returns a list of Scouter objects
-  Future<List<Scouter>> _getParsedLocalStorageScouters() async {
+  static Future<List<Scouter>> _getParsedLocalStorageScouters() async {
     final scouterJson = await SharedPreferencesHelper.getString(
         SharedPreferenceKeys.scouters.toShortString());
 
     if (scouterJson.isNotEmpty) {
-      return jsonDecode(scouterJson)
-          .map<Scouter>((json) => Scouter.fromJson(json))
-          .toList();
+      try {
+        return jsonDecode(scouterJson)
+            .map<Scouter>((json) => Scouter.fromJson(json))
+            .toList();
+      } catch (e) {
+        print("Failed to parse localStorage scouters: $e");
+        return [];
+      }
     } else {
       return [];
     }
@@ -47,42 +54,4 @@ class ScoutersHelper {
     final scouterJson = jsonEncode(scouters);
     prefs.setString('scouters', scouterJson);
   }
-
-  // An Internal function to make a network request and decode the json
-  // into a List of Scouter objects
-  Future<List<Scouter>> _fetchScouters() async {
-    try {
-      var response =
-          await http.get(Uri.parse('https://v0v0q.mocklab.io/allscouters'));
-
-      if (response.statusCode == 200) {
-        return (jsonDecode(response.body) as List)
-            .map((e) => Scouter.fromJson(e))
-            .toList();
-      } else {
-        throw Exception("Non-200 response code");
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-}
-
-class Scouter {
-  int scouterId;
-  String scouterName;
-
-  Scouter({required this.scouterId, required this.scouterName});
-
-  factory Scouter.fromJson(Map<String, dynamic> json) {
-    return Scouter(
-      scouterId: json["scouterId"],
-      scouterName: json["scouterName"],
-    );
-  }
-
-  Map toJson() => {
-        "scouterId": scouterId,
-        "scouterName": scouterName,
-      };
 }

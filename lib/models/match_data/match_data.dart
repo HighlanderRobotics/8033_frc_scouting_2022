@@ -1,11 +1,11 @@
 import 'dart:math';
 
-import 'package:frc_scouting/services/climbing_challenge.dart';
-import 'package:frc_scouting/services/event_key.dart';
+import '../climbing_challenge.dart';
+import '../event_key.dart';
+import '../event.dart';
+
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
-
-import '../event.dart';
 
 class MatchData {
   var uuid = const Uuid().v4();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/services/match_data/match_data.dart';
+import 'package:frc_scouting/models/match_data/match_data.dart';
 import 'package:frc_scouting/services/previous_matches_info.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -113,7 +113,8 @@ class PreviousMatchesScreen extends StatelessWidget {
                         onUpdate: (details) {
                           isDismissThresholdReached.value = details.reached;
 
-                          if ((details.reached && !details.previousReached) || (!details.reached && details.previousReached)) {
+                          if ((details.reached && !details.previousReached) ||
+                              (!details.reached && details.previousReached)) {
                             HapticFeedback.lightImpact();
                           }
                         },
