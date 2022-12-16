@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+message MatchData {
+    int32 uuid = 1;
+    optional string competitionKey = 2;
+    int32 matchNumber = 3;
+    int32 teamNumber = 4;
+    int32 scouterId = 5;
+    Date startTime = 6;
+    repeated Event events = 7;
+    bool didDefense = 8;
+    optional string notes = 9;
+    ClimbingChallenge climbingChallenge = 10;   
+}
+
+message Event {
+    double timeSince = 1;
+    EventType type = 2;
+    int32 position = 3;
+}
+
+enum EventType {
+    SHOTSUCCESS = 0;
+    SHOTMISS = 1;
+    ROBOTBECOMESIMMOBILE = 2;
+    ROBOTBECOMESMOBILE = 3;
+}
+
+enum ClimbingChallenge {
+    DIDNTCLIMB = 0;
+    FAILEDCLIMB = 1;
+    BOTTOMBAR = 2;
+    MIDDLEBAR = 3;
+    HIGHBAR = 4;
+    TRAVERSAL = 5;
+}
+
+// Represents a whole or partial calendar date, such as a birthday. The time of
+// day and time zone are either specified elsewhere or are insignificant. The
+// date is relative to the Gregorian Calendar. This can represent one of the
+// following:
+//
+// * A full date, with non-zero year, month, and day values
+// * A month and day value, with a zero year, such as an anniversary
+// * A year on its own, with zero month and day values
+// * A year and month value, with a zero day, such as a credit card expiration
+// date
+//
+// Related types are [google.type.TimeOfDay][google.type.TimeOfDay] and
+// `google.protobuf.Timestamp`.
+message Date {
+  // Year of the date. Must be from 1 to 9999, or 0 to specify a date without
+  // a year.
+  int32 year = 1;
+
+  // Month of a year. Must be from 1 to 12, or 0 to specify a year without a
+  // month and day.
+  int32 month = 2;
+
+  // Day of a month. Must be from 1 to 31 and valid for the year and month, or 0
+  // to specify a year by itself or a year and month where the day isn't
+  // significant.
+  int32 day = 3;
+}

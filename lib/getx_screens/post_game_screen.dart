@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
-import 'package:frc_scouting/services/climbing_challenge.dart';
+import 'package:frc_scouting/models/climbing_challenge.dart';
 import 'package:get/get.dart';
 
 import '../services/getx_business_logic.dart';

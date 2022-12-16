@@ -1,4 +1,4 @@
-import 'package:frc_scouting/services/game_screen_positions.dart';
+import 'package:frc_scouting/models/game_screen_positions.dart';
 
 import 'event_types.dart';
 

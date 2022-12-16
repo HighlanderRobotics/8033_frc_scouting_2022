@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/services/match_data/match_data.dart';
+import 'package:frc_scouting/models/match_data/match_data.dart';
 import 'package:frc_scouting/services/previous_matches_info.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -91,7 +91,7 @@ class PreviousMatchesScreen extends StatelessWidget {
             controller: txtEditingController,
             decoration: InputDecoration(
                 labelText: "Search",
-                hintText: "Search",
+                hintText: "Search by Match or Team ",
                 suffixIcon: filterPopupMenu(),
                 prefixIcon: const Icon(Icons.search),
                 border: const OutlineInputBorder(
@@ -107,13 +107,14 @@ class PreviousMatchesScreen extends StatelessWidget {
                   key: GlobalKey(),
                   child: SizeFadeTransition(
                       sizeFraction: 0.7,
-                      curve: Curves.easeOut,
+                      curve: Curves.easeInOut,
                       animation: animation,
                       child: Dismissible(
                         onUpdate: (details) {
                           isDismissThresholdReached.value = details.reached;
-                          
-                          if (details.reached) {
+
+                          if ((details.reached && !details.previousReached) ||
+                              (!details.reached && details.previousReached)) {
                             HapticFeedback.lightImpact();
                           }
                         },
@@ -166,7 +167,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                                     curve: Curves.bounceOut,
                                     scale: isDismissThresholdReached.isTrue
                                         ? 1.4
-                                        : 1,
+                                        : 0.7,
                                     child: const Icon(Icons.delete),
                                   ),
                                 ),

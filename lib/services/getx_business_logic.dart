@@ -3,17 +3,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
-import 'package:frc_scouting/services/climbing_challenge.dart';
-import 'package:frc_scouting/services/event_key.dart';
-import 'package:frc_scouting/services/game_screen_positions.dart';
-import 'package:frc_scouting/services/the_blue_alliance_api.dart';
+import 'package:frc_scouting/models/event_key.dart';
+import 'package:frc_scouting/models/game_screen_positions.dart';
+import '../networking/the_blue_alliance_api.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
-import 'documents_helper.dart';
-import 'event.dart';
-import 'event_types.dart';
-import 'match_data/match_data.dart';
+import '../persistence/documents_helper.dart';
+import '../models/event.dart';
+import '../models/event_types.dart';
+import '../models/match_data/match_data.dart';
 import 'scouters_helper.dart';
 
 enum MatchFilterType { date, hasNotUploaded }
