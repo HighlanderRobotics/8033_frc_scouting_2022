@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frc_scouting/Application/color_schemes.g.dart';
+import 'package:frc_scouting/application/color_schemes.g.dart';
 import 'package:frc_scouting/getx_screens/home_screen.dart';
 import 'package:get/get.dart';
 
