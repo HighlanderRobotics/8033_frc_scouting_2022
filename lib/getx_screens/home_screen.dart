@@ -153,14 +153,22 @@ class HomeScreen extends StatelessWidget {
                                         .documentsHelper
                                         .getPreviousMatches();
 
-                                    // if previousMatchUUIDs contains the current match
-
-                                    // if ((previousMatches.validMatches.singleWhere((element) => element.matchNumber.value == controller.matchData.matchNumber.value), orElse: () => null) != null) {
-                                    Get.snackbar("Match Already Exists",
-                                        "This match already exists in the database. Please delete it first.",
-                                        snackPosition: SnackPosition.BOTTOM);
-                                    // return;
-                                    // }
+                                    for (var match in previousMatches
+                                        .validMatches
+                                        .where((element) =>
+                                            element.matchNumber.value ==
+                                            controller
+                                                .matchData.matchNumber.value)) {
+                                      if (match.teamNumber.value ==
+                                          controller
+                                              .matchData.teamNumber.value) {
+                                        Get.snackbar("Match Already Exists",
+                                            "This match already exists in the database. Please delete it first.",
+                                            snackPosition:
+                                                SnackPosition.BOTTOM);
+                                        return;
+                                      }
+                                    }
 
                                     if (controller.currentOrientation !=
                                         Orientation.landscape) {

@@ -9,13 +9,12 @@ class Event {
 
   Event({required this.timeSince, required this.type, required this.position});
 
-  List<dynamic> toJson() =>
-      [timeSince, type.numericalValue, position.positionId];
+  List<dynamic> toJson() => [timeSince, type.numericalValue, position.index];
 
   Event.fromJson(List<dynamic> json) {
     timeSince = json[0];
     type = EventType.values[1];
-    position = GameScreenPositionHelper.fromPositionId(json[2]);
+    position = GameScreenPosition.values[(json[2])];
   }
 
   void printEvent() {

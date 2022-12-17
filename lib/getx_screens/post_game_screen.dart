@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
 import 'package:frc_scouting/models/climbing_challenge.dart';
+import 'package:frc_scouting/models/robot_roles.dart';
 import 'package:get/get.dart';
 
 import '../services/getx_business_logic.dart';
@@ -19,8 +22,6 @@ class PostGameScreen extends StatelessWidget {
 
   final BusinessLogicController controller = Get.find();
 
-  var selectedDefenseRating = "None".obs;
-
   @override
   Widget build(BuildContext context) {
     controller.resetOrientation();
@@ -34,32 +35,24 @@ class PostGameScreen extends StatelessWidget {
         child: SafeArea(
           child: Obx(
             (() => Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Select Climbing Challenge",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
                     climbingChallengeDropdown(),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 10.0),
-                      child: Text(
-                        "Defense Rating",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                    roleDropdownButton(),
+                    if (controller.matchData.robotRole.value ==
+                            RobotRole.defense ||
+                        controller.matchData.robotRole.value == RobotRole.mix)
+                      defenseRatingRadioButtons(),
+                    TextField(
+                      decoration: const InputDecoration(hintText: "Notes"),
+                      controller: notesController,
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: showQrCodeButton(),
                       ),
                     ),
-                    defenseRatingRadioButtons(),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          vertical: Get.mediaQuery.size.width * 0.03),
-                      child: TextField(
-                        decoration: const InputDecoration(hintText: "Notes"),
-                        controller: notesController,
-                      ),
-                    ),
-                    showQrCodeButton(),
                   ],
                 )),
           ),
@@ -68,24 +61,101 @@ class PostGameScreen extends StatelessWidget {
     );
   }
 
+  Widget roleDropdownButton() {
+    return Obx(() => DropdownButton(
+          items: [
+            for (var role in [
+              RobotRole.offense,
+              RobotRole.defense,
+              RobotRole.mix
+            ])
+              DropdownMenuItem(
+                value: role,
+                child: Text(role.name),
+                onTap: () => controller.matchData.robotRole.value = role,
+              ),
+          ],
+          onChanged: (newValue) {
+            if (newValue is RobotRole) {
+              controller.matchData.robotRole.value = newValue;
+            }
+
+            if (newValue == RobotRole.offense) {
+              controller.matchData.overallDefenseRating.value = 0;
+              controller.matchData.defenseFrequencyRating.value = 0;
+            }
+          },
+          value: controller.matchData.robotRole.value,
+        ));
+  }
+
   Padding defenseRatingRadioButtons() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (String radioElement in ["None", "1", "2", "3", "4", "5"])
-            Column(
-              children: [
-                Radio(
-                    value: radioElement,
-                    groupValue: selectedDefenseRating.value,
-                    onChanged: (value) =>
-                        selectedDefenseRating.value = radioElement),
-                Text(radioElement)
-              ],
+      child: Obx(
+        () => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                "Overall Defense",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
             ),
-        ],
+            SizedBox(
+              height: 100,
+              child: GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 1,
+                crossAxisCount: 5,
+                children: [
+                  for (int radioElement in [1, 2, 3, 4, 5])
+                    Column(
+                      children: [
+                        Radio(
+                            value: radioElement,
+                            groupValue:
+                                controller.matchData.overallDefenseRating.value,
+                            onChanged: (value) => controller.matchData
+                                .overallDefenseRating.value = value as int),
+                        Text("$radioElement"),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                "Defense Frequency",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ),
+            SizedBox(
+              height: 70,
+              child: GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 1,
+                crossAxisCount: 5,
+                children: [
+                  for (int radioElement in [1, 2, 3, 4, 5])
+                    Column(
+                      children: [
+                        Radio(
+                            value: radioElement,
+                            groupValue: controller
+                                .matchData.defenseFrequencyRating.value,
+                            onChanged: (value) => controller.matchData
+                                .defenseFrequencyRating.value = value as int),
+                        Text("$radioElement")
+                      ],
+                    ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

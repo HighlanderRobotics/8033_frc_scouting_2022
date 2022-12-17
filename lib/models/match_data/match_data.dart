@@ -7,6 +7,8 @@ import '../event.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 
+import '../robot_roles.dart';
+
 class MatchData {
   var uuid = const Uuid().v4();
   late Rx<CompetitionKey> competitionKey;
@@ -15,7 +17,9 @@ class MatchData {
   var scouterId = 0.obs;
   var startTime = DateTime.now();
   var events = <Event>[].obs;
-  var didDefense = false.obs;
+  Rx<RobotRole> robotRole = RobotRole.offense.obs;
+  var overallDefenseRating = 0.obs;
+  var defenseFrequencyRating = 0.obs;
   var notes = "".obs;
   var challengeResult = ClimbingChallenge.didntClimb.obs;
   var hasNotSavedToCloud = false.obs;
@@ -34,7 +38,7 @@ class MatchData {
       startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']);
       events =
           RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
-      didDefense = RxBool(json['didDefense']);
+      robotRole = RobotRole.values[(json['robotRole'])].obs;
       notes = RxString(json['notes']);
       challengeResult =
           ClimbingChallengeExtension.fromName(json['challengeResult']).obs;
@@ -52,8 +56,10 @@ class MatchData {
         'scouterId': scouterId.value,
         'startTime': startTime.millisecondsSinceEpoch,
         'events': events.map((event) => event.toJson()).toList(),
+        'robotRole': robotRole.value.index,
+        'overallDefenseRating': overallDefenseRating.value,
+        'defenseFrequencyRating': defenseFrequencyRating.value,
         'notes': notes.value,
-        'didDefense': didDefense.value,
         'challengeResult': challengeResult.value.name,
       };
 }
