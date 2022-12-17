@@ -37,8 +37,13 @@ class PostGameScreen extends StatelessWidget {
             (() => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    climbingChallengeDropdown(),
-                    roleDropdownButton(),
+                    Row(
+                      children: [
+                        climbingChallengeDropdown(),
+                        const SizedBox(width: 20),
+                        roleDropdownButton(),
+                      ],
+                    ),
                     if (controller.matchData.robotRole.value ==
                             RobotRole.defense ||
                         controller.matchData.robotRole.value == RobotRole.mix)
