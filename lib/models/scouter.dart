@@ -4,12 +4,12 @@ class Scouter {
 
   Scouter({required this.id, required this.name});
 
-  factory Scouter.fromJson(List<dynamic> json) {
+  factory Scouter.fromJson(Map<String, dynamic> json) {
     return Scouter(
-      id: json[0],
-      name: json[1],
+      id: json["id"],
+      name: json["name"],
     );
   }
 
-  List toJson() => [id, name];
+  Map toJson() => {"id": id, "name": name};
 }
