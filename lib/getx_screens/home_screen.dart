@@ -1,12 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
-import '../models/scouter.dart';
 import 'previous_matches_screen.dart';
-import 'scan_qrcode_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final matchTxtFieldController = TextEditingController();
@@ -47,7 +44,8 @@ class HomeScreen extends StatelessWidget {
                                       icon: const Icon(Icons.refresh,
                                           color: Colors.grey),
                                       onPressed: () {
-                                        controller.selectedScouterId.value = -1;
+                                        controller.selectedScouterString.value =
+                                            "";
                                         controller.scoutersHelper
                                             .getAllScouters(forceFetch: true);
                                       },
@@ -56,75 +54,7 @@ class HomeScreen extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              Obx(
-                                () => Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Selected Scouter QR ID: ${controller.selectedScouterQrCodeId.value == -1 ? "None" : controller.selectedScouterQrCodeId.value}",
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                          CupertinoIcons.qrcode_viewfinder,
-                                          color: controller
-                                                      .selectedScouterQrCodeId
-                                                      .value ==
-                                                  -1
-                                              ? Colors.grey
-                                              : Colors.deepPurple),
-                                      onPressed: (() async {
-                                        Get.closeCurrentSnackbar();
-                                        final qrCodeResult = await Get.to(
-                                            () => ScanQrCodeScreen());
-                                        if (qrCodeResult != null &&
-                                            int.tryParse(qrCodeResult) !=
-                                                null &&
-                                            Iterable.generate(6).contains(
-                                                int.parse(qrCodeResult))) {
-                                          controller.selectedScouterQrCodeId
-                                              .value = int.parse(qrCodeResult);
-                                        } else {
-                                          Get.snackbar("Invalid QR Code",
-                                              "Please scan a valid QR code",
-                                              snackPosition:
-                                                  SnackPosition.BOTTOM);
-                                        }
-                                      }),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              TextField(
-                                decoration: const InputDecoration(
-                                    hintText: "Match Number"),
-                                controller: matchTxtFieldController,
-                                keyboardType: TextInputType.number,
-                                onChanged: (String value) {
-                                  controller.matchData.matchNumber.value =
-                                      int.tryParse(value) ?? 0;
-                                  try {
-                                    if (controller.matchData.matchNumber.value >
-                                            0 &&
-                                        controller.selectedScouterQrCodeId
-                                                .value !=
-                                            -1) {
-                                      teamTxtFieldController.text = controller
-                                          .eventSchedule[controller
-                                                  .matchData.matchNumber.value -
-                                              1][controller
-                                                  .selectedScouterQrCodeId
-                                                  .value -
-                                              1]
-                                          .toString();
-                                    } else {
-                                      teamTxtFieldController.text = "";
-                                    }
-                                  } catch (_) {}
-                                },
-                              ),
+                              matchNumberTextField(),
                               TextField(
                                 decoration: const InputDecoration(
                                     hintText: "Team Number"),
@@ -141,7 +71,7 @@ class HomeScreen extends StatelessWidget {
                         Obx(
                           () => ElevatedButton(
                             onPressed: !controller.isHeaderDataValid(
-                                    controller.selectedScouterId.value)
+                                    controller.selectedScouterString.value)
                                 ? null
                                 : () async {
                                     controller.matchData.matchNumber.value =
@@ -191,29 +121,70 @@ class HomeScreen extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.all(30.0),
-              child: ElevatedButton(
-                child: const Text("View Previous Matches"),
-                onPressed: () async {
-                  final matches =
-                      controller.documentsHelper.getPreviousMatches();
-                  Get.to(
-                    () => PreviousMatchesScreen(
-                      previousMatches: matches,
-                    ),
-                  );
-                  if (matches.numberOfInvalidFiles > 0) {
-                    Get.snackbar(
-                      "Ignored Invalid Files",
-                      "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  }
-                },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    child: const Text("Previous Matches"),
+                    onPressed: () async {
+                      final matches =
+                          controller.documentsHelper.getPreviousMatches();
+                      Get.to(
+                        () => PreviousMatchesScreen(
+                          previousMatches: matches,
+                        ),
+                      );
+                      if (matches.numberOfInvalidFiles > 0) {
+                        Get.snackbar(
+                          "Ignored Invalid Files",
+                          "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    child: const Text("Match Schedule"),
+                    onPressed: () async {},
+                  ),
+                ],
               ),
             ),
           )
         ],
       ),
+    );
+  }
+
+  TextField matchNumberTextField() {
+    return TextField(
+      decoration: const InputDecoration(hintText: "Match Number"),
+      controller: matchTxtFieldController,
+      keyboardType: TextInputType.number,
+      onChanged: (String value) {
+        controller.matchData.matchNumber.value = int.tryParse(value) ?? 0;
+
+        controller.scoutersScheduleHelper.matchSchedule.value.matches
+            .firstWhereOrNull((element) => element.scouters
+                .contains(controller.selectedScouterString.value));
+
+        try {
+          if (controller.matchData.matchNumber.value > 0 &&
+              controller.scoutersScheduleHelper.matchSchedule.value
+                  .containsScouter(controller.selectedScouterString.value)) {
+            teamTxtFieldController.text = controller
+                .eventSchedule[controller.matchData.matchNumber.value - 1][
+                    controller.scoutersHelper.scouters
+                        .indexOf(controller.selectedScouterString.value)]
+                .toString();
+          } else {
+            teamTxtFieldController.text = "";
+          }
+        } catch (_) {
+          teamTxtFieldController.text = "";
+        }
+      },
     );
   }
 
@@ -227,15 +198,16 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(color: Colors.grey),
           ),
         ),
-        for (Scouter scouter in controller.scoutersHelper.scouters)
+        for (String scouterName in controller.scoutersHelper.scouters)
           DropdownMenuItem(
-            onTap: () => controller.selectedScouterId.value = scouter.id,
-            value: scouter.id,
-            child: Text(scouter.name),
+            onTap: () => controller.selectedScouterString.value = scouterName,
+            value: controller.scoutersHelper.scouters.indexOf(scouterName),
+            child: Text(scouterName),
           ),
       ],
       onChanged: (_) {},
-      value: controller.selectedScouterId.value,
+      value: controller.scoutersHelper.scouters
+          .indexOf(controller.selectedScouterString.value),
     );
   }
 }

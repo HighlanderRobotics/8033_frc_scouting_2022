@@ -50,6 +50,7 @@ dependencies:
   flutter_svg: ^1.1.6
   protobuf: ^2.1.0
   implicitly_animated_reorderable_list: ^0.4.2
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,8 @@ flutter:
 
   assets:
     - assets/
+    - .env
+    
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

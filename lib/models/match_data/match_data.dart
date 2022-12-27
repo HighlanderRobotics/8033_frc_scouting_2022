@@ -17,7 +17,7 @@ class MatchData {
   var scouterId = 0.obs;
   var startTime = DateTime.now();
   var events = <Event>[].obs;
-  Rx<RobotRole> robotRole = RobotRole.offense.obs;
+  var robotRole = RobotRole.offense.obs;
   var overallDefenseRating = 0.obs;
   var defenseFrequencyRating = 0.obs;
   var notes = "".obs;

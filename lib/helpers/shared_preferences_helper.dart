@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum SharedPreferenceKeys { scouters }
+enum SharedPreferenceKeys { scouters, scoutersSchedule }
 
 extension SharedPreferencesKeysExtension on SharedPreferenceKeys {
   String toShortString() => toString().split('.').last;
