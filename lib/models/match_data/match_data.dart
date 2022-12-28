@@ -33,7 +33,7 @@ class MatchData {
       competitionKey = Rx(CompetitionKey.values
           .firstWhere((e) => e.eventCode == json['competitionKey']));
       matchNumber = RxInt(json['matchNumber']);
-      teamNumber = RxInt(json['teamNumber']);
+      Rx teamNumber = RxInt(json['teamNumber']);
       scouterId = RxInt(json['scouterId']);
       startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']);
       events =

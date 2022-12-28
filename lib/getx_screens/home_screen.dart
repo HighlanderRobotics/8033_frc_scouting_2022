@@ -165,7 +165,7 @@ class HomeScreen extends StatelessWidget {
       onChanged: (String value) {
         controller.matchData.matchNumber.value = int.tryParse(value) ?? 0;
 
-        controller.scoutersScheduleHelper.matchSchedule.value.matches
+        controller.scoutersScheduleHelper.matchSchedule.value.shifts
             .firstWhereOrNull((element) => element.scouters
                 .contains(controller.selectedScouterString.value));
 

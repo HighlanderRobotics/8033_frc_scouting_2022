@@ -30,13 +30,12 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<MatchSchedule> fetchScoutersSchedule() async {
+  static Future<ScoutSchedule> fetchScoutersSchedule() async {
     try {
-      var response = await http
-          .get(Uri.parse('$_host/scoutersschedule'));
+      var response = await http.get(Uri.parse('$_host/scoutersschedule'));
 
       if (response.statusCode == 200) {
-        return MatchSchedule.fromJson(jsonDecode(response.body));
+        return ScoutSchedule.fromJson(jsonDecode(response.body));
       } else {
         print("Non-200 response");
         throw Exception("Non-200 response");

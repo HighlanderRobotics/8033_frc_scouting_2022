@@ -1,9 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class TheBlueAllianceAPI {
-  
   Future<List<List<int>>> getMatchSchedule(String event) async {
     List<List<int>> teams = [];
 
@@ -11,10 +11,7 @@ class TheBlueAllianceAPI {
       var response = await http.get(
           Uri.parse(
               'https://www.thebluealliance.com/api/v3/event/$event/matches/simple'),
-          headers: {
-            "X-TBA-Auth-Key":
-                "Pv3TBbmYemAECgCLpWrCK2Asp0wN5jHCnSpWBypue2GqkPqcELTZTBR6nx0DkCKb"
-          });
+          headers: {"X-TBA-Auth-Key": dotenv.env['X-TBA-Auth-Key'] ?? "OH NO"});
       if (response.statusCode == 200) {
         jsonDecode(response.body).forEach((match) {
           teams.add([

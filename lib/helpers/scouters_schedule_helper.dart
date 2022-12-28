@@ -5,10 +5,10 @@ import '../networking/scouting_server_api.dart';
 import 'shared_preferences_helper.dart';
 
 class ScoutersScheduleHelper {
-  late Rx<MatchSchedule> matchSchedule;
+  late Rx<ScoutSchedule> matchSchedule;
 
   ScoutersScheduleHelper() {
-    matchSchedule = MatchSchedule(0, RxList.empty()).obs;
+    matchSchedule = ScoutSchedule(0, RxList.empty()).obs;
   }
 
   Future getScoutersSchedule({bool forceFetch = false}) async {
@@ -26,13 +26,13 @@ class ScoutersScheduleHelper {
     }
   }
 
-  static Future<MatchSchedule?> _getParsedLocalStorageSchedule() async {
+  static Future<ScoutSchedule?> _getParsedLocalStorageSchedule() async {
     final scheduleJson = await SharedPreferencesHelper.getString(
         SharedPreferenceKeys.scoutersSchedule.toShortString());
 
     if (scheduleJson.isNotEmpty) {
       try {
-        return MatchSchedule.fromJson(jsonDecode(scheduleJson));
+        return ScoutSchedule.fromJson(jsonDecode(scheduleJson));
       } catch (e) {
         print("Failed to parse localStorage schedule: $e");
         rethrow;
@@ -42,47 +42,49 @@ class ScoutersScheduleHelper {
     }
   }
 
-  Future _saveParsedLocalStorageSchedule(MatchSchedule schedule) async {
+  Future _saveParsedLocalStorageSchedule(ScoutSchedule schedule) async {
     final prefs = await SharedPreferencesHelper.sharedPreferences;
     final scheduleJson = jsonEncode(schedule);
     prefs.setString('scoutersSchedule', scheduleJson);
   }
 }
 
-class MatchSchedule {
+class ScoutSchedule {
   int version;
-  List<Match> matches;
+  List<ScoutShift> shifts;
 
-  MatchSchedule(this.version, this.matches);
+  ScoutSchedule(this.version, this.shifts);
 
-  factory MatchSchedule.fromJson(Map<String, dynamic> json) {
-    return MatchSchedule(
+  factory ScoutSchedule.fromJson(Map<String, dynamic> json) {
+    return ScoutSchedule(
       json["version"],
-      json["matches"].map<Match>((match) => Match.fromJson(match)).toList(),
+      json["shifts"]
+          .map<ScoutShift>((match) => ScoutShift.fromJson(match))
+          .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       "version": version,
-      "matches": matches.map((match) => match.toJson()).toList(),
+      "shifts": shifts.map((match) => match.toJson()).toList(),
     };
   }
 
   bool containsScouter(String scouter) {
-    return matches.any((match) => match.scouters.contains(scouter));
+    return shifts.any((match) => match.scouters.contains(scouter));
   }
 }
 
-class Match {
+class ScoutShift {
   int start;
   int end;
   List<String> scouters;
 
-  Match(this.start, this.end, this.scouters);
+  ScoutShift(this.start, this.end, this.scouters);
 
-  factory Match.fromJson(Map<String, dynamic> json) {
-    return Match(
+  factory ScoutShift.fromJson(Map<String, dynamic> json) {
+    return ScoutShift(
       json["start"],
       json["end"],
       json["scouts"].map<String>((scouter) => scouter.toString()).toList(),
