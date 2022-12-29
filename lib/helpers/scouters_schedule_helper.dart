@@ -6,6 +6,8 @@ import '../networking/scouting_server_api.dart';
 import 'shared_preferences_helper.dart';
 
 class ScoutersScheduleHelper {
+  static ScoutersScheduleHelper shared = ScoutersScheduleHelper();
+
   late Rx<ScoutSchedule> matchSchedule;
 
   ScoutersScheduleHelper() {
@@ -28,7 +30,7 @@ class ScoutersScheduleHelper {
   }
 
   static Future<ScoutSchedule?> _getParsedLocalStorageSchedule() async {
-    final scheduleJson = await SharedPreferencesHelper.getString(
+    final scheduleJson = await SharedPreferencesHelper.shared.getString(
         SharedPreferenceKeys.scoutersSchedule.toShortString());
 
     if (scheduleJson.isNotEmpty) {
@@ -44,7 +46,7 @@ class ScoutersScheduleHelper {
   }
 
   static Future _saveParsedLocalStorageSchedule(ScoutSchedule schedule) async {
-    final prefs = await SharedPreferencesHelper.sharedPreferences;
+    final prefs = await SharedPreferencesHelper.shared.sharedPreferences;
     final scheduleJson = jsonEncode(schedule);
     prefs.setString('scoutersSchedule', scheduleJson);
   }

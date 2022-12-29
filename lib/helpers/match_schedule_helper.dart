@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'shared_preferences_helper.dart';
 
 class MatchScheduleHelper {
+  static MatchScheduleHelper shared = MatchScheduleHelper();
   late RxList<MatchEvent> matchSchedule;
 
   MatchScheduleHelper() {
@@ -31,7 +32,7 @@ class MatchScheduleHelper {
   }
 
   static Future<List<MatchEvent>> _getParsedLocalStorageSchedule() async {
-    final scheduleJson = await SharedPreferencesHelper.getString(
+    final scheduleJson = await SharedPreferencesHelper.shared.getString(
         SharedPreferenceKeys.matchSchedule.toShortString());
 
     if (scheduleJson.isNotEmpty) {
@@ -51,11 +52,11 @@ class MatchScheduleHelper {
   static Future _saveParsedLocalStorageSchedule(
       List<MatchEvent> schedule) async {
     final scheduleJson = jsonEncode(schedule);
-    await SharedPreferencesHelper.setString(
+    await SharedPreferencesHelper.shared.setString(
         SharedPreferenceKeys.matchSchedule.toShortString(), scheduleJson);
   }
 
-  MatchEvent getMatchEventFrom(
+  MatchEvent getMatchEvent(
           {required int matchNumber, required int scouterId}) =>
       matchSchedule[matchSchedule
               .indexWhere((element) => element.matchNumber == matchNumber) +

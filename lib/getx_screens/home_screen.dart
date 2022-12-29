@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
+import 'package:frc_scouting/helpers/match_schedule_helper.dart';
+import 'package:frc_scouting/helpers/scouters_helper.dart';
+import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
@@ -19,6 +22,14 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Collection App 2022"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bolt),
+            onPressed: () {
+              Get.toNamed("/settings");
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -46,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                                       onPressed: () {
                                         controller.selectedScouterString.value =
                                             "";
-                                        controller.scoutersHelper
+                                        ScoutersHelper.shared
                                             .getAllScouters(forceFetch: true);
                                       },
                                       tooltip: "Refresh Scouters",
@@ -169,30 +180,17 @@ class HomeScreen extends StatelessWidget {
 
         try {
           if (controller.matchData.matchNumber.value > 0 &&
-              controller.scoutersScheduleHelper.matchSchedule.value
+              ScoutersScheduleHelper.shared.matchSchedule.value
                   .containsScouter(controller.selectedScouterString.value)) {
-            teamTxtFieldController.text = controller.eventScheduleHelper
-                .getMatchEventFrom(
+            teamTxtFieldController.text = MatchScheduleHelper.shared
+                .getMatchEvent(
                     matchNumber: controller.matchData.matchNumber.value,
-                    scouterId: controller
-                        .scoutersScheduleHelper.matchSchedule.value
+                    scouterId: ScoutersScheduleHelper.shared.matchSchedule.value
                         .indexOfScouter(
                             matchNumber: controller.matchData.matchNumber.value,
                             scouter: controller.selectedScouterString.value))
                 .teamKey
                 .substring(3);
-
-            // teamTxtFieldController.text = controller
-            //     .scoutersScheduleHelper.matchSchedule.value
-            //     .getShiftFor(
-            //         matchNumber: controller.matchData.matchNumber.value)
-            //     .scouters
-
-            // teamTxtFieldController.text = controller
-            //     .eventSchedule[controller.matchData.matchNumber.value - 1][
-            //         controller.scoutersHelper.scouters
-            //             .indexOf(controller.selectedScouterString.value)]
-            //     .toString();
           } else {
             teamTxtFieldController.text = "";
           }
@@ -213,39 +211,16 @@ class HomeScreen extends StatelessWidget {
             style: TextStyle(color: Colors.grey),
           ),
         ),
-        for (String scouterName in controller.scoutersHelper.scouters)
+        for (String scouterName in ScoutersHelper.shared.scouters)
           DropdownMenuItem(
             onTap: () => controller.selectedScouterString.value = scouterName,
-            value: controller.scoutersHelper.scouters.indexOf(scouterName),
+            value: ScoutersHelper.shared.scouters.indexOf(scouterName),
             child: Text(scouterName),
           ),
       ],
       onChanged: (_) {},
-      value: controller.scoutersHelper.scouters
+      value: ScoutersHelper.shared.scouters
           .indexOf(controller.selectedScouterString.value),
     );
-  }
-}
-
-// create an integer closed range class that acts like Swift's 1...5 does
-
-class IntClosedRange {
-  final int start;
-  final int end;
-
-  IntClosedRange(this.start, this.end);
-
-  Set<int> get range {
-    final Set<int> range = {};
-
-    for (int i = start; i <= end; i++) {
-      range.add(i);
-    }
-
-    return range;
-  }
-
-  bool contains(int value) {
-    return range.contains(value);
   }
 }

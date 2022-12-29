@@ -7,14 +7,16 @@ extension SharedPreferencesKeysExtension on SharedPreferenceKeys {
 }
 
 class SharedPreferencesHelper {
-  static final sharedPreferences = SharedPreferences.getInstance();
+  static SharedPreferencesHelper shared = SharedPreferencesHelper();
 
-  static Future<String> getString(String key) async {
+  final sharedPreferences = SharedPreferences.getInstance();
+
+  Future<String> getString(String key) async {
     final prefs = await sharedPreferences;
     return prefs.getString(key) ?? "";
   }
 
-  static Future<bool> setString(String key, String value) async {
+  Future<bool> setString(String key, String value) async {
     final prefs = await sharedPreferences;
     return prefs.setString(key, value);
   }

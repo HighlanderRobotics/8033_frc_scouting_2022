@@ -1,4 +1,4 @@
-import '../getx_screens/home_screen.dart';
+import 'int_closed_range.dart';
 
 class ScoutShift {
   IntClosedRange matchRange;

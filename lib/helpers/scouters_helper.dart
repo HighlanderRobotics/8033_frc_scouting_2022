@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import '../networking/scouting_server_api.dart';
 
 class ScoutersHelper {
+  static ScoutersHelper shared = ScoutersHelper();
+
   // A reactive list to hold all the Scouter Objects
   RxList<String> scouters = <String>[].obs;
 
@@ -30,7 +32,7 @@ class ScoutersHelper {
   // Abstracted function to get the scouters from localStorage
   // Then it parses the JSON and returns a list of Scouter objects
   Future<List<String>> _getParsedLocalStorageScouters() async {
-    final scouterJson = await SharedPreferencesHelper.getString(
+    final scouterJson = await SharedPreferencesHelper.shared.getString(
         SharedPreferenceKeys.scouters.toShortString());
 
     if (scouterJson.isNotEmpty) {
@@ -47,7 +49,7 @@ class ScoutersHelper {
 
   // Internal function that saves a given list of Scouters to localStorage
   Future _saveParsedLocalStorageScouters(List<String> scouters) async {
-    final prefs = await SharedPreferencesHelper.sharedPreferences;
+    final prefs = await SharedPreferencesHelper.shared.sharedPreferences;
     final scouterJson = jsonEncode(scouters);
     prefs.setString('scouters', scouterJson);
   }
