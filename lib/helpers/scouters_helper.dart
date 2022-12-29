@@ -17,7 +17,7 @@ class ScoutersHelper {
       final localStorageScouters = await _getParsedLocalStorageScouters();
 
       if (forceFetch || localStorageScouters.isEmpty) {
-        scouters.value = await ScoutingServerAPI.fetchScouters();
+        scouters.value = await ScoutingServerAPI.getScouters();
         _saveParsedLocalStorageScouters(scouters.toList());
       } else {
         scouters.value = localStorageScouters;

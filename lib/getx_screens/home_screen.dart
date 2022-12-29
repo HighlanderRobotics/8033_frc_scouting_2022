@@ -55,16 +55,7 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                               matchNumberTextField(),
-                              TextField(
-                                decoration: const InputDecoration(
-                                    hintText: "Team Number"),
-                                controller: teamTxtFieldController,
-                                keyboardType: TextInputType.number,
-                                onChanged: (String value) {
-                                  controller.matchData.teamNumber.value =
-                                      int.tryParse(value) ?? 0;
-                                },
-                              ),
+                              teamNumberTextField(),
                             ],
                           ),
                         ),
@@ -93,7 +84,7 @@ class HomeScreen extends StatelessWidget {
                                           controller
                                               .matchData.teamNumber.value) {
                                         Get.snackbar("Match Already Exists",
-                                            "This match already exists in the database. Please delete it first.",
+                                            "This match already exists. Please check the match number and team number and make sure you want to continue.",
                                             snackPosition:
                                                 SnackPosition.BOTTOM);
                                         return;
@@ -157,6 +148,17 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  TextField teamNumberTextField() {
+    return TextField(
+      decoration: const InputDecoration(hintText: "Team Number"),
+      controller: teamTxtFieldController,
+      keyboardType: TextInputType.number,
+      onChanged: (String value) {
+        controller.matchData.teamNumber.value = int.tryParse(value) ?? 0;
+      },
+    );
+  }
+
   TextField matchNumberTextField() {
     return TextField(
       decoration: const InputDecoration(hintText: "Match Number"),
@@ -165,19 +167,32 @@ class HomeScreen extends StatelessWidget {
       onChanged: (String value) {
         controller.matchData.matchNumber.value = int.tryParse(value) ?? 0;
 
-        controller.scoutersScheduleHelper.matchSchedule.value.shifts
-            .firstWhereOrNull((element) => element.scouters
-                .contains(controller.selectedScouterString.value));
-
         try {
           if (controller.matchData.matchNumber.value > 0 &&
               controller.scoutersScheduleHelper.matchSchedule.value
                   .containsScouter(controller.selectedScouterString.value)) {
-            teamTxtFieldController.text = controller
-                .eventSchedule[controller.matchData.matchNumber.value - 1][
-                    controller.scoutersHelper.scouters
-                        .indexOf(controller.selectedScouterString.value)]
-                .toString();
+            teamTxtFieldController.text = controller.eventScheduleHelper
+                .getMatchEventFrom(
+                    matchNumber: controller.matchData.matchNumber.value,
+                    scouterId: controller
+                        .scoutersScheduleHelper.matchSchedule.value
+                        .indexOfScouter(
+                            matchNumber: controller.matchData.matchNumber.value,
+                            scouter: controller.selectedScouterString.value))
+                .teamKey
+                .substring(3);
+
+            // teamTxtFieldController.text = controller
+            //     .scoutersScheduleHelper.matchSchedule.value
+            //     .getShiftFor(
+            //         matchNumber: controller.matchData.matchNumber.value)
+            //     .scouters
+
+            // teamTxtFieldController.text = controller
+            //     .eventSchedule[controller.matchData.matchNumber.value - 1][
+            //         controller.scoutersHelper.scouters
+            //             .indexOf(controller.selectedScouterString.value)]
+            //     .toString();
           } else {
             teamTxtFieldController.text = "";
           }
@@ -209,5 +224,28 @@ class HomeScreen extends StatelessWidget {
       value: controller.scoutersHelper.scouters
           .indexOf(controller.selectedScouterString.value),
     );
+  }
+}
+
+// create an integer closed range class that acts like Swift's 1...5 does
+
+class IntClosedRange {
+  final int start;
+  final int end;
+
+  IntClosedRange(this.start, this.end);
+
+  Set<int> get range {
+    final Set<int> range = {};
+
+    for (int i = start; i <= end; i++) {
+      range.add(i);
+    }
+
+    return range;
+  }
+
+  bool contains(int value) {
+    return range.contains(value);
   }
 }

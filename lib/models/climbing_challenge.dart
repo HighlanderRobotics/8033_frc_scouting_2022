@@ -27,22 +27,6 @@ extension ClimbingChallengeExtension on ClimbingChallenge {
     }
   }
 
-  static ClimbingChallenge fromName(String name) {
-    switch (name) {
-      case "Didn't climb":
-        return ClimbingChallenge.didntClimb;
-      case "Failed climb":
-        return ClimbingChallenge.failedClimb;
-      case "Bottom bar":
-        return ClimbingChallenge.bottomBar;
-      case "Middle bar":
-        return ClimbingChallenge.middleBar;
-      case "High bar":
-        return ClimbingChallenge.highBar;
-      case "Traversal":
-        return ClimbingChallenge.traversal;
-      default:
-        return ClimbingChallenge.didntClimb;
-    }
-  }
+  static ClimbingChallenge fromName(String name) =>
+      ClimbingChallenge.values.firstWhere((element) => element.name == name);
 }
