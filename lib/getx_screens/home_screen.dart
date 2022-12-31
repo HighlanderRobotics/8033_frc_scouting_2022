@@ -6,6 +6,7 @@ import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
+import 'service_status_screen.dart';
 import 'previous_matches_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -23,11 +24,18 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Collection App 2022"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.bolt),
-            onPressed: () {
-              Get.toNamed("/settings");
-            },
+          Obx(
+            () => IconButton(
+              icon: Icon(
+                Icons.bolt,
+                color: controller.serviceHelper.isAllUp
+                    ? Colors.green
+                    : Colors.red,
+              ),
+              onPressed: () {
+                Get.to(() => ServiceStatusScreen());
+              },
+            ),
           ),
         ],
       ),
@@ -122,7 +130,7 @@ class HomeScreen extends StatelessWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.all(30.0),
+              padding: const EdgeInsets.only(bottom: 30.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

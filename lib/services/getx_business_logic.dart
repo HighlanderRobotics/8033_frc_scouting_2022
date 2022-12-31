@@ -7,6 +7,7 @@ import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/models/event_key.dart';
 import 'package:frc_scouting/models/game_screen_positions.dart';
+import 'package:frc_scouting/models/service.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
@@ -36,6 +37,7 @@ class BusinessLogicController extends GetxController {
   late MatchData matchData;
   final FilesHelper documentsHelper = FilesHelper();
   var matchFilterType = MatchFilterType.date.obs;
+  final ServiceHelper serviceHelper = ServiceHelper();
 
   var selectedScouterString = "".obs;
 
@@ -45,21 +47,20 @@ class BusinessLogicController extends GetxController {
     matchData = MatchData(competitionKey: selectedEvent);
 
     try {
-      MatchScheduleHelper.shared.getMatchSchedule(
-          tournamentKey: selectedEvent.eventCode);
+      MatchScheduleHelper.shared
+          .getMatchSchedule(tournamentKey: selectedEvent.eventCode);
     } catch (e) {
       print("Error getting event schedule: $e");
     }
 
     try {
-      await ScoutersHelper.shared.getAllScouters();
+      ScoutersHelper.shared.getAllScouters();
     } catch (e) {
       print("Error getting scouters: $e");
     }
 
     try {
-      await ScoutersScheduleHelper.shared.getScoutersSchedule(forceFetch: true);
-      print("");
+      ScoutersScheduleHelper.shared.getScoutersSchedule();
     } catch (e) {
       print("Error getting scouters schedule: $e");
     }

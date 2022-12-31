@@ -1,12 +1,24 @@
 import 'dart:convert';
 
 import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
+import 'package:frc_scouting/models/service.dart';
 import 'package:get/get.dart';
 
 import '../networking/scouting_server_api.dart';
 
-class ScoutersHelper {
+class ScoutersHelper extends ServiceClass {
   static ScoutersHelper shared = ScoutersHelper();
+
+  @override
+  void forceRefresh() {
+    try {
+      getAllScouters(forceFetch: true);
+    } catch (_) {}
+  }
+
+  ScoutersHelper() {
+    service = Service(name: "Scouters").obs;
+  }
 
   // A reactive list to hold all the Scouter Objects
   RxList<String> scouters = <String>[].obs;
@@ -16,24 +28,31 @@ class ScoutersHelper {
   // Additionally, it saves the new fetch to localStorage
   Future getAllScouters({bool forceFetch = false}) async {
     try {
+      service.value
+          .updateStatus(ServiceStatus.inProgress, "Fetching from localStorage");
       final localStorageScouters = await _getParsedLocalStorageScouters();
 
       if (forceFetch || localStorageScouters.isEmpty) {
         scouters.value = await ScoutingServerAPI.getScouters();
         _saveParsedLocalStorageScouters(scouters.toList());
+        service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
       } else {
         scouters.value = localStorageScouters;
+        service.value
+            .updateStatus(ServiceStatus.up, "Retrieved from localStorage");
       }
     } catch (e) {
       print("Error Occured: $e");
+      service.value
+          .updateStatus(ServiceStatus.error, "Network error: ${e.toString()}");
     }
   }
 
   // Abstracted function to get the scouters from localStorage
   // Then it parses the JSON and returns a list of Scouter objects
   Future<List<String>> _getParsedLocalStorageScouters() async {
-    final scouterJson = await SharedPreferencesHelper.shared.getString(
-        SharedPreferenceKeys.scouters.toShortString());
+    final scouterJson = await SharedPreferencesHelper.shared
+        .getString(SharedPreferenceKeys.scouters.toShortString());
 
     if (scouterJson.isNotEmpty) {
       try {
