@@ -5,7 +5,7 @@ enum RobotRole {
 }
 
 extension RobotRoleExtension on RobotRole {
-  String get name {
+  String get localizedDescription {
     switch (this) {
       case RobotRole.offense:
         return "Offense";

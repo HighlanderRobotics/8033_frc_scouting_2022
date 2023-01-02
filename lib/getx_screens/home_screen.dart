@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
@@ -10,7 +11,6 @@ import 'service_status_screen.dart';
 import 'previous_matches_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final matchTxtFieldController = TextEditingController();
   final teamTxtFieldController = TextEditingController();
 
   late BusinessLogicController controller;
@@ -58,58 +58,40 @@ class HomeScreen extends StatelessWidget {
                                 () => Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    chooseScouterNameDropdownButton(),
+                                    Expanded(child: scouterNameDropdown()),
                                     IconButton(
                                       icon: const Icon(Icons.refresh,
                                           color: Colors.grey),
                                       onPressed: () {
-                                        controller.selectedScouterString.value =
+                                        controller.matchData.scouterName.value =
                                             "";
-                                        ScoutersHelper.shared
-                                            .getAllScouters(forceFetch: true);
+                                        ScoutersHelper.shared.getAllScouters(
+                                            networkRefresh: true);
                                       },
                                       tooltip: "Refresh Scouters",
                                     ),
                                   ],
                                 ),
                               ),
-                              matchNumberTextField(),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(child: matchKeyDropdown()),
+                                  IconButton(
+                                      onPressed: () {},
+                                      icon: const Icon(Icons.plus_one))
+                                ],
+                              ),
+                              const SizedBox(height: 10),
                               teamNumberTextField(),
                             ],
                           ),
                         ),
                         Obx(
                           () => ElevatedButton(
-                            onPressed: !controller.isHeaderDataValid(
-                                    controller.selectedScouterString.value)
+                            onPressed: !controller.isHeaderDataValid()
                                 ? null
                                 : () async {
-                                    controller.matchData.matchNumber.value =
-                                        int.parse(matchTxtFieldController.text);
-                                    controller.matchData.teamNumber.value =
-                                        int.parse(teamTxtFieldController.text);
-
-                                    var previousMatches = controller
-                                        .documentsHelper
-                                        .getPreviousMatches();
-
-                                    for (var match in previousMatches
-                                        .validMatches
-                                        .where((element) =>
-                                            element.matchNumber.value ==
-                                            controller
-                                                .matchData.matchNumber.value)) {
-                                      if (match.teamNumber.value ==
-                                          controller
-                                              .matchData.teamNumber.value) {
-                                        Get.snackbar("Match Already Exists",
-                                            "This match already exists. Please check the match number and team number and make sure you want to continue.",
-                                            snackPosition:
-                                                SnackPosition.BOTTOM);
-                                        return;
-                                      }
-                                    }
-
                                     if (controller.currentOrientation !=
                                         Orientation.landscape) {
                                       controller.setLandscapeOrientation();
@@ -132,7 +114,7 @@ class HomeScreen extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 30.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
                     child: const Text("Previous Matches"),
@@ -161,8 +143,47 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-          )
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget matchKeyDropdown() {
+    return Obx(
+      () => DropdownSearch<String>(
+        dropdownDecoratorProps: const DropDownDecoratorProps(
+          dropdownSearchDecoration: InputDecoration(
+            labelText: "Match",
+            border: OutlineInputBorder(),
+          ),
+        ),
+        popupProps: const PopupProps.menu(showSelectedItems: true),
+        items: [
+          for (var scoutShift in MatchScheduleHelper.shared
+              .getMatchesFromShifts(
+                  shifts: ScoutersScheduleHelper.shared.matchSchedule.value
+                      .filterShiftsWithScouter(
+                          controller.matchData.scouterName.value),
+                  scouterName: controller.matchData.scouterName.value))
+            scoutShift.localizedDescription
+        ],
+        onChanged: (matchLocalizedDescription) {
+          if (matchLocalizedDescription is String) {
+            controller.matchData.matchKey.value = matchLocalizedDescription;
+            final a = MatchScheduleHelper.shared.matchSchedule.firstWhereOrNull(
+                (match) =>
+                    match.localizedDescription == matchLocalizedDescription);
+
+            final b = a?.teamKey.substring(3) ?? "";
+
+            if (int.tryParse(b) != null) {
+              teamTxtFieldController.text = b;
+              controller.matchData.teamNumber.value = int.parse(b);
+            }
+          }
+        },
+        selectedItem: controller.matchData.matchKey.value,
       ),
     );
   }
@@ -172,63 +193,59 @@ class HomeScreen extends StatelessWidget {
       decoration: const InputDecoration(hintText: "Team Number"),
       controller: teamTxtFieldController,
       keyboardType: TextInputType.number,
-      onChanged: (String value) {
-        controller.matchData.teamNumber.value = int.tryParse(value) ?? 0;
+      onChanged: (String teamNumber) {
+        controller.matchData.teamNumber.value = int.tryParse(teamNumber) ?? 0;
       },
     );
   }
 
-  TextField matchNumberTextField() {
-    return TextField(
-      decoration: const InputDecoration(hintText: "Match Number"),
-      controller: matchTxtFieldController,
-      keyboardType: TextInputType.number,
-      onChanged: (String value) {
-        controller.matchData.matchNumber.value = int.tryParse(value) ?? 0;
-
-        try {
-          if (controller.matchData.matchNumber.value > 0 &&
-              ScoutersScheduleHelper.shared.matchSchedule.value
-                  .containsScouter(controller.selectedScouterString.value)) {
-            teamTxtFieldController.text = MatchScheduleHelper.shared
-                .getMatchEvent(
-                    matchNumber: controller.matchData.matchNumber.value,
-                    scouterId: ScoutersScheduleHelper.shared.matchSchedule.value
-                        .indexOfScouter(
-                            matchNumber: controller.matchData.matchNumber.value,
-                            scouter: controller.selectedScouterString.value))
-                .teamKey
-                .substring(3);
-          } else {
-            teamTxtFieldController.text = "";
-          }
-        } catch (_) {
-          teamTxtFieldController.text = "";
-        }
-      },
-    );
-  }
-
-  DropdownButton<int> chooseScouterNameDropdownButton() {
-    return DropdownButton(
-      items: [
-        const DropdownMenuItem(
-          value: -1,
-          child: Text(
-            "Choose Your Name",
-            style: TextStyle(color: Colors.grey),
+  DropdownSearch<String> scouterNameDropdown() {
+    return DropdownSearch<String>(
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+            labelText: "Scouter Name", border: OutlineInputBorder()),
+      ),
+      popupProps: const PopupProps.menu(
+        showSearchBox: true,
+        searchFieldProps: TextFieldProps(
+          decoration: InputDecoration(
+            label: Text("Search"),
+            border: OutlineInputBorder(),
           ),
         ),
-        for (String scouterName in ScoutersHelper.shared.scouters)
-          DropdownMenuItem(
-            onTap: () => controller.selectedScouterString.value = scouterName,
-            value: ScoutersHelper.shared.scouters.indexOf(scouterName),
-            child: Text(scouterName),
-          ),
-      ],
-      onChanged: (_) {},
-      value: ScoutersHelper.shared.scouters
-          .indexOf(controller.selectedScouterString.value),
+      ),
+      items: ScoutersHelper.shared.scouters,
+      // items: [
+      //   for (String scouterName in ScoutersHelper.shared.scouters) scouterName
+      // ],
+      selectedItem: controller.matchData.scouterName.value,
+      onChanged: (value) {
+        controller.matchData.scouterName.value = value ?? "";
+        controller.matchData.teamNumber = 0.obs;
+        controller.matchData.matchKey.value = "";
+
+        teamTxtFieldController.text = "";
+      },
     );
+    // return DropdownButton(
+    //   items: [
+    //     const DropdownMenuItem(
+    //       value: -1,
+    //       child: Text(
+    //         "Choose Your Name",
+    //         style: TextStyle(color: Colors.grey),
+    //       ),
+    //     ),
+    //     for (String scouterName in ScoutersHelper.shared.scouters)
+    //       DropdownMenuItem(
+    //         onTap: () => controller.selectedScouterString.value = scouterName,
+    //         value: ScoutersHelper.shared.scouters.indexOf(scouterName),
+    //         child: Text(scouterName),
+    //       ),
+    //   ],
+    //   onChanged: (_) {},
+    //   value: ScoutersHelper.shared.scouters
+    //       .indexOf(controller.selectedScouterString.value),
+    // );
   }
 }

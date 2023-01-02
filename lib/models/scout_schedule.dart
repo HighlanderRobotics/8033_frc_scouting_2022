@@ -1,13 +1,27 @@
+import '../helpers/scouters_schedule_helper.dart';
 import 'scout_shift.dart';
 
-class ScoutSchedule {
+class ScoutersSchedule {
   int version;
   List<ScoutShift> shifts;
 
-  ScoutSchedule(this.version, this.shifts);
+  List<ScoutShift> filterShiftsWithScouter(String scouterName) {
+    if (scouterName.isEmpty) {
+      return shifts;
+    }
 
-  factory ScoutSchedule.fromJson(Map<String, dynamic> json) {
-    return ScoutSchedule(
+    final shiftsWithScouter = ScoutersScheduleHelper
+        .shared.matchSchedule.value.shifts
+        .where((element) => element.scouters.contains(scouterName))
+        .toList();
+
+    return shiftsWithScouter;
+  }
+
+  ScoutersSchedule(this.version, this.shifts);
+
+  factory ScoutersSchedule.fromJson(Map<String, dynamic> json) {
+    return ScoutersSchedule(
       json["version"],
       json["shifts"]
           .map<ScoutShift>((match) => ScoutShift.fromJson(match))
@@ -27,8 +41,8 @@ class ScoutSchedule {
   }
 
   ScoutShift getShiftFor({required int matchNumber}) {
-    return shifts
-        .firstWhere((element) => element.matchRange.contains(matchNumber));
+    return shifts.firstWhere(
+        (element) => element.matchShiftDuration.range.contains(matchNumber));
   }
 
   int indexOfScouter({required int matchNumber, required String scouter}) =>

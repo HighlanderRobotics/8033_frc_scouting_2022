@@ -5,7 +5,7 @@ import '../helpers/match_schedule_helper.dart';
 import '../helpers/scouters_helper.dart';
 import '../helpers/scouters_schedule_helper.dart';
 
-enum ServiceStatus { up, error, inProgress, unknown }
+enum ServiceStatus { error, inProgress, up, unknown }
 
 extension ServiceStatusExtension on ServiceStatus {
   String get longString {
@@ -54,7 +54,7 @@ class Service {
 abstract class ServiceClass {
   var service = Service().obs;
 
-  void forceRefresh();
+  void refresh({required bool networkRefresh});
 }
 
 class ServiceHelper {
@@ -64,14 +64,15 @@ class ServiceHelper {
     ScoutersScheduleHelper.shared,
   ].obs;
 
-  void forceRefreshAll() {
+  void refreshAll({bool networkRefresh = false}) {
     for (var service in services) {
-      service.forceRefresh();
+      service.refresh(networkRefresh: networkRefresh);
     }
   }
 
-  void forceRefresh(ServiceClass service) {
-    service.forceRefresh();
+  void forceRefresh(
+      {required ServiceClass service, bool networkRefresh = false}) {
+    service.refresh(networkRefresh: networkRefresh);
   }
 
   bool get isAllUp {

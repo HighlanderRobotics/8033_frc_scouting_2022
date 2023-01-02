@@ -9,10 +9,13 @@ import '../networking/scouting_server_api.dart';
 class ScoutersHelper extends ServiceClass {
   static ScoutersHelper shared = ScoutersHelper();
 
+  // A reactive list to hold all the Scouter Objects
+  RxList<String> scouters = <String>[].obs;
+
   @override
-  void forceRefresh() {
+  void refresh({bool networkRefresh = false}) {
     try {
-      getAllScouters(forceFetch: true);
+      getAllScouters(networkRefresh: networkRefresh);
     } catch (_) {}
   }
 
@@ -20,19 +23,16 @@ class ScoutersHelper extends ServiceClass {
     service = Service(name: "Scouters").obs;
   }
 
-  // A reactive list to hold all the Scouter Objects
-  RxList<String> scouters = <String>[].obs;
-
   // fetch scouters from storage
   // if invalid or is asked to forceFetch, it fetches the new values to the server
   // Additionally, it saves the new fetch to localStorage
-  Future getAllScouters({bool forceFetch = false}) async {
+  Future getAllScouters({bool networkRefresh = false}) async {
     try {
       service.value
           .updateStatus(ServiceStatus.inProgress, "Fetching from localStorage");
       final localStorageScouters = await _getParsedLocalStorageScouters();
 
-      if (forceFetch || localStorageScouters.isEmpty) {
+      if (networkRefresh || localStorageScouters.isEmpty) {
         scouters.value = await ScoutingServerAPI.getScouters();
         _saveParsedLocalStorageScouters(scouters.toList());
         service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
@@ -43,8 +43,8 @@ class ScoutersHelper extends ServiceClass {
       }
     } catch (e) {
       print("Error Occured: $e");
-      service.value
-          .updateStatus(ServiceStatus.error, "Network error: ${e.toString()}");
+      service.value.updateStatus(
+          ServiceStatus.error, "Network or parsing error: ${e.toString()}");
     }
   }
 

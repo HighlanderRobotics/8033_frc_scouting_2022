@@ -8,7 +8,7 @@ enum ClimbingChallenge {
 }
 
 extension ClimbingChallengeExtension on ClimbingChallenge {
-  String get name {
+  String get localizedDescription {
     switch (this) {
       case ClimbingChallenge.didntClimb:
         return "Didn't climb";
@@ -27,6 +27,7 @@ extension ClimbingChallengeExtension on ClimbingChallenge {
     }
   }
 
-  static ClimbingChallenge fromName(String name) =>
-      ClimbingChallenge.values.firstWhere((element) => element.name == name);
+  static ClimbingChallenge fromLocalizedDescription(String name) =>
+      ClimbingChallenge.values
+          .firstWhere((element) => element.localizedDescription == name);
 }

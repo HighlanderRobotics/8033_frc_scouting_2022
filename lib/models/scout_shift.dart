@@ -1,21 +1,26 @@
-import 'int_closed_range.dart';
+import 'package:frc_scouting/models/int_closed_range.dart';
 
 class ScoutShift {
-  IntClosedRange matchRange;
+  MatchScoutShiftDuration matchShiftDuration;
   List<String> scouters;
 
-  ScoutShift(this.matchRange, this.scouters);
+  ScoutShift(this.matchShiftDuration, this.scouters);
 
   factory ScoutShift.fromJson(Map<String, dynamic> json) {
     return ScoutShift(
-      IntClosedRange(json["start"], json["end"]),
+      MatchScoutShiftDuration(json["start"], json["end"]),
       json["scouts"].map<String>((scouter) => scouter.toString()).toList(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "start": matchRange.start,
-        "end": matchRange.end,
+        "start": matchShiftDuration.start.rawMatchNumber,
+        "end": matchShiftDuration.end.rawMatchNumber,
         "scouts": scouters.map((scouter) => scouter.toString()).toList(),
       };
+
+  String get localizedDescription =>
+      "${matchShiftDuration.start.eventType.name} ${matchShiftDuration.start.eventTypeMatchNumber}";
+
+  int scouterPlacement(String scouterName) => scouters.indexOf(scouterName);
 }

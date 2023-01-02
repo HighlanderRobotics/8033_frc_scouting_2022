@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:frc_scouting/models/scout_shift.dart';
 import 'package:frc_scouting/networking/scouting_server_api.dart';
 import 'package:get/get.dart';
 
+import '../models/match_event.dart';
 import '../models/service.dart';
 import 'shared_preferences_helper.dart';
 
@@ -11,9 +13,9 @@ class MatchScheduleHelper extends ServiceClass {
   late RxList<MatchEvent> matchSchedule;
 
   @override
-  void forceRefresh() {
+  void refresh({bool networkRefresh = false}) {
     try {
-      getMatchSchedule(tournamentKey: "2022cc", forceFetch: true);
+      getMatchSchedule(tournamentKey: "2022cc", networkRefresh: networkRefresh);
     } catch (_) {}
   }
 
@@ -22,13 +24,32 @@ class MatchScheduleHelper extends ServiceClass {
     service = Service(name: "Match Schedule").obs;
   }
 
+  List<MatchEvent> getMatchesFromShifts(
+      {required List<ScoutShift> shifts, required String scouterName}) {
+    var matches = <MatchEvent>[];
+
+    for (var match in matchSchedule) {
+      for (var shift in shifts) {
+        if (match.key.contains("_${shift.scouterPlacement(scouterName)}") &&
+            shift.matchShiftDuration.range.contains(match.matchNumber)) {
+          matches.add(match);
+          break;
+        }
+      }
+    }
+
+    matches.sort((a, b) => a.matchNumber.compareTo(b.matchNumber));
+
+    return matches;
+  }
+
   Future getMatchSchedule(
-      {bool forceFetch = false, required String tournamentKey}) async {
+      {bool networkRefresh = false, required String tournamentKey}) async {
     service.value
         .updateStatus(ServiceStatus.inProgress, "Fetching from localStorage");
     final localStorageSchedule = await _getParsedLocalStorageSchedule();
 
-    if (localStorageSchedule.isNotEmpty || forceFetch) {
+    if (localStorageSchedule.isEmpty || networkRefresh) {
       try {
         matchSchedule.value =
             await ScoutingServerAPI.getMatches(tournamentKey: tournamentKey);
@@ -37,7 +58,7 @@ class MatchScheduleHelper extends ServiceClass {
         service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
       } catch (e) {
         service.value.updateStatus(
-            ServiceStatus.error, "Network error: ${e.toString()}");
+            ServiceStatus.error, "Network or parsing error: ${e.toString()}");
       }
     } else {
       matchSchedule.value = localStorageSchedule;

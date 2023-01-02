@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/models/match_data/match_data.dart';
+import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
+import 'package:frc_scouting/models/event_types.dart';
+import 'package:frc_scouting/models/match_data.dart';
+import 'package:frc_scouting/models/match_type.dart';
 import 'package:frc_scouting/models/previous_matches_info.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
 
+import '../models/match_event.dart';
 import 'view_qrcode_screen.dart';
 import '../services/getx_business_logic.dart';
 
@@ -69,7 +73,7 @@ class PreviousMatchesScreen extends StatelessWidget {
       child: ListTile(
         leading: Icon(
             filter == MatchFilterType.date ? Icons.today : Icons.cloud_off),
-        title: Text(filter.name),
+        title: Text(filter.localizedDescription),
         trailing: controller.matchFilterType.value == filter
             ? const Icon(Icons.check)
             : null,
@@ -130,8 +134,8 @@ class PreviousMatchesScreen extends StatelessWidget {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                  "Deleted ${matchData.matchNumber.value}"),
+                              content:
+                                  Text("Deleted ${matchData.matchKey.value}"),
                               action: SnackBarAction(
                                 label: "Undo",
                                 onPressed: () {
@@ -206,9 +210,10 @@ class PreviousMatchesScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Match: ${matchData.matchNumber.toString()}"),
+                  Text(MatchEvent.formatMatchKey(matchData.matchKey.value),
+                      style: const TextStyle(fontSize: 18)),
                   Text(
-                    "Team: ${matchData.teamNumber.toString()}",
+                    "Team: ${matchData.teamNumber.value}",
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   Text(
@@ -248,9 +253,8 @@ class PreviousMatchesScreen extends StatelessWidget {
 
     if (txtEditingController.text.isNotEmpty) {
       filteredMatches.value = previousMatches.validMatches
-          .where((element) => element.matchNumber
-              .toString()
-              .contains(txtEditingController.text))
+          .where((element) =>
+              element.matchKey.toString().contains(txtEditingController.text))
           .toList();
     } else {
       filteredMatches.value = previousMatches.validMatches;

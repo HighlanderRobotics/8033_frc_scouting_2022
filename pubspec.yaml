@@ -51,6 +51,7 @@ dependencies:
   protobuf: ^2.1.0
   implicitly_animated_reorderable_list: ^0.4.2
   flutter_dotenv: ^5.0.2
+  dropdown_search: ^5.0.5
 
 dev_dependencies:
   flutter_test:

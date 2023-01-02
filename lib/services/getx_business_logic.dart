@@ -14,13 +14,13 @@ import '../getx_screens/home_screen.dart';
 import '../persistence/files_helper.dart';
 import '../models/event.dart';
 import '../models/event_types.dart';
-import '../models/match_data/match_data.dart';
+import '../models/match_data.dart';
 import '../helpers/scouters_helper.dart';
 
 enum MatchFilterType { date, hasNotUploaded }
 
 extension MatchFilterTypeExtension on MatchFilterType {
-  String get name {
+  String get localizedDescription {
     switch (this) {
       case MatchFilterType.date:
         return "Date";
@@ -38,8 +38,6 @@ class BusinessLogicController extends GetxController {
   final FilesHelper documentsHelper = FilesHelper();
   var matchFilterType = MatchFilterType.date.obs;
   final ServiceHelper serviceHelper = ServiceHelper();
-
-  var selectedScouterString = "".obs;
 
   @override
   void onInit() async {
@@ -101,10 +99,10 @@ class BusinessLogicController extends GetxController {
     );
   }
 
-  bool isHeaderDataValid(String selectedScouterString) {
-    return matchData.matchNumber.value != 0 &&
-        matchData.teamNumber.value != 0 &&
-        selectedScouterString != "";
+  bool isHeaderDataValid() {
+    return matchData.matchKey.value.isNotEmpty &&
+        matchData.scouterName.isNotEmpty &&
+        matchData.teamNumber.value != 0;
   }
 
   void addEvent(EventType eventType, GameScreenPosition position) {

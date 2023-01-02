@@ -37,14 +37,12 @@ class PostGameScreen extends StatelessWidget {
             (() => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          climbingChallengeDropdown(),
-                          const SizedBox(width: 20),
-                          roleDropdownButton(),
-                        ],
-                      ),
+                    Row(
+                      children: [
+                        climbingChallengeDropdown(),
+                        const SizedBox(width: 20),
+                        roleDropdownButton(),
+                      ],
                     ),
                     if (controller.matchData.robotRole.value ==
                             RobotRole.defense ||
@@ -53,6 +51,8 @@ class PostGameScreen extends StatelessWidget {
                     TextField(
                       decoration: const InputDecoration(hintText: "Notes"),
                       controller: notesController,
+                      onChanged: (value) =>
+                          controller.matchData.notes.value = value,
                     ),
                     Center(
                       child: Padding(
@@ -78,7 +78,7 @@ class PostGameScreen extends StatelessWidget {
             ])
               DropdownMenuItem(
                 value: role,
-                child: Text(role.name),
+                child: Text(role.localizedDescription),
                 onTap: () => controller.matchData.robotRole.value = role,
               ),
           ],
@@ -172,16 +172,16 @@ class PostGameScreen extends StatelessWidget {
       items: [
         for (var challenge in climbingChallenges)
           DropdownMenuItem(
-            value: challenge.name,
+            value: challenge.localizedDescription,
             child: Text(
-              challenge.name,
+              challenge.localizedDescription,
             ),
           ),
       ],
       onChanged: (newValue) => controller.matchData.challengeResult.value =
-          ClimbingChallengeExtension.fromName(
-              newValue ?? ClimbingChallenge.didntClimb.name),
-      value: controller.matchData.challengeResult.value.name,
+          ClimbingChallengeExtension.fromLocalizedDescription(
+              newValue ?? ClimbingChallenge.didntClimb.localizedDescription),
+      value: controller.matchData.challengeResult.value.localizedDescription,
     );
   }
 

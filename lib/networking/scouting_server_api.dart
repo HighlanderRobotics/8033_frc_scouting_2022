@@ -1,15 +1,18 @@
 import 'dart:convert';
 
-import '../models/match_data/match_data.dart';
+import 'package:flutter/material.dart';
+
+import '../models/match_data.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/match_event.dart';
 import '../models/scout_schedule.dart';
 
 class ScoutingServerAPI {
   // An Internal function to make a network request and decode the json
   // into a List of Scouter objects
 
-  static const String _host = "http://localhost:4000";
+  static const String _host = "https://4585-75-111-65-32.ngrok.io";
 
   static Future<List<String>> getScouters() async {
     try {
@@ -30,13 +33,13 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<ScoutSchedule> getScoutersSchedule() async {
+  static Future<ScoutersSchedule> getScoutersSchedule() async {
     try {
       var response =
           await http.get(Uri.parse('$_host/API/manager/getScoutersSchedule'));
 
       if (response.statusCode == 200) {
-        return ScoutSchedule.fromJson(jsonDecode(response.body));
+        return ScoutersSchedule.fromJson(jsonDecode(response.body));
       } else {
         print("Non-200 response");
         throw Exception("Non-200 response");
@@ -50,9 +53,9 @@ class ScoutingServerAPI {
   static Future addScoutReport(MatchData matchData) async {
     try {
       final response = await http.post(
-        Uri.parse('$_host/addscoutreport'),
+        Uri.parse('$_host/API/manager/addScoutReport'),
         headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
+          'Content-Type': 'application/json',
         },
         body: jsonEncode(matchData.toJson()),
       );
@@ -69,7 +72,8 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<List<MatchEvent>> getMatches({required String tournamentKey}) async {
+  static Future<List<MatchEvent>> getMatches(
+      {required String tournamentKey}) async {
     final response = await http.get(Uri.parse(
         '$_host/API/manager/getMatches/?tournamentKey=$tournamentKey'));
 
@@ -87,61 +91,26 @@ class ScoutingServerAPI {
       throw Exception("Non-200 response");
     }
   }
-}
 
-class MatchEvent {
-  String key;
-  String gameKey;
-  int matchNumber;
-  String teamKey;
-  MatchType matchType;
+  static Future<List<bool>> isMatchesScouted(
+      {required String tournamentKey,
+      required String scouterName,
+      required List<String> matchKeys}) async {
+    final response = await http.get(Uri.parse(
+        "$_host/API/manager/isMatchesScouted?tournamentKey=2022cc&scouterName=Jacob Trentini&matchKeys=['2022cc_qm1', '2022cc_qm2', '2022cc_qm3'"));
 
-  MatchEvent(
-      {required this.key,
-      required this.gameKey,
-      required this.matchNumber,
-      required this.teamKey,
-      required this.matchType});
-
-  factory MatchEvent.fromJson(Map<String, dynamic> json) {
-    return MatchEvent(
-        key: json['key'],
-        gameKey: json['gameKey'],
-        matchNumber: json['matchNumber'],
-        teamKey: json['teamKey'],
-        matchType: MatchTypeExtension.fromShortName(json['matchType']));
-  }
-
-  Map<String, dynamic> toJson() => {
-        'key': key,
-        'gameKey': gameKey,
-        'matchNumber': matchNumber,
-        'teamKey': teamKey,
-        'matchType': matchType.shortName,
-      };
-}
-
-enum MatchType { qualification, elimination }
-
-extension MatchTypeExtension on MatchType {
-  String get name {
-    switch (this) {
-      case MatchType.qualification:
-        return "Qualification";
-      case MatchType.elimination:
-        return "Elimination";
+    if (response.statusCode == 200) {
+      try {
+        return (jsonDecode(response.body) as List<dynamic>)
+            .map((match) => match["status"] as bool)
+            .toList();
+      } catch (e) {
+        print("Failed decoding isMatchesScouted - network response error: $e");
+        throw Exception(e);
+      }
+    } else {
+      print("Non-200 response");
+      throw Exception("Non-200 response");
     }
   }
-
-  String get shortName {
-    switch (this) {
-      case MatchType.qualification:
-        return "qm";
-      case MatchType.elimination:
-        return "ef";
-    }
-  }
-
-  static MatchType fromShortName(String shortName) =>
-      MatchType.values.firstWhere((element) => element.shortName == shortName);
 }
