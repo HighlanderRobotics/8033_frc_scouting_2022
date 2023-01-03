@@ -9,6 +9,15 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 # ScoutReport Enum Conversions
 
+## GameScreenPosition
+```dart
+hub = 0
+tarmac = 1
+launchpad = 2
+fieldEnd = 3
+field = 4
+```
+
 ## EventType
 
 ```dart
