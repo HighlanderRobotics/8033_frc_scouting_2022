@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-
 import '../models/match_data.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,7 +10,7 @@ class ScoutingServerAPI {
   // An Internal function to make a network request and decode the json
   // into a List of Scouter objects
 
-  static const String _host = "https://4585-75-111-65-32.ngrok.io";
+  static const String _host = "https://08d0-2600-387-f-4817-00-2.ngrok.io";
 
   static Future<List<String>> getScouters() async {
     try {
@@ -24,8 +22,8 @@ class ScoutingServerAPI {
             .map((e) => e.toString())
             .toList();
       } else {
-        print("Non-200 response");
-        throw Exception("Non-200 response");
+        print("HTTP ${response.statusCode} response");
+        throw Exception("HTTP ${response.statusCode} response");
       }
     } catch (e) {
       print("Failed decoding scouters - network response error: $e");
@@ -41,8 +39,8 @@ class ScoutingServerAPI {
       if (response.statusCode == 200) {
         return ScoutersSchedule.fromJson(jsonDecode(response.body));
       } else {
-        print("Non-200 response");
-        throw Exception("Non-200 response");
+        print("HTTP ${response.statusCode} response");
+        throw Exception("HTTP ${response.statusCode} response");
       }
     } catch (e) {
       print("Failed decoding scouters schedule - network response error $e");
@@ -57,14 +55,14 @@ class ScoutingServerAPI {
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(matchData.toJson()),
+        body: jsonEncode(matchData.toJson(includesCloudStatus: false)),
       );
 
       if (response.statusCode == 200) {
         print("Successfully added scout report");
       } else {
-        print("Non-200 response");
-        throw Exception("Non-200 response");
+        print("HTTP ${response.statusCode} response");
+        throw Exception("HTTP ${response.statusCode} response");
       }
     } catch (e) {
       print("Failed adding scout report - network response error $e");
@@ -79,16 +77,25 @@ class ScoutingServerAPI {
 
     if (response.statusCode == 200) {
       try {
-        return (jsonDecode(response.body) as List<dynamic>)
-            .map((match) => MatchEvent.fromJson(match))
-            .toList();
+        final jsonMap = jsonDecode(response.body) as List<dynamic>;
+        var matches = <MatchEvent>[];
+
+        for (final jsonObject in jsonMap) {
+          try {
+            matches.add(MatchEvent.fromJson(jsonObject));
+          } catch (e) {
+            print(e.toString());
+          }
+        }
+
+        return matches;
       } catch (e) {
         print("Failed decoding matches - network response error: $e");
         throw Exception(e);
       }
     } else {
-      print("Non-200 response");
-      throw Exception("Non-200 response");
+      print("HTTP ${response.statusCode} response");
+      throw Exception("HTTP ${response.statusCode} response");
     }
   }
 
@@ -109,8 +116,8 @@ class ScoutingServerAPI {
         throw Exception(e);
       }
     } else {
-      print("Non-200 response");
-      throw Exception("Non-200 response");
+      print("HTTP ${response.statusCode} response");
+      throw Exception("HTTP ${response.statusCode} response");
     }
   }
 }

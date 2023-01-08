@@ -5,6 +5,7 @@ import 'package:frc_scouting/networking/scouting_server_api.dart';
 import 'package:get/get.dart';
 
 import '../models/match_event.dart';
+import '../models/match_type.dart';
 import '../models/service.dart';
 import 'shared_preferences_helper.dart';
 
@@ -31,14 +32,24 @@ class MatchScheduleHelper extends ServiceClass {
     for (var match in matchSchedule) {
       for (var shift in shifts) {
         if (match.key.contains("_${shift.scouterPlacement(scouterName)}") &&
-            shift.matchShiftDuration.range.contains(match.matchNumber)) {
+            shift.matchShiftDuration.range
+                .contains(match.matchKey.matchNumber)) {
           matches.add(match);
           break;
         }
       }
     }
 
-    matches.sort((a, b) => a.matchNumber.compareTo(b.matchNumber));
+    for (final matchType in MatchType.values) {
+      final filteredMatches = matches
+          .where((match) => match.matchKey.matchType == matchType)
+          .toList();
+      filteredMatches.sort(
+          (a, b) => a.matchKey.matchNumber.compareTo(b.matchKey.matchNumber));
+
+      matches.removeWhere((match) => match.matchKey.matchType == matchType);
+      matches.addAll(filteredMatches);
+    }
 
     return matches;
   }
@@ -93,7 +104,7 @@ class MatchScheduleHelper extends ServiceClass {
 
   MatchEvent getMatchEvent(
           {required int matchNumber, required int scouterId}) =>
-      matchSchedule[matchSchedule
-              .indexWhere((element) => element.matchNumber == matchNumber) +
+      matchSchedule[matchSchedule.indexWhere(
+              (element) => element.matchKey.matchNumber == matchNumber) +
           scouterId];
 }

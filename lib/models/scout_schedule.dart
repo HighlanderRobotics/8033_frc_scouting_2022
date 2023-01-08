@@ -7,15 +7,14 @@ class ScoutersSchedule {
 
   List<ScoutShift> filterShiftsWithScouter(String scouterName) {
     if (scouterName.isEmpty) {
-      return shifts;
+      return this.shifts;
     }
 
-    final shiftsWithScouter = ScoutersScheduleHelper
-        .shared.matchSchedule.value.shifts
+    var shifts = ScoutersScheduleHelper.shared.matchSchedule.value.shifts
         .where((element) => element.scouters.contains(scouterName))
         .toList();
 
-    return shiftsWithScouter;
+    return shifts;
   }
 
   ScoutersSchedule(this.version, this.shifts);

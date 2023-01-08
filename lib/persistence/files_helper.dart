@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:path_provider/path_provider.dart';
 
 import '../models/match_data.dart';
 import '../models/previous_matches_info.dart';
+import '../networking/scouting_server_api.dart';
 
 class FilesHelper {
   late Directory directory;
@@ -17,12 +17,14 @@ class FilesHelper {
   Future<bool> saveMatchData(MatchData matchData) async {
     await _writeToFile(matchData);
 
-    // TODO: try to upload to Server?
+    try {
+      await ScoutingServerAPI.addScoutReport(matchData);
+      matchData.hasSavedToCloud.value = true;
+    } catch (e) {
+      matchData.hasSavedToCloud.value = false;
+    }
 
-    // TODO: Get saved statuses from server
-    matchData.hasNotSavedToCloud.value = Random().nextBool();
-
-    return matchData.hasNotSavedToCloud.value;
+    return matchData.hasSavedToCloud.value;
   }
 
   Future<void> _writeToFile(MatchData matchData) async {
@@ -31,7 +33,7 @@ class FilesHelper {
     var filePath = "$path/frc-${matchData.uuid}.json";
     print("Writing to file: $filePath");
     File file = File(filePath);
-    file.writeAsString(jsonEncode(matchData.toJson()));
+    file.writeAsString(jsonEncode(matchData.toJson(includesCloudStatus: true)));
     print("Successfully wrote to file: $filePath");
   }
 

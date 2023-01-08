@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
 import 'package:frc_scouting/models/climbing_challenge.dart';
@@ -9,15 +7,6 @@ import 'package:get/get.dart';
 import '../services/getx_business_logic.dart';
 
 class PostGameScreen extends StatelessWidget {
-  List<ClimbingChallenge> climbingChallenges = [
-    ClimbingChallenge.didntClimb,
-    ClimbingChallenge.failedClimb,
-    ClimbingChallenge.bottomBar,
-    ClimbingChallenge.middleBar,
-    ClimbingChallenge.highBar,
-    ClimbingChallenge.traversal,
-  ];
-
   final notesController = TextEditingController();
 
   final BusinessLogicController controller = Get.find();
@@ -140,7 +129,7 @@ class PostGameScreen extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: 70,
+              height: 100,
               child: GridView.count(
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: 1,
@@ -170,7 +159,7 @@ class PostGameScreen extends StatelessWidget {
   DropdownButton<String> climbingChallengeDropdown() {
     return DropdownButton(
       items: [
-        for (var challenge in climbingChallenges)
+        for (var challenge in ClimbingChallenge.values)
           DropdownMenuItem(
             value: challenge.localizedDescription,
             child: Text(
@@ -188,21 +177,17 @@ class PostGameScreen extends StatelessWidget {
   ElevatedButton showQrCodeButton() {
     return ElevatedButton(
       onPressed: () async {
-        // if (!controller.isPostGameDataValid()) {
-        //   Get.snackbar(
-        //     "Invalid Post Game Data",
-        //     "Please select a climbing challenge",
-        //     snackPosition: SnackPosition.BOTTOM,
-        //   );
-        // } else {
-        if (await controller.documentsHelper
-            .saveMatchData(controller.matchData)) {
-          Get.snackbar(
-            "Upload Successful",
-            "Match has uploaded to cloud",
-            snackPosition: SnackPosition.BOTTOM,
-          );
-        }
+        final uploadResult = await controller.documentsHelper
+            .saveMatchData(controller.matchData);
+
+        Get.snackbar(
+          "Upload ${uploadResult ? "Successful" : "Unsuccessful"}",
+          uploadResult
+              ? "The match has been uploaded to the server"
+              : "The match could not be uploaded to the server. Please try again later in the Previous Matches Screen",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+
         Get.to(() => QrCodeScreen(
             matchQrCodes:
                 controller.separateEventsToQrCodes(controller.matchData),

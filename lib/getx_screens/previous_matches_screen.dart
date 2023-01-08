@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
-import 'package:frc_scouting/models/event_types.dart';
 import 'package:frc_scouting/models/match_data.dart';
-import 'package:frc_scouting/models/match_type.dart';
 import 'package:frc_scouting/models/previous_matches_info.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
 
-import '../models/match_event.dart';
+import '../models/match_key.dart';
 import 'view_qrcode_screen.dart';
 import '../services/getx_business_logic.dart';
 
@@ -28,15 +25,17 @@ class PreviousMatchesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Files Directory: ${controller.documentsHelper.directory.path}");
-    print(
-        "Number of valid matches: ${previousMatches.validMatches.length} out of ${previousMatches.validMatches.length + previousMatches.numberOfInvalidFiles}");
+    Future.delayed(3.seconds, () {
+      print("Files Directory: ${controller.documentsHelper.directory.path}");
+      print(
+          "Number of valid matches: ${previousMatches.validMatches.length} out of ${previousMatches.validMatches.length + previousMatches.numberOfInvalidFiles}");
 
-    filteredMatches.value = previousMatches.validMatches;
+      filteredMatches.value = previousMatches.validMatches;
 
-    controller.resetOrientation();
+      controller.resetOrientation();
 
-    filterSearchResultsAndUpdateList();
+      filterSearchResultsAndUpdateList();
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -83,9 +82,9 @@ class PreviousMatchesScreen extends StatelessWidget {
 
   Widget previousMatchesListView() {
     return WillPopScope(
-      onWillPop: () {
+      onWillPop: () async {
         Get.closeCurrentSnackbar();
-        return Future.value(true);
+        return true;
       },
       child: Column(children: [
         Padding(
@@ -180,7 +179,8 @@ class PreviousMatchesScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: matchRowView(matchData, context),
+                        child:
+                            matchRowView(matchData, matchData.matchKey.value!),
                       )),
                 );
               },
@@ -193,7 +193,7 @@ class PreviousMatchesScreen extends StatelessWidget {
     );
   }
 
-  Widget matchRowView(MatchData matchData, BuildContext context) {
+  Widget matchRowView(MatchData matchData, MatchKey matchKey) {
     return InkWell(
       child: ListTile(
         onTap: () => Get.to(
@@ -210,7 +210,7 @@ class PreviousMatchesScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(MatchEvent.formatMatchKey(matchData.matchKey.value),
+                  Text(matchKey.localizedDescription,
                       style: const TextStyle(fontSize: 18)),
                   Text(
                     "Team: ${matchData.teamNumber.value}",
@@ -228,7 +228,7 @@ class PreviousMatchesScreen extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(matchData.hasNotSavedToCloud.isTrue
+            Icon(matchData.hasSavedToCloud.isTrue
                 ? Icons.cloud_done
                 : Icons.cloud_off),
             const SizedBox(width: 10),
@@ -266,7 +266,7 @@ class PreviousMatchesScreen extends StatelessWidget {
         break;
       case MatchFilterType.hasNotUploaded:
         for (MatchData matchData in filteredMatches.toList()) {
-          if (matchData.hasNotSavedToCloud.isFalse) {
+          if (matchData.hasSavedToCloud.isFalse) {
             filteredMatches.remove(matchData);
             filteredMatches.insert(0, matchData);
           }

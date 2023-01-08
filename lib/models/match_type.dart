@@ -1,40 +1,62 @@
-enum MatchType { semiFinals, quarterFinals, eliminationFinals, finals }
+enum MatchType {
+  qualifierMatch,
+  quarterFinals,
+  eliminationFinals,
+  semiFinals,
+  finals,
+  grandFinals
+}
 
 extension MatchTypeExtension on MatchType {
   String get localizedDescription {
     switch (this) {
-      case MatchType.semiFinals:
-        return "Semi-Finals";
+      case MatchType.qualifierMatch:
+        return "Qualification";
       case MatchType.quarterFinals:
-        return "Quarter-Finals";
+        return "Quarter Finals";
       case MatchType.eliminationFinals:
         return "Elimination Finals";
+      case MatchType.semiFinals:
+        return "Semi Finals";
       case MatchType.finals:
         return "Finals";
+      case MatchType.grandFinals:
+        return "Grand Finals";
     }
   }
 
   String get shortName {
     switch (this) {
-      case MatchType.semiFinals:
-        return "sf";
+      case MatchType.qualifierMatch:
+        return "qm";
       case MatchType.quarterFinals:
         return "qf";
       case MatchType.eliminationFinals:
         return "ef";
+      case MatchType.semiFinals:
+        return "sf";
       case MatchType.finals:
         return "f";
+      case MatchType.grandFinals:
+        return "gf";
     }
   }
 
-  static MatchType fromRawMatchNumber(int rawMatchNumber) => rawMatchNumber > 65
-      ? MatchType.quarterFinals
-      : MatchType.eliminationFinals;
+  static MatchType fromShortName(String shortName) {
+    try {
+      return MatchType.values
+          .firstWhere((element) => element.shortName == shortName);
+    } catch (e) {
+      throw Exception("Invalid match type");
+    }
+  }
 
-  static MatchType fromShortName(String shortName) =>
-      MatchType.values.firstWhere((element) => element.shortName == shortName);
-
-  static MatchType fromLocalizedDescription(String matchType) =>
-      MatchType.values
+  static MatchType fromLocalizedDescription(String matchType) {
+    try {
+      return MatchType.values
           .firstWhere((element) => element.localizedDescription == matchType);
+    } catch (e) {
+      throw Exception("Invalid match type");
+    }
+  }
 }

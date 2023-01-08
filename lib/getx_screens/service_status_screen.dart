@@ -14,46 +14,48 @@ class ServiceStatusScreen extends StatelessWidget {
         title: const Text("Service Status"),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Text("Manage all the services this app depends on."),
-            ),
-            Obx(
-              () => ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: controller.serviceHelper.services.length,
-                  itemBuilder: (context, index) =>
-                      serviceRow(controller.serviceHelper.services[index])),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 30.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      child: const Text("Network Refresh All"),
-                      onPressed: () {
-                        controller.serviceHelper
-                            .refreshAll(networkRefresh: true);
-                      },
-                    ),
-                    ElevatedButton(
-                      child: const Text("Storage Refresh All"),
-                      onPressed: () {
-                        controller.serviceHelper
-                            .refreshAll(networkRefresh: false);
-                      },
-                    ),
-                  ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Text("Manage all the services this app depends on."),
+              ),
+              Obx(
+                () => ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.serviceHelper.services.length,
+                    itemBuilder: (context, index) =>
+                        serviceRow(controller.serviceHelper.services[index])),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 30.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        child: const Text("Network Refresh All"),
+                        onPressed: () {
+                          controller.serviceHelper
+                              .refreshAll(networkRefresh: true);
+                        },
+                      ),
+                      ElevatedButton(
+                        child: const Text("Storage Refresh All"),
+                        onPressed: () {
+                          controller.serviceHelper
+                              .refreshAll(networkRefresh: false);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

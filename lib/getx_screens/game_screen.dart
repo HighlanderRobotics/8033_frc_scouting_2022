@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/post_game_screen.dart';
@@ -12,43 +14,39 @@ class GameScreen extends StatelessWidget {
 
   var robotIsMobile = true.obs;
 
-  void move() {
-    Get.to(() => PostGameScreen());
-  }
-
   final GlobalKey draggableFABParentKey = GlobalKey();
 
-  double calculateBoxDecorationHeight() {
-    return (Get.mediaQuery.size.width * 1620) / 3240;
-  }
+  double calculateBoxDecorationHeight() =>
+      (Get.mediaQuery.size.width * 1620) / 3240;
 
-  double calculateDeviceVerticalEdgeToBoxDecorationHeight() {
-    return (Get.mediaQuery.size.height - calculateBoxDecorationHeight()) / 2;
-  }
+  double calculateDeviceVerticalEdgeToBoxDecorationHeight() =>
+      (Get.mediaQuery.size.height - calculateBoxDecorationHeight()) / 2;
+
+  Timer timer = Timer(150.seconds, () => Get.to(() => PostGameScreen()));
 
   @override
   Widget build(BuildContext context) {
-    print("width: ${Get.mediaQuery.size.width}");
-    print("height: ${Get.mediaQuery.size.height}");
-    print("DecorationImage Height: ${calculateBoxDecorationHeight()}");
-    print(
-        "Top to DecorationImage Height: ${calculateDeviceVerticalEdgeToBoxDecorationHeight()}");
-
-    // controller.startGameScreenTimer();
     controller.setLandscapeOrientation();
-    controller.startGameScreenTimer();
 
-    return Scaffold(
-      body: paintWidget(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: null,
-        mini: true,
-        child: GestureDetector(
-          child: const Icon(Icons.arrow_forward),
-          onLongPress: () {
-            HapticFeedback.heavyImpact();
-            move();
-          },
+    return WillPopScope(
+      onWillPop: () async {
+        timer.cancel();
+        controller.resetOrientation();
+        return true;
+      },
+      child: Scaffold(
+        body: paintWidget(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: null,
+          mini: true,
+          child: GestureDetector(
+            child: const Icon(Icons.arrow_forward),
+            onLongPress: () {
+              timer.cancel();
+              HapticFeedback.heavyImpact();
+              Get.to(() => PostGameScreen());
+            },
+          ),
         ),
       ),
     );
@@ -164,12 +162,15 @@ class GameScreen extends StatelessWidget {
 
     return Obx(
       () => DraggableFloatingActionButton(
-        initialOffset: const Offset(10, 10),
+        initialOffset: const Offset(20, 20),
         parentKey: draggableFABParentKey,
         onPressed: () {
-          controller.addEvent(
-              EventType.robotBecomesImmobile, GameScreenPosition.none);
           robotIsMobile.toggle();
+          controller.addEvent(
+              robotIsMobile.isTrue
+                  ? EventType.robotBecomesMobile
+                  : EventType.robotBecomesImmobile,
+              GameScreenPosition.none);
         },
         child: Container(
           width: radius,

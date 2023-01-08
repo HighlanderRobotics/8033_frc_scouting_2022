@@ -1,4 +1,4 @@
-import 'package:frc_scouting/models/int_closed_range.dart';
+import 'package:frc_scouting/models/match_scout_shift_duration.dart';
 
 class ScoutShift {
   MatchScoutShiftDuration matchShiftDuration;
@@ -8,19 +8,20 @@ class ScoutShift {
 
   factory ScoutShift.fromJson(Map<String, dynamic> json) {
     return ScoutShift(
-      MatchScoutShiftDuration(json["start"], json["end"]),
+      MatchScoutShiftDuration(
+          json["start"], json["end"], json["startKey"], json["endKey"]),
       json["scouts"].map<String>((scouter) => scouter.toString()).toList(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "start": matchShiftDuration.start.rawMatchNumber,
-        "end": matchShiftDuration.end.rawMatchNumber,
+        "startKey": matchShiftDuration.startTime.matchKey.shortMatchKey,
+        "endKey": matchShiftDuration.endTime.matchKey.shortMatchKey,
         "scouts": scouters.map((scouter) => scouter.toString()).toList(),
       };
 
   String get localizedDescription =>
-      "${matchShiftDuration.start.eventType.name} ${matchShiftDuration.start.eventTypeMatchNumber}";
+      matchShiftDuration.startTime.matchKey.localizedDescription;
 
   int scouterPlacement(String scouterName) => scouters.indexOf(scouterName);
 }

@@ -1,6 +1,8 @@
 import 'dart:math';
 
-import '../networking/scouting_server_api.dart';
+import 'package:frc_scouting/helpers/match_schedule_helper.dart';
+import 'package:frc_scouting/models/match_key.dart';
+
 import 'climbing_challenge.dart';
 import 'event_key.dart';
 import 'event.dart';
@@ -13,7 +15,7 @@ import 'robot_roles.dart';
 class MatchData {
   var uuid = const Uuid().v4();
   late Rx<CompetitionKey> competitionKey;
-  var matchKey = "".obs;
+  Rx<MatchKey?> matchKey = null.obs;
   var teamNumber = 0.obs;
   var scouterName = "".obs;
   var startTime = DateTime.now();
@@ -23,10 +25,16 @@ class MatchData {
   var defenseFrequencyRating = 0.obs;
   var notes = "".obs;
   var challengeResult = ClimbingChallenge.didntClimb.obs;
-  var hasNotSavedToCloud = false.obs;
+  var hasSavedToCloud = false.obs;
 
-  String getKey(int scouterPlacement) =>
-      "${competitionKey.value}_${matchKey.value}_$scouterPlacement";
+  String get key {
+    if (matchKey != null.obs) {
+      final match = MatchScheduleHelper.shared.matchSchedule
+          .firstWhere((match) => match.matchKey == matchKey.value);
+      return match.key;
+    }
+    return "";
+  }
 
   MatchData({required CompetitionKey competitionKey})
       : competitionKey = competitionKey.obs;
@@ -34,28 +42,27 @@ class MatchData {
   MatchData.fromJson(Map<String, dynamic> json) {
     try {
       uuid = json['uuid'];
-      competitionKey = Rx(CompetitionKey.values
-          .firstWhere((e) => e.eventCode == json['competitionKey']));
-      matchKey = RxString(json['matchKey']);
-      teamNumber = RxInt(json['teamNumber']);
-      scouterName = RxString(json['scouterName']);
+      competitionKey = CompetitionKey.values
+          .firstWhere((e) => e.eventCode == json['competitionKey'])
+          .obs;
+      matchKey = MatchKey.fromJsonUsingShortKeyForm(json['matchKey']).obs;
+      teamNumber = json['teamNumber'].obs;
+      scouterName = json['scouterName'].obs;
       startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']);
-      events =
-          RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
+      events = json['events'].map<Event>((e) => Event.fromJson(e)).toList().obs;
       robotRole = RobotRole.values[(json['robotRole'])].obs;
       notes = RxString(json['notes']);
       challengeResult = ClimbingChallenge.values[json['challengeResult']].obs;
-      // ClimbingChallengeExtension.fromLocalizedDescription(json['challengeResult']).obs;
-      hasNotSavedToCloud = Random().nextBool().obs; // TODO: Implement this
+      hasSavedToCloud = json["hasSavedToCloud"].obs ?? false.obs;
     } on TypeError {
       throw Exception("Invalid JSON");
     }
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson({required bool includesCloudStatus}) => {
         'uuid': uuid,
         'competitionKey': competitionKey.value.eventCode,
-        'matchKey': matchKey.value,
+        'matchKey': matchKey.value?.shortMatchKey,
         'teamNumber': teamNumber.value,
         'scouterName': scouterName.value,
         'startTime': startTime.millisecondsSinceEpoch,
@@ -65,5 +72,6 @@ class MatchData {
         'defenseFrequencyRating': defenseFrequencyRating.value,
         'notes': notes.value,
         'challengeResult': challengeResult.value.index,
+        if (includesCloudStatus) 'hasSavedToCloud': hasSavedToCloud.value,
       };
 }

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/getx_screens/post_game_screen.dart';
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/models/event_key.dart';
@@ -45,21 +44,33 @@ class BusinessLogicController extends GetxController {
     matchData = MatchData(competitionKey: selectedEvent);
 
     try {
-      MatchScheduleHelper.shared
-          .getMatchSchedule(tournamentKey: selectedEvent.eventCode);
+      MatchScheduleHelper.shared.getMatchSchedule(
+          tournamentKey: selectedEvent.eventCode, networkRefresh: true);
     } catch (e) {
+      try {
+        MatchScheduleHelper.shared.getMatchSchedule(
+            tournamentKey: selectedEvent.eventCode, networkRefresh: false);
+      } catch (e) {}
       print("Error getting event schedule: $e");
     }
 
     try {
-      ScoutersHelper.shared.getAllScouters();
+      ScoutersHelper.shared.getAllScouters(networkRefresh: true);
     } catch (e) {
+      try {
+        ScoutersHelper.shared.getAllScouters(networkRefresh: false);
+      } catch (e) {}
       print("Error getting scouters: $e");
     }
 
     try {
-      ScoutersScheduleHelper.shared.getScoutersSchedule();
+      ScoutersScheduleHelper.shared.getScoutersSchedule(networkRefresh: true);
     } catch (e) {
+      try {
+        ScoutersScheduleHelper.shared
+            .getScoutersSchedule(networkRefresh: false);
+      } catch (e) {}
+
       print("Error getting scouters schedule: $e");
     }
 
@@ -99,12 +110,6 @@ class BusinessLogicController extends GetxController {
     );
   }
 
-  bool isHeaderDataValid() {
-    return matchData.matchKey.value.isNotEmpty &&
-        matchData.scouterName.isNotEmpty &&
-        matchData.teamNumber.value != 0;
-  }
-
   void addEvent(EventType eventType, GameScreenPosition position) {
     final event = Event(
         timeSince: DateTime.now().millisecondsSinceEpoch -
@@ -117,7 +122,7 @@ class BusinessLogicController extends GetxController {
 
   List<String> separateEventsToQrCodes(MatchData matchData) {
     List<String> qrCodes = [];
-    var jsonString = jsonEncode(matchData.toJson());
+    var jsonString = jsonEncode(matchData.toJson(includesCloudStatus: true));
     const qrCodeLimit = 2500;
 
     print("jsonString length: ${jsonString.length}");
@@ -135,18 +140,10 @@ class BusinessLogicController extends GetxController {
   }
 
   void reset() {
+    // ignore: unnecessary_string_interpolations
+    final scouterName = "${matchData.scouterName.value}";
     matchData = MatchData(competitionKey: selectedEvent);
+    matchData.scouterName.value = scouterName;
     Get.offAll(() => HomeScreen());
-  }
-
-  Future<void> startGameScreenTimer() async {
-    matchData.startTime = DateTime.now();
-
-    await Future.delayed(
-      const Duration(seconds: 125),
-      () => Get.to(
-        PostGameScreen(),
-      ),
-    );
   }
 }

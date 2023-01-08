@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -63,6 +64,7 @@ class ScanQrCodeScreen extends StatelessWidget {
               if (barcode.rawValue == null) {
                 debugPrint('Failed to scan Barcode');
               } else {
+                HapticFeedback.lightImpact();
                 final String code = barcode.rawValue!;
                 Get.back(result: code);
               }
