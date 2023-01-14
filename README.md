@@ -1,4 +1,4 @@
-# 8033 FRC Scouting for 2022
+# 8033 FRC Collection App 2023
 
 To build, open folder in VSCode or Android Studio. Make sure to build using dart and flutter dev tools (Use flutter doctor to check status of flutter). 
 
