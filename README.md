@@ -25,7 +25,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 8 = Entered Community
 9 = Exited Community
 
-10  = Becomes Immobile
+10 = Becomes Immobile
 11 = Becomes Mobile
 ```
 
