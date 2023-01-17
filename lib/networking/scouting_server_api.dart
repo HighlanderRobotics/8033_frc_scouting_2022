@@ -10,12 +10,13 @@ class ScoutingServerAPI {
   // An Internal function to make a network request and decode the json
   // into a List of Scouter objects
 
-  static const String _host = "https://08d0-2600-387-f-4817-00-2.ngrok.io";
+  // ignore: prefer_final_fields
+  static String _serverAuthority = "https://b725-2600-387-c-6c10-00-b.ngrok.io";
 
   static Future<List<String>> getScouters() async {
     try {
-      var response =
-          await http.get(Uri.parse('$_host/API/manager/getScouters'));
+      var response = await http
+          .get(Uri.parse('$_serverAuthority/API/manager/getScouters'));
 
       if (response.statusCode == 200) {
         return (jsonDecode(response.body) as List<dynamic>)
@@ -33,8 +34,8 @@ class ScoutingServerAPI {
 
   static Future<ScoutersSchedule> getScoutersSchedule() async {
     try {
-      var response =
-          await http.get(Uri.parse('$_host/API/manager/getScoutersSchedule'));
+      var response = await http
+          .get(Uri.parse('$_serverAuthority/API/manager/getScoutersSchedule'));
 
       if (response.statusCode == 200) {
         return ScoutersSchedule.fromJson(jsonDecode(response.body));
@@ -51,7 +52,7 @@ class ScoutingServerAPI {
   static Future addScoutReport(MatchData matchData) async {
     try {
       final response = await http.post(
-        Uri.parse('$_host/API/manager/addScoutReport'),
+        Uri.parse('$_serverAuthority/API/manager/addScoutReport'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
@@ -70,10 +71,11 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<List<MatchEvent>> getMatches(
-      {required String tournamentKey}) async {
+  static Future<List<MatchEvent>> getMatches({
+    required String tournamentKey,
+  }) async {
     final response = await http.get(Uri.parse(
-        '$_host/API/manager/getMatches/?tournamentKey=$tournamentKey'));
+        '$_serverAuthority/API/manager/getMatches/?tournamentKey=$tournamentKey'));
 
     if (response.statusCode == 200) {
       try {
@@ -99,12 +101,13 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<List<bool>> isMatchesScouted(
-      {required String tournamentKey,
-      required String scouterName,
-      required List<String> matchKeys}) async {
+  static Future<List<bool>> isMatchesScouted({
+    required String tournamentKey,
+    required String scouterName,
+    required List<String> matchKeys,
+  }) async {
     final response = await http.get(Uri.parse(
-        "$_host/API/manager/isMatchesScouted?tournamentKey=2022cc&scouterName=Jacob Trentini&matchKeys=['2022cc_qm1', '2022cc_qm2', '2022cc_qm3'"));
+        "$_serverAuthority/API/manager/isMatchesScouted?tournamentKey=2022cc&scouterName=Jacob Trentini&matchKeys=['2022cc_qm1', '2022cc_qm2', '2022cc_qm3'"));
 
     if (response.statusCode == 200) {
       try {

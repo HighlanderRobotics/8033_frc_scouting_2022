@@ -21,7 +21,9 @@ class PreviousMatchesScreen extends StatelessWidget {
 
   var isDismissThresholdReached = false.obs;
 
-  PreviousMatchesScreen({required this.previousMatches});
+  PreviousMatchesScreen({
+    required this.previousMatches,
+  });
 
   @override
   Widget build(BuildContext context) {

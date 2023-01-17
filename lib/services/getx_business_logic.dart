@@ -6,6 +6,7 @@ import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/models/event_key.dart';
 import 'package:frc_scouting/models/game_screen_positions.dart';
+import 'package:frc_scouting/models/robot_action.dart';
 import 'package:frc_scouting/models/service.dart';
 import 'package:get/get.dart';
 
@@ -110,14 +111,16 @@ class BusinessLogicController extends GetxController {
     );
   }
 
-  void addEvent(EventType eventType, GameScreenPosition position) {
+  void addEventToTimeline(RobotAction robotAction, int position) {
     final event = Event(
-        timeSince: DateTime.now().millisecondsSinceEpoch -
-            matchData.startTime.millisecondsSinceEpoch,
-        type: eventType,
-        position: position);
+      timeSince: DateTime.now().millisecondsSinceEpoch -
+          matchData.startTime.millisecondsSinceEpoch,
+      action: robotAction,
+      position: position,
+    );
+
     matchData.events.add(event);
-    event.printEvent();
+    event.debugLogDescription();
   }
 
   List<String> separateEventsToQrCodes(MatchData matchData) {

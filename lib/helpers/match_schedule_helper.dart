@@ -25,8 +25,10 @@ class MatchScheduleHelper extends ServiceClass {
     service = Service(name: "Match Schedule").obs;
   }
 
-  List<MatchEvent> getMatchesFromShifts(
-      {required List<ScoutShift> shifts, required String scouterName}) {
+  List<MatchEvent> getMatchesFromShifts({
+    required List<ScoutShift> shifts,
+    required String scouterName,
+  }) {
     var matches = <MatchEvent>[];
 
     for (var match in matchSchedule) {
@@ -102,8 +104,10 @@ class MatchScheduleHelper extends ServiceClass {
         SharedPreferenceKeys.matchSchedule.toShortString(), scheduleJson);
   }
 
-  MatchEvent getMatchEvent(
-          {required int matchNumber, required int scouterId}) =>
+  MatchEvent getMatchEvent({
+    required int matchNumber,
+    required int scouterId,
+  }) =>
       matchSchedule[matchSchedule.indexWhere(
               (element) => element.matchKey.matchNumber == matchNumber) +
           scouterId];

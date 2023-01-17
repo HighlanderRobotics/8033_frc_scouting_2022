@@ -2,27 +2,51 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/getx_screens/post_game_screen.dart';
-import 'package:frc_scouting/models/game_screen_positions.dart';
+import 'package:frc_scouting/models/levels.dart';
 import 'package:get/get.dart';
-import '../models/event_types.dart';
+
+import '../models/robot_action.dart';
+import 'post_game_screen.dart';
+
 import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
 
 class GameScreen extends StatelessWidget {
-  final BusinessLogicController controller = Get.find();
+  GameScreen({bool isInteractive = true}) {
+    isInteractive = isInteractive;
+  }
 
-  var robotIsMobile = true.obs;
+  final isInteractive = false;
+
+  final BusinessLogicController controller = Get.find();
 
   final GlobalKey draggableFABParentKey = GlobalKey();
 
-  double calculateBoxDecorationHeight() =>
-      (Get.mediaQuery.size.width * 1620) / 3240;
+  double getBoxDecorationHeight() => (Get.mediaQuery.size.width * 1620) / 3240;
 
-  double calculateDeviceVerticalEdgeToBoxDecorationHeight() =>
-      (Get.mediaQuery.size.height - calculateBoxDecorationHeight()) / 2;
+  double getDeviceVerticalEdgeToBoxDecorationHeight() =>
+      (Get.mediaQuery.size.height - getBoxDecorationHeight()) / 2;
 
   Timer timer = Timer(150.seconds, () => Get.to(() => PostGameScreen()));
+
+  final double positionedWidgetMultiplier = 0.22;
+
+  final communityEntranceRectangleValues = [
+    [0.345, 0.130],
+    [0.480, 0.355],
+    [0.840, 0.130],
+  ];
+
+  final fieldCargoCircleValues = [
+    [0.408, 0.530],
+    [0.408, 0.385],
+    [0.408, 0.235],
+    [0.408, 0.087],
+    [0.553, 0.530],
+    [0.553, 0.385],
+    [0.553, 0.235],
+    [0.553, 0.087],
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +83,7 @@ class GameScreen extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         image: const DecorationImage(
-          image: AssetImage('assets/field22.png'),
+          image: AssetImage('assets/field23.png'),
           alignment: Alignment.center,
           fit: BoxFit.fitWidth,
         ),
@@ -68,79 +92,18 @@ class GameScreen extends StatelessWidget {
       child: Stack(
         key: draggableFABParentKey,
         children: [
-          InkWell(
-            child: SizedBox(
-              width: Get.mediaQuery.size.width,
-              height: Get.mediaQuery.size.height,
-            ),
-            onTap: () {
-              controller.addEvent(
-                  EventType.shotSuccess, GameScreenPosition.field);
-              HapticFeedback.lightImpact();
-            },
-            onLongPress: () {
-              controller.addEvent(EventType.shotMiss, GameScreenPosition.field);
-              HapticFeedback.heavyImpact();
-            },
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: createCustomEventWidget(
-              GameScreenPosition.hub,
-              BoxShape.circle,
-              calculateBoxDecorationHeight(),
-              calculateBoxDecorationHeight(),
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: createCustomEventWidget(
-              GameScreenPosition.tarmac,
-              BoxShape.circle,
-              calculateBoxDecorationHeight() * 0.5,
-              calculateBoxDecorationHeight() * 0.5,
-            ),
-          ),
-          Positioned(
-            top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
-            left: 0,
-            child: createCustomEventWidget(
-                GameScreenPosition.fieldEnd,
-                BoxShape.rectangle,
-                calculateBoxDecorationHeight() * 0.4,
-                Get.mediaQuery.size.height -
-                    (calculateDeviceVerticalEdgeToBoxDecorationHeight() * 2)),
-          ),
-          Positioned(
-            top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
-            right: 0,
-            child: createCustomEventWidget(
-                GameScreenPosition.fieldEnd,
-                BoxShape.rectangle,
-                calculateBoxDecorationHeight() * 0.4,
-                Get.mediaQuery.size.height -
-                    (calculateDeviceVerticalEdgeToBoxDecorationHeight() * 2)),
-          ),
-          Positioned(
-            top: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
-            left: Get.mediaQuery.size.width * 0.14,
-            child: createCustomEventWidget(
-              GameScreenPosition.launchpad,
-              BoxShape.rectangle,
-              calculateBoxDecorationHeight() * 0.25,
-              calculateBoxDecorationHeight() * 0.5,
-            ),
-          ),
-          Positioned(
-            bottom: calculateDeviceVerticalEdgeToBoxDecorationHeight(),
-            right: Get.mediaQuery.size.width * 0.14,
-            child: createCustomEventWidget(
-              GameScreenPosition.launchpad,
-              BoxShape.rectangle,
-              calculateBoxDecorationHeight() * 0.25,
-              calculateBoxDecorationHeight() * 0.5,
-            ),
-          ),
+          // TODO: Get position from GameScreen Configration
+
+          for (final index in gridRectangleValues)
+            createGridRectangle(index: index, isLeft: true),
+          // for (final index in gridRectangleValues)
+          //   createGridRectangle(index: index, isLeft: false),
+          for (final index in communityEntranceRectangleValues)
+            communityEntranceMethodRectangle(index: index, isLeft: true),
+          // for (final index in communityEntranceRectangleValues)
+          // communityEntranceMethodRectangle(index: index, isLeft: false),
+          for (final index in fieldCargoCircleValues)
+            createFieldCargoCircle(index),
           draggableFloatingActionButtonWidget(),
           Align(
             alignment: Alignment.topCenter,
@@ -148,7 +111,10 @@ class GameScreen extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 "Team: ${controller.matchData.teamNumber.toString()}",
-                style: const TextStyle(color: Colors.white, fontSize: 20),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    shadows: [Shadow(blurRadius: 15)]),
               ),
             ),
           ),
@@ -157,74 +123,184 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  Widget draggableFloatingActionButtonWidget() {
-    const radius = 50.0;
+  Positioned communityEntranceMethodRectangle({
+    required List<double> index,
+    required bool isLeft,
+  }) {
+    return Positioned(
+      top: getDeviceVerticalEdgeToBoxDecorationHeight() +
+          getBoxDecorationHeight() * index[0],
+      left: isLeft ? Get.mediaQuery.size.width * 0.185 : null,
+      right: isLeft ? null : Get.mediaQuery.size.width * 0.185,
+      child: InkWell(
+        child: createCustomEventWidget(
+            boxShape: BoxShape.rectangle,
+            width: getBoxDecorationHeight() * 0.2,
+            height: getBoxDecorationHeight() * index[1]),
+        onTap: () {},
+      ),
+    );
+  }
 
-    return Obx(
-      () => DraggableFloatingActionButton(
-        initialOffset: const Offset(20, 20),
-        parentKey: draggableFABParentKey,
-        onPressed: () {
-          robotIsMobile.toggle();
-          controller.addEvent(
-              robotIsMobile.isTrue
-                  ? EventType.robotBecomesMobile
-                  : EventType.robotBecomesImmobile,
-              GameScreenPosition.none);
-        },
-        child: Container(
-          width: radius,
-          height: radius,
-          decoration: ShapeDecoration(
-            shadows: [
-              BoxShadow(
-                color: Colors.orange.shade300,
-                blurRadius: 15,
-                spreadRadius: 1,
-              ),
-            ],
-            shape: const CircleBorder(),
-            color: Colors.orange.shade200,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                robotIsMobile.isTrue
-                    ? "assets/robotEnabledIcon.png"
-                    : "assets/robotDisabledIcon.png",
-              )
-            ],
+  Positioned createFieldCargoCircle(List<double> index) {
+    return Positioned(
+        left: Get.mediaQuery.size.width * index[0],
+        bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
+            getBoxDecorationHeight() * index[1],
+        child: InkWell(
+          child: createCustomEventWidget(
+              boxShape: BoxShape.circle,
+              width: Get.mediaQuery.size.width * 0.04,
+              height: Get.mediaQuery.size.width * 0.04),
+          onTap: () {},
+        ));
+  }
+
+  final List<int> gridRectangleValues = [0, 1, 2];
+
+  Positioned createGridRectangle({
+    required bool isLeft,
+    required int index,
+  }) {
+    return Positioned(
+      bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
+          getBoxDecorationHeight() * index * 0.22,
+      left: isLeft ? 0 : null,
+      right: isLeft ? null : 0,
+      child: InkWell(
+        child: createCustomEventWidget(
+          boxShape: BoxShape.rectangle,
+          width: getBoxDecorationHeight() * 0.35,
+          height: getBoxDecorationHeight() * 0.218,
+        ),
+        onTap: () => showDialog(
+          context: Get.context!,
+          builder: (context) => createGameImmersiveDialog(
+            widgets: Level.values
+                .map((e) => levelDialogRectangle(e, index))
+                .toList(),
+            index: index + 1,
+            context: context,
           ),
         ),
       ),
     );
   }
 
-  InkWell createCustomEventWidget(GameScreenPosition position,
-      BoxShape boxShape, double width, double height) {
-    return InkWell(
+  Widget draggableFloatingActionButtonWidget() {
+    return DraggableFloatingActionButton(
+      initialOffset: const Offset(20, 20),
+      parentKey: draggableFABParentKey,
+      onPressed: () {
+        controller.addEventToTimeline(RobotAction.pickedUpCone, 0);
+      },
       child: Container(
-        width: width,
-        height: height,
-        alignment: Alignment.center,
-        decoration: ShapeDecoration(
-          shape: boxShape == BoxShape.circle
-              ? const CircleBorder()
-              : const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget createCustomEventWidget({
+    required BoxShape boxShape,
+    required double width,
+    required double height,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        shape: boxShape == BoxShape.circle
+            ? const CircleBorder()
+            : const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+        color: Colors.deepPurple.withOpacity(0.5),
+      ),
+    );
+  }
+
+  final Map<int, List<int>> indexToLevelAssociations = {
+    1: [1, 4, 7],
+    2: [2, 5, 8],
+    3: [3, 6, 9],
+  };
+
+  Dialog createGameImmersiveDialog({
+    required List<Widget> widgets,
+    required int index,
+    required BuildContext context,
+  }) {
+    return Dialog(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 8, right: 8),
+          child: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.close),
+          ),
+        ),
+        Expanded(
+          child: Row(
+            children: widgets,
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+extension LevelDialog on GameScreen {
+  Widget levelDialogRectangle(Level level, int index) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(
+          bottom: 15.0,
+          left: 15.0,
+          right: 15.0,
+          top: 5,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20.0),
+          onTap: () {
+            controller.addEventToTimeline(RobotAction.placedObject,
+                indexToLevelAssociations[index]![level.index]);
+            Navigator.of(Get.context!).pop();
+          },
+          child: Container(
+            decoration: BoxDecoration(
+                color: level.displayColor,
+                borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Level ${level.index}",
+                        style: const TextStyle(
+                          fontSize: 30,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        )),
+                    const SizedBox(height: 50),
+                    Text(level.localizedDescription,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        )),
+                  ],
                 ),
-          color: Colors.deepPurple.withOpacity(0.5),
+              ],
+            ),
+          ),
         ),
       ),
-      onTap: () {
-        controller.addEvent(EventType.shotSuccess, position);
-        HapticFeedback.lightImpact();
-      },
-      onLongPress: () {
-        controller.addEvent(EventType.shotMiss, position);
-        HapticFeedback.heavyImpact();
-      },
     );
   }
 }

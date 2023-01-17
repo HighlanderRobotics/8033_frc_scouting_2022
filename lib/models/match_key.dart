@@ -6,7 +6,10 @@ class MatchKey {
   late MatchType matchType;
   late int matchNumber;
 
-  MatchKey({required this.matchType, required this.matchNumber});
+  MatchKey({
+    required this.matchType,
+    required this.matchNumber,
+  });
 
   // like 'qf1'
   MatchKey.fromJsonUsingShortKeyForm(String jsonString) {

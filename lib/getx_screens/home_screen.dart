@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Collection App 2022"),
+        title: const Text("Collection App 2023"),
         actions: [
           Obx(
             () => IconButton(
@@ -134,21 +134,22 @@ class HomeScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
-                      onPressed: !(controller.matchData.matchKey != null.obs &&
-                              controller.matchData.scouterName.isNotEmpty &&
-                              controller.matchData.teamNumber.value != 0)
-                          ? null
-                          : () async {
-                              if (controller.currentOrientation !=
-                                  Orientation.landscape) {
-                                controller.setLandscapeOrientation();
-                                await Future.delayed(
-                                    const Duration(milliseconds: 700));
-                              }
+                      onPressed:
+                          !(controller.matchData.matchKey.value != null &&
+                                  controller.matchData.scouterName.isNotEmpty &&
+                                  controller.matchData.teamNumber.value != 0)
+                              ? null
+                              : () async {
+                                  if (controller.currentOrientation !=
+                                      Orientation.landscape) {
+                                    controller.setLandscapeOrientation();
+                                    await Future.delayed(
+                                        const Duration(milliseconds: 700));
+                                  }
 
-                              Get.to(() => GameScreen());
-                            },
-                      child: const Text(
+                                  Get.to(() => GameScreen());
+                                },
+                      child: Text(
                         "Start",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),

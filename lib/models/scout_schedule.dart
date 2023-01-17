@@ -39,11 +39,16 @@ class ScoutersSchedule {
     return shifts.any((match) => match.scouters.contains(scouter));
   }
 
-  ScoutShift getShiftFor({required int matchNumber}) {
+  ScoutShift getShiftFor({
+    required int matchNumber,
+  }) {
     return shifts.firstWhere(
         (element) => element.matchShiftDuration.range.contains(matchNumber));
   }
 
-  int indexOfScouter({required int matchNumber, required String scouter}) =>
+  int indexOfScouter({
+    required int matchNumber,
+    required String scouter,
+  }) =>
       getShiftFor(matchNumber: matchNumber).scouters.indexOf(scouter);
 }

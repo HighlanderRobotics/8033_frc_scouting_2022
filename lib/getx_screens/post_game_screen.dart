@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
 import 'package:frc_scouting/models/climbing_challenge.dart';
@@ -24,29 +25,27 @@ class PostGameScreen extends StatelessWidget {
         child: SafeArea(
           child: Obx(
             (() => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        climbingChallengeDropdown(),
-                        const SizedBox(width: 20),
-                        roleDropdownButton(),
-                      ],
-                    ),
-                    if (controller.matchData.robotRole.value ==
-                            RobotRole.defense ||
-                        controller.matchData.robotRole.value == RobotRole.mix)
-                      defenseRatingRadioButtons(),
+                    climbingChallengeDropdown(),
+                    const SizedBox(height: 20),
+                    robotRoleDropdown(),
+                    const SizedBox(height: 20),
                     TextField(
-                      decoration: const InputDecoration(hintText: "Notes"),
+                      decoration: const InputDecoration(
+                        labelText: "Notes",
+                        filled: true,
+                      ),
                       controller: notesController,
-                      onChanged: (value) =>
-                          controller.matchData.notes.value = value,
+                      onChanged: (text) =>
+                          controller.matchData.notes.value = text,
                     ),
                     Center(
                       child: Padding(
                         padding: const EdgeInsets.all(15.0),
-                        child: showQrCodeButton(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: showQrCodeButton(),
+                        ),
                       ),
                     ),
                   ],
@@ -57,120 +56,44 @@ class PostGameScreen extends StatelessWidget {
     );
   }
 
-  Widget roleDropdownButton() {
-    return Obx(() => DropdownButton(
-          items: [
-            for (var role in [
-              RobotRole.offense,
-              RobotRole.defense,
-              RobotRole.mix
-            ])
-              DropdownMenuItem(
-                value: role,
-                child: Text(role.localizedDescription),
-                onTap: () => controller.matchData.robotRole.value = role,
-              ),
-          ],
-          onChanged: (newValue) {
-            if (newValue is RobotRole) {
-              controller.matchData.robotRole.value = newValue;
-            }
-
-            if (newValue == RobotRole.offense) {
-              controller.matchData.overallDefenseRating.value = 0;
-              controller.matchData.defenseFrequencyRating.value = 0;
-            }
-          },
-          value: controller.matchData.robotRole.value,
-        ));
-  }
-
-  Padding defenseRatingRadioButtons() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: Obx(
-        () => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Overall Defense",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ),
-            SizedBox(
-              height: 100,
-              child: GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 1,
-                crossAxisCount: 5,
-                children: [
-                  for (int radioElement in [1, 2, 3, 4, 5])
-                    Column(
-                      children: [
-                        Radio(
-                            value: radioElement,
-                            groupValue:
-                                controller.matchData.overallDefenseRating.value,
-                            onChanged: (value) => controller.matchData
-                                .overallDefenseRating.value = value as int),
-                        Text("$radioElement"),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Defense Frequency",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ),
-            SizedBox(
-              height: 100,
-              child: GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 1,
-                crossAxisCount: 5,
-                children: [
-                  for (int radioElement in [1, 2, 3, 4, 5])
-                    Column(
-                      children: [
-                        Radio(
-                            value: radioElement,
-                            groupValue: controller
-                                .matchData.defenseFrequencyRating.value,
-                            onChanged: (value) => controller.matchData
-                                .defenseFrequencyRating.value = value as int),
-                        Text("$radioElement")
-                      ],
-                    ),
-                ],
-              ),
-            )
-          ],
+  DropdownSearch<ClimbingChallenge> climbingChallengeDropdown() {
+    return DropdownSearch<ClimbingChallenge>(
+      items: ClimbingChallenge.values,
+      itemAsString: (climbingChallenge) =>
+          climbingChallenge.localizedDescription,
+      selectedItem: controller.matchData.challengeResult.value,
+      onChanged: (climbingChallenge) {
+        if (climbingChallenge != null) {
+          controller.matchData.challengeResult.value = climbingChallenge;
+        }
+      },
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Climbing Challenge",
+          border: OutlineInputBorder(),
+          filled: true,
         ),
       ),
     );
   }
 
-  DropdownButton<String> climbingChallengeDropdown() {
-    return DropdownButton(
-      items: [
-        for (var challenge in ClimbingChallenge.values)
-          DropdownMenuItem(
-            value: challenge.localizedDescription,
-            child: Text(
-              challenge.localizedDescription,
-            ),
-          ),
-      ],
-      onChanged: (newValue) => controller.matchData.challengeResult.value =
-          ClimbingChallengeExtension.fromLocalizedDescription(
-              newValue ?? ClimbingChallenge.didntClimb.localizedDescription),
-      value: controller.matchData.challengeResult.value.localizedDescription,
+  DropdownSearch<RobotRole> robotRoleDropdown() {
+    return DropdownSearch<RobotRole>(
+      items: RobotRole.values,
+      itemAsString: (robotRole) => robotRole.localizedDescription,
+      selectedItem: controller.matchData.robotRole.value,
+      onChanged: (robotRole) {
+        if (robotRole != null) {
+          controller.matchData.robotRole.value = robotRole;
+        }
+      },
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Robot Role",
+          border: OutlineInputBorder(),
+          filled: true,
+        ),
+      ),
     );
   }
 
@@ -193,7 +116,17 @@ class PostGameScreen extends StatelessWidget {
                 controller.separateEventsToQrCodes(controller.matchData),
             canGoBack: false));
       },
-      child: const Text("Show QR Code"),
+      child: Padding(
+        padding: const EdgeInsets.all(7.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.qr_code),
+            SizedBox(width: 10),
+            Text("Show QR Code"),
+          ],
+        ),
+      ),
     );
   }
 }

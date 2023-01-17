@@ -4,7 +4,7 @@ extension CompetitionKeyExtension on CompetitionKey {
   String get stringValue {
     switch (this) {
       case CompetitionKey.chezyChamps2022:
-        return 'Chezy Champs 2022';
+        return 'Chezy Champs 2023';
     }
   }
 

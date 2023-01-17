@@ -54,7 +54,9 @@ class Service {
 abstract class ServiceClass {
   var service = Service().obs;
 
-  void refresh({required bool networkRefresh});
+  void refresh({
+    required bool networkRefresh,
+  });
 }
 
 class ServiceHelper {
@@ -70,8 +72,10 @@ class ServiceHelper {
     }
   }
 
-  void forceRefresh(
-      {required ServiceClass service, bool networkRefresh = false}) {
+  void forceRefresh({
+    required ServiceClass service,
+    bool networkRefresh = false,
+  }) {
     service.refresh(networkRefresh: networkRefresh);
   }
 

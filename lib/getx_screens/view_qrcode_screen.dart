@@ -9,7 +9,10 @@ class QrCodeScreen extends StatelessWidget {
   late final List<String> matchQrCodes;
   var canGoBack = false;
 
-  QrCodeScreen({required this.matchQrCodes, required this.canGoBack});
+  QrCodeScreen({
+    required this.matchQrCodes,
+    required this.canGoBack,
+  });
 
   void nextPage() => pageNumber.value =
       (pageNumber.value < matchQrCodes.length - 1) ? pageNumber.value + 1 : 0;

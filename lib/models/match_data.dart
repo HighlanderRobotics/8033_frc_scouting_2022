@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/models/match_key.dart';
 
@@ -21,10 +19,9 @@ class MatchData {
   var startTime = DateTime.now();
   var events = <Event>[].obs;
   var robotRole = RobotRole.offense.obs;
-  var overallDefenseRating = 0.obs;
-  var defenseFrequencyRating = 0.obs;
   var notes = "".obs;
-  var challengeResult = ClimbingChallenge.didntClimb.obs;
+  var autoChallengeResult = ClimbingChallenge.noClimb.obs;
+  var challengeResult = ClimbingChallenge.noClimb.obs;
   var hasSavedToCloud = false.obs;
 
   String get key {
@@ -33,45 +30,44 @@ class MatchData {
           .firstWhere((match) => match.matchKey == matchKey.value);
       return match.key;
     }
+
     return "";
   }
 
-  MatchData({required CompetitionKey competitionKey})
-      : competitionKey = competitionKey.obs;
+  MatchData({
+    required CompetitionKey competitionKey,
+  }) : competitionKey = competitionKey.obs;
 
   MatchData.fromJson(Map<String, dynamic> json) {
-    try {
-      uuid = json['uuid'];
-      competitionKey = CompetitionKey.values
-          .firstWhere((e) => e.eventCode == json['competitionKey'])
-          .obs;
-      matchKey = MatchKey.fromJsonUsingShortKeyForm(json['matchKey']).obs;
-      teamNumber = json['teamNumber'].obs;
-      scouterName = json['scouterName'].obs;
-      startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']);
-      events = json['events'].map<Event>((e) => Event.fromJson(e)).toList().obs;
-      robotRole = RobotRole.values[(json['robotRole'])].obs;
-      notes = RxString(json['notes']);
-      challengeResult = ClimbingChallenge.values[json['challengeResult']].obs;
-      hasSavedToCloud = json["hasSavedToCloud"].obs ?? false.obs;
-    } on TypeError {
-      throw Exception("Invalid JSON");
-    }
+    uuid = json['uuid'];
+    competitionKey = json['competitionKey'].obs;
+    matchKey = json['matchKey'].obs;
+    teamNumber = json['teamNumber'].obs;
+    scouterName = json['scouterName'].obs;
+    startTime = DateTime.parse(json['startTime']);
+    events = json['events'].map<Event>((e) => Event.fromJson(e)).toList().obs;
+    robotRole = json['robotRole'].obs;
+    notes = json['notes'].obs;
+    autoChallengeResult = json['autoChallengeResult'].obs;
+    challengeResult = json['challengeResult'].obs;
+    hasSavedToCloud = json['hasSavedToCloud'].obs;
   }
 
-  Map<String, dynamic> toJson({required bool includesCloudStatus}) => {
+  Map<String, dynamic> toJson({
+    required bool includesCloudStatus,
+  }) =>
+      {
         'uuid': uuid,
         'competitionKey': competitionKey.value.eventCode,
         'matchKey': matchKey.value?.shortMatchKey,
         'teamNumber': teamNumber.value,
         'scouterName': scouterName.value,
-        'startTime': startTime.millisecondsSinceEpoch,
-        'events': events.map((event) => event.toJson()).toList(),
+        'startTime': startTime.microsecondsSinceEpoch,
+        'events': events.map((e) => e.toJson()).toList(),
         'robotRole': robotRole.value.index,
-        'overallDefenseRating': overallDefenseRating.value,
-        'defenseFrequencyRating': defenseFrequencyRating.value,
         'notes': notes.value,
+        'autoChallengeResult': autoChallengeResult.value.index,
         'challengeResult': challengeResult.value.index,
-        if (includesCloudStatus) 'hasSavedToCloud': hasSavedToCloud.value,
+        if (includesCloudStatus) 'hasSavedToCloud': hasSavedToCloud.isTrue,
       };
 }
