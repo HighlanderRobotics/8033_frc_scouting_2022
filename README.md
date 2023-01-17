@@ -4,6 +4,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 # ScoutReport Objects
 
+## Climbing Result
 ```dart
 0 = No Climb
 1 = Supported
@@ -12,8 +13,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 4 = In Community
 ```
 
-## Actions
-
+## Robot Actions
 ```dart
 0 = Picked up Cube
 1 = Picked up Cone
@@ -26,7 +26,6 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 ```
 
 ## Positions
-
 ```dart
 7, 8, 9
 4, 5, 6
