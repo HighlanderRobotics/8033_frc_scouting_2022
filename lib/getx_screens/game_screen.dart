@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:frc_scouting/models/levels.dart';
 import 'package:get/get.dart';
 
+import '../models/object_type.dart';
 import '../models/robot_action.dart';
 import 'post_game_screen.dart';
 
@@ -152,7 +153,17 @@ class GameScreen extends StatelessWidget {
               boxShape: BoxShape.circle,
               width: Get.mediaQuery.size.width * 0.04,
               height: Get.mediaQuery.size.width * 0.04),
-          onTap: () {},
+          onTap: () {
+            showDialog(
+              context: Get.context!,
+              builder: (context) => createGameImmersiveDialog(
+                widgets: ObjectType.values
+                    .map((objectType) => objectDialogRectangle(objectType))
+                    .toList(),
+                context: context,
+              ),
+            );
+          },
         ));
   }
 
@@ -177,9 +188,8 @@ class GameScreen extends StatelessWidget {
           context: Get.context!,
           builder: (context) => createGameImmersiveDialog(
             widgets: Level.values
-                .map((e) => levelDialogRectangle(e, index))
+                .map((level) => levelDialogRectangle(level, index + 1))
                 .toList(),
-            index: index + 1,
             context: context,
           ),
         ),
@@ -192,7 +202,10 @@ class GameScreen extends StatelessWidget {
       initialOffset: const Offset(20, 20),
       parentKey: draggableFABParentKey,
       onPressed: () {
-        controller.addEventToTimeline(RobotAction.pickedUpCone, 0);
+        controller.addEventToTimeline(
+          robotAction: RobotAction.placedObject,
+          position: 0,
+        );
       },
       child: Container(
         decoration: const BoxDecoration(
@@ -232,7 +245,6 @@ class GameScreen extends StatelessWidget {
 
   Dialog createGameImmersiveDialog({
     required List<Widget> widgets,
-    required int index,
     required BuildContext context,
   }) {
     return Dialog(
@@ -245,16 +257,15 @@ class GameScreen extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: Row(
-            children: widgets,
-          ),
-        ),
+            child: Row(
+          children: widgets,
+        )),
       ]),
     );
   }
 }
 
-extension LevelDialog on GameScreen {
+extension GameScreenDialogs on GameScreen {
   Widget levelDialogRectangle(Level level, int index) {
     return Expanded(
       child: Padding(
@@ -267,8 +278,11 @@ extension LevelDialog on GameScreen {
         child: InkWell(
           borderRadius: BorderRadius.circular(20.0),
           onTap: () {
-            controller.addEventToTimeline(RobotAction.placedObject,
-                indexToLevelAssociations[index]![level.index]);
+            level.playHapticFeedback();
+            controller.addEventToTimeline(
+              robotAction: RobotAction.placedObject,
+              position: indexToLevelAssociations[index]![level.index],
+            );
             Navigator.of(Get.context!).pop();
           },
           child: Container(
@@ -298,6 +312,38 @@ extension LevelDialog on GameScreen {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget objectDialogRectangle(ObjectType objectType) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(
+          bottom: 15.0,
+          left: 15.0,
+          right: 15.0,
+          top: 5,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20.0),
+          onTap: () {
+            objectType.playHapticFeedback();
+            controller.addEventToTimeline(
+              robotAction: objectType == ObjectType.cube
+                  ? RobotAction.pickedUpCube
+                  : RobotAction.pickedUpCone,
+              position: 0,
+            );
+            Navigator.of(Get.context!).pop();
+          },
+          child: Container(
+            decoration: BoxDecoration(
+                color: objectType.displayBackgroundColor,
+                borderRadius: const BorderRadius.all(Radius.circular(20.0))),
+            child: Image.asset(objectType.displayImagePath),
           ),
         ),
       ),

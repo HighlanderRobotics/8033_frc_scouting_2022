@@ -111,7 +111,8 @@ class BusinessLogicController extends GetxController {
     );
   }
 
-  void addEventToTimeline(RobotAction robotAction, int position) {
+  void addEventToTimeline(
+      {required RobotAction robotAction, required int position}) {
     final event = Event(
       timeSince: DateTime.now().millisecondsSinceEpoch -
           matchData.startTime.millisecondsSinceEpoch,
