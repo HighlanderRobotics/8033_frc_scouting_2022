@@ -36,4 +36,6 @@ class MatchKey {
       "${matchType.localizedDescription} $matchNumber";
 
   String get shortMatchKey => "${matchType.shortName}$matchNumber";
+
+  bool get isBlank => matchNumber == 0;
 }

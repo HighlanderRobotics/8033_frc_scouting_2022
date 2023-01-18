@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
 import 'package:frc_scouting/models/levels.dart';
 import 'package:get/get.dart';
 
@@ -13,13 +15,20 @@ import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
 
 class GameScreen extends StatelessWidget {
-  GameScreen({bool isInteractive = true}) {
+  GameScreen({
+    bool isInteractive = true,
+    required this.rotation,
+  }) {
     isInteractive = isInteractive;
   }
 
+  final BusinessLogicController controller = Get.find();
+
+  final GameConfigurationRotation rotation;
   final isInteractive = false;
 
-  final BusinessLogicController controller = Get.find();
+  var isRobotCarryingCargo = true.obs;
+  var isCommunityEntranceObjectsHidden = false.obs;
 
   final GlobalKey draggableFABParentKey = GlobalKey();
 
@@ -29,6 +38,7 @@ class GameScreen extends StatelessWidget {
       (Get.mediaQuery.size.height - getBoxDecorationHeight()) / 2;
 
   Timer timer = Timer(150.seconds, () => Get.to(() => PostGameScreen()));
+  Timer autoTimer = Timer(17.seconds, () {});
 
   final double positionedWidgetMultiplier = 0.22;
 
@@ -53,9 +63,19 @@ class GameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     controller.setLandscapeOrientation();
 
+    autoTimer.cancel();
+
+    if (isInteractive) {
+      autoTimer = Timer(17.seconds, () {
+        HapticFeedback.mediumImpact();
+        isCommunityEntranceObjectsHidden.value = true;
+      });
+    }
+
     return WillPopScope(
       onWillPop: () async {
         timer.cancel();
+        autoTimer.cancel();
         controller.resetOrientation();
         return true;
       },
@@ -67,9 +87,12 @@ class GameScreen extends StatelessWidget {
           child: GestureDetector(
             child: const Icon(Icons.arrow_forward),
             onLongPress: () {
-              timer.cancel();
-              HapticFeedback.heavyImpact();
-              Get.to(() => PostGameScreen());
+              if (isInteractive) {
+                timer.cancel();
+                autoTimer.cancel();
+                HapticFeedback.heavyImpact();
+                Get.to(() => PostGameScreen());
+              }
             },
           ),
         ),
@@ -87,73 +110,98 @@ class GameScreen extends StatelessWidget {
           image: AssetImage('assets/field23.png'),
           alignment: Alignment.center,
           fit: BoxFit.fitWidth,
+          opacity: 0.4,
         ),
         color: Colors.grey[850],
       ),
-      child: Stack(
-        key: draggableFABParentKey,
-        children: [
-          // TODO: Get position from GameScreen Configration
+      child: Obx(
+        () => Stack(
+          key: draggableFABParentKey,
+          children: [
+            // TODO: Get rotation direction from GameScreen Configration
 
-          for (final index in gridRectangleValues)
-            createGridRectangle(index: index, isLeft: true),
-          // for (final index in gridRectangleValues)
-          //   createGridRectangle(index: index, isLeft: false),
-          for (final index in communityEntranceRectangleValues)
-            communityEntranceMethodRectangle(index: index, isLeft: true),
-          // for (final index in communityEntranceRectangleValues)
-          // communityEntranceMethodRectangle(index: index, isLeft: false),
-          for (final index in fieldCargoCircleValues)
-            createFieldCargoCircle(index),
-          draggableFloatingActionButtonWidget(),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "Team: ${controller.matchData.teamNumber.toString()}",
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    shadows: [Shadow(blurRadius: 15)]),
+            for (final index in gridRectangleValues)
+              createGridRectangle(index: index),
+
+            if (isCommunityEntranceObjectsHidden.isFalse &&
+                isInteractive == false)
+              for (final index in communityEntranceRectangleValues)
+                createCommunityEntranceMethodRectangle(index: index),
+
+            for (final index in fieldCargoCircleValues)
+              createFieldCargoCircle(index),
+            draggableFloatingActionButtonWidget(),
+            createSubstationRectangle(),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Team: ${controller.matchData.teamNumber.toString()} • ${isCommunityEntranceObjectsHidden.isTrue ? "Teleop" : "Auto"}",
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      shadows: [Shadow(blurRadius: 15)]),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Positioned communityEntranceMethodRectangle({
+  Positioned createCommunityEntranceMethodRectangle({
     required List<double> index,
-    required bool isLeft,
   }) {
     return Positioned(
       top: getDeviceVerticalEdgeToBoxDecorationHeight() +
           getBoxDecorationHeight() * index[0],
-      left: isLeft ? Get.mediaQuery.size.width * 0.185 : null,
-      right: isLeft ? null : Get.mediaQuery.size.width * 0.185,
+      left: rotation == GameConfigurationRotation.left
+          ? Get.mediaQuery.size.width * 0.185
+          : null,
+      right: rotation == GameConfigurationRotation.right
+          ? Get.mediaQuery.size.width * 0.185
+          : null,
       child: InkWell(
-        child: createCustomEventWidget(
+        child: Obx(
+          () => createCustomEventWidget(
             boxShape: BoxShape.rectangle,
             width: getBoxDecorationHeight() * 0.2,
-            height: getBoxDecorationHeight() * index[1]),
-        onTap: () {},
+            height: getBoxDecorationHeight() * index[1],
+            isDisabled: isCommunityEntranceObjectsHidden.isTrue,
+          ),
+        ),
+        onTap: () {
+          if (isCommunityEntranceObjectsHidden.isFalse) {
+            HapticFeedback.mediumImpact();
+            controller.addEventToTimeline(
+              robotAction: RobotAction.crossedCommunityLine,
+              position: 0,
+            );
+          }
+        },
       ),
     );
   }
 
   Positioned createFieldCargoCircle(List<double> index) {
     return Positioned(
-        left: Get.mediaQuery.size.width * index[0],
-        bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
-            getBoxDecorationHeight() * index[1],
-        child: InkWell(
-          child: createCustomEventWidget(
-              boxShape: BoxShape.circle,
-              width: Get.mediaQuery.size.width * 0.04,
-              height: Get.mediaQuery.size.width * 0.04),
-          onTap: () {
+      left: Get.mediaQuery.size.width * index[0] - 4,
+      bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
+          getBoxDecorationHeight() * index[1] -
+          4,
+      child: InkWell(
+        child: Obx(
+          () => createCustomEventWidget(
+            boxShape: BoxShape.circle,
+            width: Get.mediaQuery.size.width * 0.05,
+            height: Get.mediaQuery.size.width * 0.05,
+            isDisabled: isRobotCarryingCargo.isTrue,
+          ),
+        ),
+        onTap: () {
+          if (isRobotCarryingCargo.isFalse || isInteractive == false) {
             showDialog(
               context: Get.context!,
               builder: (context) => createGameImmersiveDialog(
@@ -163,56 +211,111 @@ class GameScreen extends StatelessWidget {
                 context: context,
               ),
             );
-          },
-        ));
+          }
+        },
+      ),
+    );
+  }
+
+  Positioned createSubstationRectangle() {
+    return Positioned(
+      left: rotation == GameConfigurationRotation.left ? 0 : null,
+      right: rotation == GameConfigurationRotation.right ? 0 : null,
+      top: getDeviceVerticalEdgeToBoxDecorationHeight(),
+      child: InkWell(
+        child: Obx(
+          () => createCustomEventWidget(
+            boxShape: BoxShape.rectangle,
+            width: Get.mediaQuery.size.width * 0.2,
+            height: getBoxDecorationHeight() * 0.3,
+            isDisabled: isRobotCarryingCargo.isTrue,
+          ),
+        ),
+        onTap: () {
+          if (isRobotCarryingCargo.isFalse || isInteractive == false) {
+            showDialog(
+              context: Get.context!,
+              builder: (context) => createGameImmersiveDialog(
+                widgets: ObjectType.values
+                    .map((objectType) => objectDialogRectangle(objectType))
+                    .toList(),
+                context: context,
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 
   final List<int> gridRectangleValues = [0, 1, 2];
 
-  Positioned createGridRectangle({
-    required bool isLeft,
-    required int index,
-  }) {
+  Positioned createGridRectangle({required int index}) {
     return Positioned(
       bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
           getBoxDecorationHeight() * index * 0.22,
-      left: isLeft ? 0 : null,
-      right: isLeft ? null : 0,
+      left: rotation == GameConfigurationRotation.left ? 0 : null,
+      right: rotation == GameConfigurationRotation.right ? 0 : null,
       child: InkWell(
-        child: createCustomEventWidget(
-          boxShape: BoxShape.rectangle,
-          width: getBoxDecorationHeight() * 0.35,
-          height: getBoxDecorationHeight() * 0.218,
-        ),
-        onTap: () => showDialog(
-          context: Get.context!,
-          builder: (context) => createGameImmersiveDialog(
-            widgets: Level.values
-                .map((level) => levelDialogRectangle(level, index + 1))
-                .toList(),
-            context: context,
+        child: Obx(
+          () => createCustomEventWidget(
+            boxShape: BoxShape.rectangle,
+            width: getBoxDecorationHeight() * 0.35,
+            height: getBoxDecorationHeight() * 0.218,
+            isDisabled: isRobotCarryingCargo.isFalse,
           ),
         ),
+        onTap: () {
+          if (isRobotCarryingCargo.isTrue) {
+            showDialog(
+              context: Get.context!,
+              builder: (context) => createGameImmersiveDialog(
+                widgets: Level.values
+                    .map((level) => levelDialogRectangle(level, index + 1))
+                    .toList(),
+                context: context,
+              ),
+            );
+          }
+        },
       ),
     );
   }
 
   Widget draggableFloatingActionButtonWidget() {
-    return DraggableFloatingActionButton(
-      initialOffset: const Offset(20, 20),
-      parentKey: draggableFABParentKey,
-      onPressed: () {
-        controller.addEventToTimeline(
-          robotAction: RobotAction.placedObject,
-          position: 0,
-        );
-      },
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
+    return Obx(
+      () => DraggableFloatingActionButton(
+        initialOffset: Offset(Get.mediaQuery.size.width - 70, 20),
+        parentKey: draggableFABParentKey,
+        onPressed: () {},
+        child: InkWell(
+          onTap: () {
+            if (isRobotCarryingCargo.isTrue) {
+              HapticFeedback.mediumImpact();
+              controller.addEventToTimeline(
+                robotAction: RobotAction.droppedObject,
+                position: 0,
+              );
+
+              isRobotCarryingCargo.value = false;
+            }
+          },
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isRobotCarryingCargo.isTrue
+                  ? CupertinoIcons.bag_badge_minus
+                  : CupertinoIcons.bag_badge_plus,
+              size: 35,
+              color: Colors.white,
+            ),
+          ),
         ),
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -221,6 +324,7 @@ class GameScreen extends StatelessWidget {
     required BoxShape boxShape,
     required double width,
     required double height,
+    required bool isDisabled,
   }) {
     return Container(
       width: width,
@@ -232,7 +336,7 @@ class GameScreen extends StatelessWidget {
             : const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
-        color: Colors.deepPurple.withOpacity(0.5),
+        color: Colors.deepPurple.withOpacity(isDisabled ? 0 : 0.8),
       ),
     );
   }
@@ -279,10 +383,13 @@ extension GameScreenDialogs on GameScreen {
           borderRadius: BorderRadius.circular(20.0),
           onTap: () {
             level.playHapticFeedback();
+
             controller.addEventToTimeline(
               robotAction: RobotAction.placedObject,
               position: indexToLevelAssociations[index]![level.index],
             );
+
+            isRobotCarryingCargo.value = false;
             Navigator.of(Get.context!).pop();
           },
           child: Container(
@@ -330,14 +437,19 @@ extension GameScreenDialogs on GameScreen {
         child: InkWell(
           borderRadius: BorderRadius.circular(20.0),
           onTap: () {
-            objectType.playHapticFeedback();
-            controller.addEventToTimeline(
-              robotAction: objectType == ObjectType.cube
-                  ? RobotAction.pickedUpCube
-                  : RobotAction.pickedUpCone,
-              position: 0,
-            );
-            Navigator.of(Get.context!).pop();
+            if (isRobotCarryingCargo.isFalse) {
+              objectType.playHapticFeedback();
+
+              controller.addEventToTimeline(
+                robotAction: objectType == ObjectType.cube
+                    ? RobotAction.pickedUpCube
+                    : RobotAction.pickedUpCone,
+                position: 0,
+              );
+
+              isRobotCarryingCargo.value = true;
+              Navigator.of(Get.context!).pop();
+            }
           },
           child: Container(
             decoration: BoxDecoration(

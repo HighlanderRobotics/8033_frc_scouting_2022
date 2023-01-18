@@ -11,17 +11,39 @@ import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
 import '../models/match_type.dart';
+import 'game_configuration_screen.dart';
 import 'service_status_screen.dart';
 import 'previous_matches_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final teamTxtFieldController = TextEditingController();
-
   late BusinessLogicController controller;
 
   var isCustomMatchSelected = false.obs;
 
   final matchNumberTxtFieldController = TextEditingController();
+
+  void updateMatchNumberTextField(String newValue, {bool forceUpdate = false}) {
+    if (forceUpdate) {
+      matchNumberTxtFieldController.text = newValue;
+    }
+
+    controller.matchData.matchKey.value.matchNumber =
+        int.tryParse(newValue) ?? 0;
+    controller.matchData.matchKey.refresh();
+    controller.refresh();
+  }
+
+  final teamTxtFieldController = TextEditingController();
+
+  void updateTeamTextField(String newValue, {bool forceUpdate = false}) {
+    if (forceUpdate) {
+      teamTxtFieldController.text = newValue;
+    }
+
+    controller.matchData.teamNumber.value = int.tryParse(newValue) ?? 0;
+    controller.matchData.teamNumber.refresh();
+    controller.refresh();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,138 +69,142 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Obx(
-        () => Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              children: [
-                                Obx(
-                                  () => scouterNameDropdown(),
-                                ),
-                                const SizedBox(height: 20),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: const [
-                                          Text("Match Builder"),
-                                          Text(
-                                            "Use only when there is no upcoming matches available to choose from.",
-                                            maxLines: 2,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              Obx(() => scouterNameDropdown()),
+                              const SizedBox(height: 20),
+                              matchBuilderRow(),
+                              const SizedBox(height: 20),
+                              Obx(
+                                () => isCustomMatchSelected.isFalse
+                                    ? matchKeyDropdown()
+                                    : Column(
+                                        children: [
+                                          matchTypeDropdown(),
+                                          const SizedBox(height: 20),
+                                          matchNumberTextField(),
                                         ],
                                       ),
-                                    ),
-                                    Obx(
-                                      () => Switch(
-                                          value: isCustomMatchSelected.value,
-                                          onChanged: (bool switchState) {
-                                            HapticFeedback.lightImpact();
-                                            isCustomMatchSelected.value =
-                                                switchState;
-
-                                            if (!switchState) {
-                                              controller.matchData.matchKey =
-                                                  null.obs;
-                                            }
-                                          }),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                Obx(
-                                  () => isCustomMatchSelected.isFalse
-                                      ? matchKeyDropdown()
-                                      : Column(
-                                          children: [
-                                            matchTypeDropdown(),
-                                            const SizedBox(height: 20),
-                                            matchNumberTextField(),
-                                          ],
-                                        ),
-                                ),
-                                const SizedBox(height: 20),
-                                teamNumberTextField(),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 20),
+                              teamNumberTextField(),
+                            ],
                           ),
-                        ]),
-                  ),
+                        ),
+                      ]),
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 30.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ElevatedButton(
-                      onPressed:
-                          !(controller.matchData.matchKey.value != null &&
-                                  controller.matchData.scouterName.isNotEmpty &&
-                                  controller.matchData.teamNumber.value != 0)
-                              ? null
-                              : () async {
-                                  if (controller.currentOrientation !=
-                                      Orientation.landscape) {
-                                    controller.setLandscapeOrientation();
-                                    await Future.delayed(
-                                        const Duration(milliseconds: 700));
-                                  }
-
-                                  Get.to(() => GameScreen());
-                                },
-                      child: Text(
-                        "Start",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    ElevatedButton(
-                      child: const Text("Previous Matches"),
-                      onPressed: () async {
-                        final matches =
-                            controller.documentsHelper.getPreviousMatches();
-                        Get.to(
-                          () => PreviousMatchesScreen(
-                            previousMatches: matches,
-                          ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 30.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  startButton(),
+                  ElevatedButton(
+                    child: const Text("Previous Matches"),
+                    onPressed: () async {
+                      final matches =
+                          controller.documentsHelper.getPreviousMatches();
+                      Get.to(
+                        () => PreviousMatchesScreen(
+                          previousMatches: matches,
+                        ),
+                      );
+                      if (matches.numberOfInvalidFiles > 0) {
+                        Get.snackbar(
+                          "Ignored Invalid Files",
+                          "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
+                          snackPosition: SnackPosition.BOTTOM,
                         );
-                        if (matches.numberOfInvalidFiles > 0) {
-                          Get.snackbar(
-                            "Ignored Invalid Files",
-                            "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Row matchBuilderRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text("Match Builder"),
+              Text(
+                "Use only when there is no upcoming matches available to choose from.",
+                maxLines: 2,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
         ),
+        Obx(
+          () => Switch(
+              value: isCustomMatchSelected.value,
+              onChanged: (bool switchState) {
+                HapticFeedback.lightImpact();
+                isCustomMatchSelected.value = switchState;
+
+                if (!switchState) {
+                  controller.matchData.matchKey = MatchKey(
+                          matchType: MatchType.qualifierMatch, matchNumber: 0)
+                      .obs;
+                }
+              }),
+        ),
+      ],
+    );
+  }
+
+  Widget startButton() {
+    return ElevatedButton(
+      // controller.matchData.matchKey.value.isBlank ||
+      //         controller.matchData.scouterName.isEmpty ||
+      //         controller.matchData.teamNumber.value == 0
+      //     ? null
+      //     :
+      onPressed: () {
+        // if (controller.currentOrientation != Orientation.landscape) {
+        //   controller.setLandscapeOrientation();
+        //   Future.delayed(
+        //     700.milliseconds,
+        //     () => Get.to(() => GameScreen()),
+        //   );
+        // } else {
+        //   Get.to(() => GameScreen());
+        // }
+        Get.to(() => GameConfigurationScreen());
+      },
+      child: const Text(
+        "Start",
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -202,16 +228,12 @@ class HomeScreen extends StatelessWidget {
                 .shared.matchSchedule
                 .firstWhereOrNull((match) => match.matchKey == matchKey);
 
-            if (controller.matchData.matchKey.value == null) {
-              controller.matchData.matchKey = matchKey.obs;
-            }
-
             if (matchScheduleAndMatchKey != null) {
-              teamTxtFieldController.text =
-                  "${matchScheduleAndMatchKey.teamNumber}";
-              matchNumberTxtFieldController.text = "${matchKey.matchNumber}";
-              controller.matchData.teamNumber.value =
-                  matchScheduleAndMatchKey.teamNumber;
+              controller.matchData.matchKey.value = matchKey;
+              updateMatchNumberTextField("${matchKey.matchNumber}",
+                  forceUpdate: true);
+              updateTeamTextField("${matchScheduleAndMatchKey.teamNumber}",
+                  forceUpdate: true);
             }
           }
         },
@@ -241,21 +263,14 @@ class HomeScreen extends StatelessWidget {
       items: MatchType.values,
       onChanged: (matchType) {
         if (matchType != null) {
-          // ignore: prefer_conditional_assignment
-          if (controller.matchData.matchKey.value == null) {
-            controller.matchData.matchKey = MatchKey(
-                    matchNumber:
-                        int.tryParse(matchNumberTxtFieldController.text) ?? 0,
-                    matchType: matchType)
-                .obs;
-          } else {
-            controller.matchData.matchKey.value!.matchType = matchType;
-          }
-          controller.update();
+          controller.matchData.matchKey.value = MatchKey(
+              matchNumber:
+                  int.tryParse(matchNumberTxtFieldController.text) ?? 0,
+              matchType: matchType);
         }
       },
       itemAsString: (item) => item.localizedDescription,
-      selectedItem: controller.matchData.matchKey.value?.matchType,
+      selectedItem: controller.matchData.matchKey.value.matchType,
     );
 
     // return DropdownButton<MatchType>(
@@ -283,18 +298,8 @@ class HomeScreen extends StatelessWidget {
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
       ],
-      onChanged: (String matchNumberString) {
-        final matchNumber = int.parse(matchNumberString);
-
-        if (matchNumber > 65) {
-          return;
-        }
-
-        controller.matchData.matchKey.value ??= MatchKey(
-            matchNumber: matchNumber,
-            matchType: controller.matchData.matchKey.value?.matchType ??
-                MatchType.quarterFinals);
-      },
+      onChanged: (String matchNumberString) =>
+          updateMatchNumberTextField(matchNumberString),
     );
   }
 
@@ -309,9 +314,7 @@ class HomeScreen extends StatelessWidget {
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
       ],
-      onChanged: (String teamNumber) {
-        controller.matchData.teamNumber.value = int.tryParse(teamNumber) ?? 0;
-      },
+      onChanged: (String teamNumber) => updateTeamTextField(teamNumber),
     );
   }
 
@@ -346,9 +349,7 @@ class HomeScreen extends StatelessWidget {
       selectedItem: controller.matchData.scouterName.value,
       onChanged: (value) {
         controller.matchData.scouterName.value = value ?? "";
-        controller.matchData.teamNumber = 0.obs;
-
-        teamTxtFieldController.text = "";
+        updateMatchNumberTextField("0", forceUpdate: true);
       },
     );
   }

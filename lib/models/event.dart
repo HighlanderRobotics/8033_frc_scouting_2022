@@ -19,11 +19,11 @@ class Event {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'timeSince': timeSince,
-        'action': action.index,
-        'position': position,
-      };
+  List<dynamic> toJson() => [
+        timeSince,
+        action.index,
+        position,
+      ];
 
   void debugLogDescription() {
     print(

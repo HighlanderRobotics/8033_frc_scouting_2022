@@ -11,7 +11,7 @@ class ScoutingServerAPI {
   // into a List of Scouter objects
 
   // ignore: prefer_final_fields
-  static String _serverAuthority = "https://b725-2600-387-c-6c10-00-b.ngrok.io";
+  static String _serverAuthority = "https://df9e-2600-387-c-6c19-00-7.ngrok.io";
 
   static Future<List<String>> getScouters() async {
     try {

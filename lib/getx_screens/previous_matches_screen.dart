@@ -182,7 +182,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                           ),
                         ),
                         child:
-                            matchRowView(matchData, matchData.matchKey.value!),
+                            matchRowView(matchData, matchData.matchKey.value),
                       )),
                 );
               },

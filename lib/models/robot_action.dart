@@ -6,6 +6,5 @@ enum RobotAction {
   deliveredToTeam,
   blocked,
   pinned,
-  enteredCommunity,
-  exitedCommunity,
+  crossedCommunityLine
 }

@@ -1,5 +1,6 @@
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/models/match_key.dart';
+import 'package:frc_scouting/models/match_type.dart';
 
 import 'climbing_challenge.dart';
 import 'event_key.dart';
@@ -13,7 +14,8 @@ import 'robot_roles.dart';
 class MatchData {
   var uuid = const Uuid().v4();
   late Rx<CompetitionKey> competitionKey;
-  Rx<MatchKey?> matchKey = null.obs;
+  var matchKey =
+      MatchKey(matchNumber: 0, matchType: MatchType.qualifierMatch).obs;
   var teamNumber = 0.obs;
   var scouterName = "".obs;
   var startTime = DateTime.now();
@@ -59,7 +61,7 @@ class MatchData {
       {
         'uuid': uuid,
         'competitionKey': competitionKey.value.eventCode,
-        'matchKey': matchKey.value?.shortMatchKey,
+        'matchKey': matchKey.value.shortMatchKey,
         'teamNumber': teamNumber.value,
         'scouterName': scouterName.value,
         'startTime': startTime.microsecondsSinceEpoch,
