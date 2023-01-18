@@ -11,11 +11,11 @@ class Event {
     required this.position,
   });
 
-  factory Event.fromJson(Map<String, dynamic> json) {
+  factory Event.fromJson(List<dynamic> json) {
     return Event(
-      timeSince: json['timeSince'],
-      action: RobotAction.values[json['action']],
-      position: json['position'],
+      timeSince: json[0],
+      action: RobotAction.values[1],
+      position: json[2],
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/models/match_data.dart';
 import 'package:frc_scouting/models/previous_matches_info.dart';
+import 'package:frc_scouting/persistence/files_helper.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -16,37 +17,32 @@ class PreviousMatchesScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   final txtEditingController = TextEditingController();
 
-  PreviousMatchesInfo previousMatches;
+  late Rx<PreviousMatchesInfo> previousMatchesInfo;
   late final RxList<MatchData> filteredMatches = <MatchData>[].obs;
 
   var isDismissThresholdReached = false.obs;
 
-  PreviousMatchesScreen({
-    required this.previousMatches,
-  });
+  PreviousMatchesScreen({required PreviousMatchesInfo previousMatchesInfo}) {
+    this.previousMatchesInfo = previousMatchesInfo.obs;
+  }
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(3.seconds, () {
-      print("Files Directory: ${controller.documentsHelper.directory.path}");
-      print(
-          "Number of valid matches: ${previousMatches.validMatches.length} out of ${previousMatches.validMatches.length + previousMatches.numberOfInvalidFiles}");
+    print("Files Directory: ${controller.documentsHelper.directory.path}");
+    print(
+        "Number of valid matches: ${previousMatchesInfo.value.validMatches.length} out of ${previousMatchesInfo.value.validMatches.length + previousMatchesInfo.value.numberOfInvalidFiles}");
+    controller.resetOrientation();
 
-      filteredMatches.value = previousMatches.validMatches;
-
-      controller.resetOrientation();
-
-      filterSearchResultsAndUpdateList();
-    });
+    filterSearchResultsAndUpdateList();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Previous Matches"),
       ),
-      body:
-          previousMatches.validMatches.isNotEmpty || filteredMatches.isNotEmpty
-              ? previousMatchesListView()
-              : noMatchesView(),
+      body: previousMatchesInfo.value.validMatches.isNotEmpty ||
+              filteredMatches.isNotEmpty
+          ? previousMatchesListView()
+          : noMatchesView(),
     );
   }
 
@@ -135,14 +131,14 @@ class PreviousMatchesScreen extends StatelessWidget {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content:
-                                  Text("Deleted ${matchData.matchKey.value}"),
+                              content: Text(
+                                  "Deleted ${matchData.matchKey.value.localizedDescription}"),
                               action: SnackBarAction(
                                 label: "Undo",
-                                onPressed: () {
-                                  controller.documentsHelper
-                                      .saveMatchData(matchData);
-                                  controller.documentsHelper
+                                onPressed: () async {
+                                  await controller.documentsHelper
+                                      .saveAndUploadMatchData(matchData);
+                                  await controller.documentsHelper
                                       .getPreviousMatches();
                                   filterSearchResultsAndUpdateList();
                                 },
@@ -150,15 +146,6 @@ class PreviousMatchesScreen extends StatelessWidget {
                               duration: 3.seconds,
                             ),
                           );
-
-                          // Get.snackbar(
-                          //   "Match Deleted",
-                          //   "Match ${item.matchNumber} has been deleted",
-                          //   duration: const Duration(seconds: 2),
-                          //   snackPosition: SnackPosition.BOTTOM,
-                          //   backgroundColor: Colors.deepPurple,
-                          //   colorText: Colors.white,
-                          // );
                         },
                         background: Container(
                           color: Colors.red[900],
@@ -201,7 +188,7 @@ class PreviousMatchesScreen extends StatelessWidget {
         onTap: () => Get.to(
           () => QrCodeScreen(
             matchQrCodes: controller.separateEventsToQrCodes(matchData),
-            canGoBack: true,
+            canPopScope: true,
           ),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -230,9 +217,37 @@ class PreviousMatchesScreen extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(matchData.hasSavedToCloud.isTrue
-                ? Icons.cloud_done
-                : Icons.cloud_off),
+            Obx(
+              () => IconButton(
+                icon: Icon(matchData.hasSavedToCloud.isTrue
+                    ? Icons.cloud_done
+                    : Icons.cloud_off),
+                onPressed: () async {
+                  await controller.documentsHelper.deleteFile(matchData.uuid);
+                  await controller.documentsHelper.writeToFile(matchData);
+                  if (matchData.hasSavedToCloud.isTrue) {
+                    Get.snackbar(
+                      "Match Already Uploaded",
+                      "Match ${matchData.matchKey.value.localizedDescription} has been uploaded to the cloud",
+                      duration: const Duration(seconds: 2),
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  } else {
+                    controller.documentsHelper
+                        .saveAndUploadMatchData(matchData)
+                        .then((uploadStatus) {
+                      filterSearchResultsAndUpdateList();
+                      Get.snackbar(
+                        "Match Uploaded ${uploadStatus ? "Successfully" : "Unsuccessfully"}",
+                        "Match ${matchData.matchKey.value.localizedDescription} has ${uploadStatus ? "uploaded" : "failed to upload"} to the cloud",
+                        duration: const Duration(seconds: 2),
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    });
+                  }
+                },
+              ),
+            ),
             const SizedBox(width: 10),
             const Icon(Icons.arrow_forward_ios_rounded),
           ],
@@ -251,15 +266,15 @@ class PreviousMatchesScreen extends StatelessWidget {
   }
 
   void filterSearchResultsAndUpdateList() {
-    // List<MatchData> searchList = <MatchData>[];
+    filteredMatches.value = previousMatchesInfo.value.validMatches;
 
     if (txtEditingController.text.isNotEmpty) {
-      filteredMatches.value = previousMatches.validMatches
+      filteredMatches.value = previousMatchesInfo.value.validMatches
           .where((element) =>
               element.matchKey.toString().contains(txtEditingController.text))
           .toList();
     } else {
-      filteredMatches.value = previousMatches.validMatches;
+      filteredMatches.value = previousMatchesInfo.value.validMatches;
     }
 
     switch (controller.matchFilterType.value) {

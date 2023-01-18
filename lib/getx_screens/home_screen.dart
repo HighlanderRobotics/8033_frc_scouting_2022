@@ -42,7 +42,6 @@ class HomeScreen extends StatelessWidget {
 
     controller.matchData.teamNumber.value = int.tryParse(newValue) ?? 0;
     controller.matchData.teamNumber.refresh();
-    controller.refresh();
   }
 
   @override
@@ -121,12 +120,9 @@ class HomeScreen extends StatelessWidget {
                     child: const Text("Previous Matches"),
                     onPressed: () async {
                       final matches =
-                          controller.documentsHelper.getPreviousMatches();
-                      Get.to(
-                        () => PreviousMatchesScreen(
-                          previousMatches: matches,
-                        ),
-                      );
+                          await controller.documentsHelper.getPreviousMatches();
+                      Get.to(() =>
+                          PreviousMatchesScreen(previousMatchesInfo: matches));
                       if (matches.numberOfInvalidFiles > 0) {
                         Get.snackbar(
                           "Ignored Invalid Files",

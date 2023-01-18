@@ -57,13 +57,25 @@ class GameConfigurationScreen extends StatelessWidget {
           Expanded(
             child: AbsorbPointer(
               absorbing: true,
-              child: Obx(() => GameScreen(
+              child: Obx(
+                () => SafeArea(
+                  child: GameScreen(
                     isInteractive: false,
                     rotation: rotation.value,
-                  )),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Get.to(() => GameScreen(
+              isInteractive: true,
+              rotation: rotation.value,
+            )),
+        mini: true,
+        child: const Icon(Icons.arrow_forward),
       ),
     );
   }

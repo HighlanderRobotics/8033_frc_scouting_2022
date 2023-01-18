@@ -7,52 +7,60 @@ import '../models/match_data.dart';
 import '../models/previous_matches_info.dart';
 import '../networking/scouting_server_api.dart';
 
-class FilesHelper {
+class DocumentsHelper {
   late Directory directory;
 
-  FilesHelper() {
+  DocumentsHelper() {
     getApplicationDocumentsDirectory().then((value) => directory = value);
   }
 
-  Future<bool> saveMatchData(MatchData matchData) async {
-    await _writeToFile(matchData);
-
+  Future<bool> saveAndUploadMatchData(MatchData matchData) async {
     try {
       await ScoutingServerAPI.addScoutReport(matchData);
       matchData.hasSavedToCloud.value = true;
+      await deleteFile(matchData.uuid);
     } catch (e) {
-      matchData.hasSavedToCloud.value = false;
+      if (e.toString() == "HTTP 406 response") {
+        print("Match data already exists on server");
+        matchData.hasSavedToCloud.value = true;
+        await deleteFile(matchData.uuid);
+      } else {
+        print("Error uploading match data: $e");
+        matchData.hasSavedToCloud.value = false;
+      }
     }
+
+    await writeToFile(matchData);
 
     return matchData.hasSavedToCloud.value;
   }
 
-  Future<void> _writeToFile(MatchData matchData) async {
+  Future<void> writeToFile(MatchData matchData) async {
     String path = directory.path;
 
     var filePath = "$path/frc-${matchData.uuid}.json";
     print("Writing to file: $filePath");
     File file = File(filePath);
-    file.writeAsString(jsonEncode(matchData.toJson(includesCloudStatus: true)));
+    file.writeAsString(jsonEncode(matchData.toJson(includeUploadStatus: true)));
     print("Successfully wrote to file: $filePath");
   }
 
-  List<FileSystemEntity> getFilesInDirectoryMask() {
-    return directory.listSync().toList();
+  Future<List<FileSystemEntity>> getFilesInDirectoryMask() {
+    return directory.list().toList();
   }
 
   bool _isFileValid(File file) {
     return file.uri.pathSegments.last.substring(0, 4).contains("frc-");
   }
 
-  PreviousMatchesInfo getPreviousMatches() {
-    final List<FileSystemEntity> allFiles = getFilesInDirectoryMask();
+  Future<PreviousMatchesInfo> getPreviousMatches() async {
+    final List<FileSystemEntity> allFiles = await getFilesInDirectoryMask();
     final List<File> files = allFiles.whereType<File>().toList();
     var matches = PreviousMatchesInfo([], 0);
 
     for (var file in files) {
       if (_isFileValid(file)) {
-        final String contents = file.readAsStringSync();
+        final String contents = await file.readAsString();
         try {
           final MatchData match = MatchData.fromJson(jsonDecode(contents));
           matches.validMatches.add(match);
@@ -80,21 +88,5 @@ class FilesHelper {
     } catch (e) {
       print("Error deleting file: $filePath");
     }
-  }
-
-  List<String> getPreviousMatchUUIDs() {
-    List<String> previousMatchUUIDs = [];
-
-    final List<FileSystemEntity> allFiles = getFilesInDirectoryMask();
-    final List<File> files = allFiles.whereType<File>().toList();
-
-    for (var file in files) {
-      if (_isFileValid(file)) {
-        previousMatchUUIDs.add(file.uri.pathSegments.last
-            .substring(5, file.uri.pathSegments.last.length - 1));
-      }
-    }
-
-    return previousMatchUUIDs;
   }
 }

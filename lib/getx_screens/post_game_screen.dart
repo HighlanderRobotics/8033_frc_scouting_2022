@@ -99,22 +99,25 @@ class PostGameScreen extends StatelessWidget {
 
   ElevatedButton showQrCodeButton() {
     return ElevatedButton(
-      onPressed: () async {
-        final uploadResult = await controller.documentsHelper
-            .saveMatchData(controller.matchData);
+      onPressed: () {
+        controller.documentsHelper
+            .saveAndUploadMatchData(controller.matchData)
+            .then((uploadResult) {
+          Get.snackbar(
+            "Upload ${uploadResult ? "Successful" : "Unsuccessful"}",
+            uploadResult
+                ? "The match has been uploaded to the server"
+                : "The match could not be uploaded to the server. Please try again later in the Previous Matches Screen",
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        });
 
-        Get.snackbar(
-          "Upload ${uploadResult ? "Successful" : "Unsuccessful"}",
-          uploadResult
-              ? "The match has been uploaded to the server"
-              : "The match could not be uploaded to the server. Please try again later in the Previous Matches Screen",
-          snackPosition: SnackPosition.BOTTOM,
+        Get.to(
+          () => QrCodeScreen(
+              matchQrCodes:
+                  controller.separateEventsToQrCodes(controller.matchData),
+              canPopScope: false),
         );
-
-        Get.to(() => QrCodeScreen(
-            matchQrCodes:
-                controller.separateEventsToQrCodes(controller.matchData),
-            canGoBack: false));
       },
       child: Padding(
         padding: const EdgeInsets.all(7.0),

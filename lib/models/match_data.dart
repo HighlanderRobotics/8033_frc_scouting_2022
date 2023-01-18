@@ -13,7 +13,7 @@ import 'robot_roles.dart';
 
 class MatchData {
   var uuid = const Uuid().v4();
-  late Rx<CompetitionKey> competitionKey;
+  late Rx<TournamentKey> tournamentKey;
   var matchKey =
       MatchKey(matchNumber: 0, matchType: MatchType.qualifierMatch).obs;
   var teamNumber = 0.obs;
@@ -36,40 +36,49 @@ class MatchData {
     return "";
   }
 
-  MatchData({
-    required CompetitionKey competitionKey,
-  }) : competitionKey = competitionKey.obs;
+  MatchData({required TournamentKey competitionKey})
+      : tournamentKey = competitionKey.obs;
 
   MatchData.fromJson(Map<String, dynamic> json) {
     uuid = json['uuid'];
-    competitionKey = json['competitionKey'].obs;
-    matchKey = json['matchKey'].obs;
-    teamNumber = json['teamNumber'].obs;
-    scouterName = json['scouterName'].obs;
-    startTime = DateTime.parse(json['startTime']);
-    events = json['events'].map<Event>((e) => Event.fromJson(e)).toList().obs;
-    robotRole = json['robotRole'].obs;
-    notes = json['notes'].obs;
-    autoChallengeResult = json['autoChallengeResult'].obs;
-    challengeResult = json['challengeResult'].obs;
-    hasSavedToCloud = json['hasSavedToCloud'].obs;
+    tournamentKey = TournamentKey.values
+        .firstWhere(
+            (tournamentKey) => json['tournamentKey'] == tournamentKey.eventCode)
+        .obs;
+    matchKey = MatchKey.fromJsonUsingShortKeyForm(json['matchKey']).obs;
+    teamNumber = RxInt(json['teamNumber']);
+    scouterName = RxString(json['scouterName']);
+    startTime = DateTime.fromMillisecondsSinceEpoch(json['startTime']);
+    events =
+        RxList(json['events'].map<Event>((e) => Event.fromJson(e)).toList());
+    robotRole = RobotRole.values[json['robotRole']].obs;
+    notes = RxString(json['notes']);
+    autoChallengeResult =
+        ClimbingChallenge.values[json['autoChallengeResult']].obs;
+    challengeResult = ClimbingChallenge.values[json['challengeResult']].obs;
+
+    if (json.containsKey("hasSavedToCloud")) {
+      hasSavedToCloud = RxBool(json['hasSavedToCloud']);
+    } else {
+      hasSavedToCloud = false.obs;
+    }
   }
 
   Map<String, dynamic> toJson({
-    required bool includesCloudStatus,
+    required bool includeUploadStatus,
   }) =>
       {
         'uuid': uuid,
-        'competitionKey': competitionKey.value.eventCode,
+        'tournamentKey': tournamentKey.value.eventCode,
         'matchKey': matchKey.value.shortMatchKey,
         'teamNumber': teamNumber.value,
         'scouterName': scouterName.value,
-        'startTime': startTime.microsecondsSinceEpoch,
+        'startTime': startTime.millisecondsSinceEpoch,
         'events': events.map((e) => e.toJson()).toList(),
         'robotRole': robotRole.value.index,
         'notes': notes.value,
         'autoChallengeResult': autoChallengeResult.value.index,
         'challengeResult': challengeResult.value.index,
-        if (includesCloudStatus) 'hasSavedToCloud': hasSavedToCloud.isTrue,
+        if (includeUploadStatus) 'hasSavedToCloud': hasSavedToCloud.isTrue,
       };
 }

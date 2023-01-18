@@ -11,7 +11,8 @@ class ScoutingServerAPI {
   // into a List of Scouter objects
 
   // ignore: prefer_final_fields
-  static String _serverAuthority = "https://df9e-2600-387-c-6c19-00-7.ngrok.io";
+  static String _serverAuthority =
+      "https://389e-2601-648-8800-169e-a48a-6c93-a3c-9739.ngrok.io";
 
   static Future<List<String>> getScouters() async {
     try {
@@ -56,7 +57,7 @@ class ScoutingServerAPI {
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(matchData.toJson(includesCloudStatus: false)),
+        body: jsonEncode(matchData.toJson(includeUploadStatus: false)),
       );
 
       if (response.statusCode == 200) {

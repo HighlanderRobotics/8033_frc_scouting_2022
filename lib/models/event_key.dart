@@ -1,16 +1,16 @@
-enum CompetitionKey { chezyChamps2022 }
+enum TournamentKey { chezyChamps2022 }
 
-extension CompetitionKeyExtension on CompetitionKey {
+extension TournamentKeyExtension on TournamentKey {
   String get stringValue {
     switch (this) {
-      case CompetitionKey.chezyChamps2022:
-        return 'Chezy Champs 2023';
+      case TournamentKey.chezyChamps2022:
+        return 'Chezy Champs 2022';
     }
   }
 
   String get eventCode {
     switch (this) {
-      case CompetitionKey.chezyChamps2022:
+      case TournamentKey.chezyChamps2022:
         return "2022cc";
     }
   }

@@ -33,15 +33,15 @@ extension MatchFilterTypeExtension on MatchFilterType {
 }
 
 class BusinessLogicController extends GetxController {
-  late CompetitionKey selectedEvent;
+  late TournamentKey selectedEvent;
   late MatchData matchData;
-  final FilesHelper documentsHelper = FilesHelper();
+  final DocumentsHelper documentsHelper = DocumentsHelper();
   var matchFilterType = MatchFilterType.date.obs;
   final ServiceHelper serviceHelper = ServiceHelper();
 
   @override
   void onInit() async {
-    selectedEvent = CompetitionKey.chezyChamps2022;
+    selectedEvent = TournamentKey.chezyChamps2022;
     matchData = MatchData(competitionKey: selectedEvent);
 
     try {
@@ -126,7 +126,7 @@ class BusinessLogicController extends GetxController {
 
   List<String> separateEventsToQrCodes(MatchData matchData) {
     List<String> qrCodes = [];
-    var jsonString = jsonEncode(matchData.toJson(includesCloudStatus: true));
+    var jsonString = jsonEncode(matchData.toJson(includeUploadStatus: true));
     const qrCodeLimit = 2500;
 
     print("jsonString length: ${jsonString.length}");

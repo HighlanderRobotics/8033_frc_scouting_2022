@@ -7,11 +7,11 @@ class QrCodeScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   var pageNumber = 0.obs;
   late final List<String> matchQrCodes;
-  var canGoBack = false;
+  var canPopScope = false;
 
   QrCodeScreen({
     required this.matchQrCodes,
-    required this.canGoBack,
+    required this.canPopScope,
   });
 
   void nextPage() => pageNumber.value =
@@ -24,7 +24,7 @@ class QrCodeScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: const Text("QR Code"),
-          automaticallyImplyLeading: canGoBack,
+          automaticallyImplyLeading: canPopScope,
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -61,10 +61,10 @@ class QrCodeScreen extends StatelessWidget {
                     child: const Text("Next Page"),
                   ),
                 ElevatedButton(
-                  child: Text(canGoBack ? "Back" : "Finish"),
+                  child: Text(canPopScope ? "Back" : "Finish"),
                   onPressed: () {
                     Get.closeCurrentSnackbar();
-                    if (canGoBack) {
+                    if (canPopScope) {
                       Get.back();
                     } else {
                       controller.reset();

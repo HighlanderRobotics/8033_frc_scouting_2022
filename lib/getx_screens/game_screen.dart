@@ -16,28 +16,38 @@ import '../services/getx_business_logic.dart';
 
 class GameScreen extends StatelessWidget {
   GameScreen({
-    bool isInteractive = true,
+    required this.isInteractive,
     required this.rotation,
-  }) {
-    isInteractive = isInteractive;
-  }
+  });
 
   final BusinessLogicController controller = Get.find();
 
   final GameConfigurationRotation rotation;
-  final isInteractive = false;
+  final bool isInteractive;
 
   var isRobotCarryingCargo = true.obs;
   var isCommunityEntranceObjectsHidden = false.obs;
 
   final GlobalKey draggableFABParentKey = GlobalKey();
 
-  double getBoxDecorationHeight() => (Get.mediaQuery.size.width * 1620) / 3240;
+  Size get boxDecorationSize {
+    return Size(
+      Get.mediaQuery.size.width -
+          Get.mediaQuery.padding.left -
+          Get.mediaQuery.padding.right,
+      ((Get.mediaQuery.size.width -
+                  Get.mediaQuery.padding.top -
+                  Get.mediaQuery.padding.bottom) *
+              1620) /
+          3240,
+    );
+  }
 
   double getDeviceVerticalEdgeToBoxDecorationHeight() =>
-      (Get.mediaQuery.size.height - getBoxDecorationHeight()) / 2;
+      ((Get.mediaQuery.size.height - boxDecorationSize.height) / 2) - Get.mediaQuery.padding.top -
+          Get.mediaQuery.padding.bottom;
 
-  Timer timer = Timer(150.seconds, () => Get.to(() => PostGameScreen()));
+  Timer presentPostGameScreenTimer = Timer(150.seconds, () {});
   Timer autoTimer = Timer(17.seconds, () {});
 
   final double positionedWidgetMultiplier = 0.22;
@@ -62,40 +72,54 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     controller.setLandscapeOrientation();
-
     autoTimer.cancel();
 
     if (isInteractive) {
+      presentPostGameScreenTimer = Timer(150.seconds, () {
+        if (isInteractive) {
+          HapticFeedback.mediumImpact();
+          Get.to(() => PostGameScreen());
+        }
+      });
       autoTimer = Timer(17.seconds, () {
-        HapticFeedback.mediumImpact();
-        isCommunityEntranceObjectsHidden.value = true;
+        if (isInteractive) {
+          HapticFeedback.mediumImpact();
+          isCommunityEntranceObjectsHidden.value = true;
+        }
       });
     }
 
     return WillPopScope(
       onWillPop: () async {
-        timer.cancel();
+        presentPostGameScreenTimer.cancel();
         autoTimer.cancel();
         controller.resetOrientation();
         return true;
       },
       child: Scaffold(
-        body: paintWidget(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: null,
-          mini: true,
-          child: GestureDetector(
-            child: const Icon(Icons.arrow_forward),
-            onLongPress: () {
-              if (isInteractive) {
-                timer.cancel();
-                autoTimer.cancel();
-                HapticFeedback.heavyImpact();
-                Get.to(() => PostGameScreen());
-              }
-            },
-          ),
+        body: SafeArea(
+          // keep the bottom and top safe area insets the same
+          bottom: true,
+          top: true,
+          child: paintWidget(),
         ),
+        floatingActionButton: !isInteractive
+            ? null
+            : FloatingActionButton(
+                onPressed: null,
+                mini: true,
+                child: GestureDetector(
+                  child: const Icon(Icons.arrow_forward),
+                  onLongPress: () {
+                    if (isInteractive) {
+                      presentPostGameScreenTimer.cancel();
+                      autoTimer.cancel();
+                      HapticFeedback.heavyImpact();
+                      Get.to(() => PostGameScreen());
+                    }
+                  },
+                ),
+              ),
       ),
     );
   }
@@ -156,19 +180,19 @@ class GameScreen extends StatelessWidget {
   }) {
     return Positioned(
       top: getDeviceVerticalEdgeToBoxDecorationHeight() +
-          getBoxDecorationHeight() * index[0],
+          boxDecorationSize.height * index[0],
       left: rotation == GameConfigurationRotation.left
-          ? Get.mediaQuery.size.width * 0.185
+          ? boxDecorationSize.width * 0.185
           : null,
       right: rotation == GameConfigurationRotation.right
-          ? Get.mediaQuery.size.width * 0.185
+          ? boxDecorationSize.width * 0.185
           : null,
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(
             boxShape: BoxShape.rectangle,
-            width: getBoxDecorationHeight() * 0.2,
-            height: getBoxDecorationHeight() * index[1],
+            width: boxDecorationSize.height * 0.2,
+            height: boxDecorationSize.height * index[1],
             isDisabled: isCommunityEntranceObjectsHidden.isTrue,
           ),
         ),
@@ -187,16 +211,16 @@ class GameScreen extends StatelessWidget {
 
   Positioned createFieldCargoCircle(List<double> index) {
     return Positioned(
-      left: Get.mediaQuery.size.width * index[0] - 4,
+      left: boxDecorationSize.width * index[0] - 4,
       bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
-          getBoxDecorationHeight() * index[1] -
+          boxDecorationSize.height * index[1] -
           4,
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(
             boxShape: BoxShape.circle,
-            width: Get.mediaQuery.size.width * 0.05,
-            height: Get.mediaQuery.size.width * 0.05,
+            width: boxDecorationSize.width * 0.05,
+            height: boxDecorationSize.width * 0.05,
             isDisabled: isRobotCarryingCargo.isTrue,
           ),
         ),
@@ -226,8 +250,8 @@ class GameScreen extends StatelessWidget {
         child: Obx(
           () => createCustomEventWidget(
             boxShape: BoxShape.rectangle,
-            width: Get.mediaQuery.size.width * 0.2,
-            height: getBoxDecorationHeight() * 0.3,
+            width: boxDecorationSize.width * 0.2,
+            height: boxDecorationSize.height * 0.3,
             isDisabled: isRobotCarryingCargo.isTrue,
           ),
         ),
@@ -253,15 +277,15 @@ class GameScreen extends StatelessWidget {
   Positioned createGridRectangle({required int index}) {
     return Positioned(
       bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
-          getBoxDecorationHeight() * index * 0.22,
+          boxDecorationSize.height * index * 0.22,
       left: rotation == GameConfigurationRotation.left ? 0 : null,
       right: rotation == GameConfigurationRotation.right ? 0 : null,
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(
             boxShape: BoxShape.rectangle,
-            width: getBoxDecorationHeight() * 0.35,
-            height: getBoxDecorationHeight() * 0.218,
+            width: boxDecorationSize.height * 0.35,
+            height: boxDecorationSize.height * 0.218,
             isDisabled: isRobotCarryingCargo.isFalse,
           ),
         ),
@@ -285,7 +309,7 @@ class GameScreen extends StatelessWidget {
   Widget draggableFloatingActionButtonWidget() {
     return Obx(
       () => DraggableFloatingActionButton(
-        initialOffset: Offset(Get.mediaQuery.size.width - 70, 20),
+        initialOffset: Offset(boxDecorationSize.width - 70, 20),
         parentKey: draggableFABParentKey,
         onPressed: () {},
         child: InkWell(
