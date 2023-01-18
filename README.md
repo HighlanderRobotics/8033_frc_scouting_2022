@@ -22,7 +22,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 5 = Delivered to Team
 6 = Blocked
 7 = Pinned
-8 = Crossed (to/from) Community
+8 = Crossed Community Line
 ```
 
 ## Positions
