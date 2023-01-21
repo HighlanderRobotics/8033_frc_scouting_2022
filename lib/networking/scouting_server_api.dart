@@ -1,27 +1,31 @@
 import 'dart:convert';
 
+import 'package:frc_scouting/models/constants.dart';
+import 'package:get/get.dart';
+
 import '../models/match_data.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/match_event.dart';
+import '../models/match_scouted.dart';
 import '../models/scout_schedule.dart';
 
 class ScoutingServerAPI {
+  static final shared = ScoutingServerAPI();
   // An Internal function to make a network request and decode the json
   // into a List of Scouter objects
 
   // ignore: prefer_final_fields
-  static String _serverAuthority =
-      "https://389e-2601-648-8800-169e-a48a-6c93-a3c-9739.ngrok.io";
+  var _serverAuthority = "http://localhost:4000".obs;
 
-  static Future<List<String>> getScouters() async {
+  Future<List<String>> getScouters() async {
     try {
       var response = await http
-          .get(Uri.parse('$_serverAuthority/API/manager/getScouters'));
+          .get(Uri.parse('${_serverAuthority.value}/API/manager/getScouters'));
 
       if (response.statusCode == 200) {
         return (jsonDecode(response.body) as List<dynamic>)
-            .map((e) => e.toString())
+            .map((jsonString) => jsonString.toString())
             .toList();
       } else {
         print("HTTP ${response.statusCode} response");
@@ -33,10 +37,10 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<ScoutersSchedule> getScoutersSchedule() async {
+  Future<ScoutersSchedule> getScoutersSchedule() async {
     try {
-      var response = await http
-          .get(Uri.parse('$_serverAuthority/API/manager/getScoutersSchedule'));
+      var response = await http.get(Uri.parse(
+          '${_serverAuthority.value}/API/manager/getScoutersSchedule'));
 
       if (response.statusCode == 200) {
         return ScoutersSchedule.fromJson(jsonDecode(response.body));
@@ -45,15 +49,15 @@ class ScoutingServerAPI {
         throw Exception("HTTP ${response.statusCode} response");
       }
     } catch (e) {
-      print("Failed decoding scouters schedule - network response error $e");
+      print("Failed decoding scouters schedule - network response error: $e");
       throw Exception(e);
     }
   }
 
-  static Future addScoutReport(MatchData matchData) async {
+  Future addScoutReport(MatchData matchData) async {
     try {
       final response = await http.post(
-        Uri.parse('$_serverAuthority/API/manager/addScoutReport'),
+        Uri.parse('${_serverAuthority.value}/API/manager/addScoutReport'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
@@ -72,11 +76,9 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<List<MatchEvent>> getMatches({
-    required String tournamentKey,
-  }) async {
+  Future<List<MatchEvent>> getMatches() async {
     final response = await http.get(Uri.parse(
-        '$_serverAuthority/API/manager/getMatches/?tournamentKey=$tournamentKey'));
+        '${_serverAuthority.value}/API/manager/getMatches/?tournamentKey=${Constants.shared.tournamentKey.eventCode}'));
 
     if (response.statusCode == 200) {
       try {
@@ -102,18 +104,17 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<List<bool>> isMatchesScouted({
-    required String tournamentKey,
+  Future<List<MatchScouted>> isMatchesScouted({
     required String scouterName,
     required List<String> matchKeys,
   }) async {
     final response = await http.get(Uri.parse(
-        "$_serverAuthority/API/manager/isMatchesScouted?tournamentKey=2022cc&scouterName=Jacob Trentini&matchKeys=['2022cc_qm1', '2022cc_qm2', '2022cc_qm3'"));
+        "${_serverAuthority.value}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.eventCode}&scouterName=$scouterName&matchKeys=[${matchKeys.join(",")}]"));
 
     if (response.statusCode == 200) {
       try {
         return (jsonDecode(response.body) as List<dynamic>)
-            .map((match) => match["status"] as bool)
+            .map((jsonObject) => MatchScouted.fromJson(jsonObject))
             .toList();
       } catch (e) {
         print("Failed decoding isMatchesScouted - network response error: $e");

@@ -1,7 +1,7 @@
 import 'robot_action.dart';
 
 class Event {
-  int timeSince;
+  Duration timeSince;
   RobotAction action;
   int position;
 
@@ -13,14 +13,14 @@ class Event {
 
   factory Event.fromJson(List<dynamic> json) {
     return Event(
-      timeSince: json[0],
+      timeSince: Duration(milliseconds: json[0]),
       action: RobotAction.values[1],
       position: json[2],
     );
   }
 
   List<dynamic> toJson() => [
-        timeSince,
+        timeSince.inMilliseconds,
         action.index,
         position,
       ];

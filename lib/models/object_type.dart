@@ -30,16 +30,4 @@ extension ObjectTypeExtension on ObjectType {
         return "assets/cone.png";
     }
   }
-
-  // get haptic feedback for objectType
-  void playHapticFeedback() {
-    switch (this) {
-      case ObjectType.cube:
-        HapticFeedback.lightImpact();
-        break;
-      case ObjectType.cone:
-        HapticFeedback.heavyImpact();
-        break;
-    }
-  }
 }

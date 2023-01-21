@@ -30,18 +30,4 @@ extension LevelExtension on Level {
         return const Color.fromRGBO(255, 199, 0, 1);
     }
   }
-
-  void playHapticFeedback() {
-    switch (this) {
-      case Level.bottomRow:
-        HapticFeedback.lightImpact();
-        break;
-      case Level.middleRow:
-        HapticFeedback.mediumImpact();
-        break;
-      case Level.topRow:
-        HapticFeedback.heavyImpact();
-        break;
-    }
-  }
 }

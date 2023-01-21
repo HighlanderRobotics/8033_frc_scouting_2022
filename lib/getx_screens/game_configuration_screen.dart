@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
+import 'package:frc_scouting/getx_screens/settings_screen.dart';
 import 'package:get/get.dart';
 
 import '../services/getx_business_logic.dart';
@@ -28,7 +29,7 @@ extension RotationExtension on GameConfigurationRotation {
 
 class GameConfigurationScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
-  var rotation = GameConfigurationRotation.left.obs;
+  final SettingsScreenVariables variables = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +38,10 @@ class GameConfigurationScreen extends StatelessWidget {
         title: const Text("Game Configuration"),
         actions: [
           IconButton(
-            icon: Icon(Icons.rotate_right),
+            icon: const Icon(Icons.rotate_right),
             tooltip: "Rotate Screen",
-            onPressed: () => rotation.value = rotation.value.getToggleValue(),
+            onPressed: () => variables.rotation.value =
+                variables.rotation.value.getToggleValue(),
           )
         ],
       ),
@@ -49,33 +51,18 @@ class GameConfigurationScreen extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Obx(
               () => Text(
-                "Currently Rotated: ${rotation.value.localizedDescription}",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                "Currently Rotated: ${variables.rotation.value.localizedDescription}",
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),
           Expanded(
             child: AbsorbPointer(
               absorbing: true,
-              child: Obx(
-                () => SafeArea(
-                  child: GameScreen(
-                    isInteractive: false,
-                    rotation: rotation.value,
-                  ),
-                ),
-              ),
+              child: GameScreen(isInteractive: false),
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(() => GameScreen(
-              isInteractive: true,
-              rotation: rotation.value,
-            )),
-        mini: true,
-        child: const Icon(Icons.arrow_forward),
       ),
     );
   }

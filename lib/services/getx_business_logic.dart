@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
-import 'package:frc_scouting/models/event_key.dart';
-import 'package:frc_scouting/models/game_screen_positions.dart';
 import 'package:frc_scouting/models/robot_action.dart';
 import 'package:frc_scouting/models/service.dart';
 import 'package:get/get.dart';
@@ -13,7 +11,6 @@ import 'package:get/get.dart';
 import '../getx_screens/home_screen.dart';
 import '../persistence/files_helper.dart';
 import '../models/event.dart';
-import '../models/event_types.dart';
 import '../models/match_data.dart';
 import '../helpers/scouters_helper.dart';
 
@@ -33,24 +30,20 @@ extension MatchFilterTypeExtension on MatchFilterType {
 }
 
 class BusinessLogicController extends GetxController {
-  late TournamentKey selectedEvent;
   late MatchData matchData;
-  final DocumentsHelper documentsHelper = DocumentsHelper();
+  final FilesHelper documentsHelper = FilesHelper();
   var matchFilterType = MatchFilterType.date.obs;
   final ServiceHelper serviceHelper = ServiceHelper();
 
   @override
   void onInit() async {
-    selectedEvent = TournamentKey.chezyChamps2022;
-    matchData = MatchData(competitionKey: selectedEvent);
+    matchData = MatchData();
 
     try {
-      MatchScheduleHelper.shared.getMatchSchedule(
-          tournamentKey: selectedEvent.eventCode, networkRefresh: true);
+      MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: true);
     } catch (e) {
       try {
-        MatchScheduleHelper.shared.getMatchSchedule(
-            tournamentKey: selectedEvent.eventCode, networkRefresh: false);
+        MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: false);
       } catch (e) {}
       print("Error getting event schedule: $e");
     }
@@ -114,8 +107,9 @@ class BusinessLogicController extends GetxController {
   void addEventToTimeline(
       {required RobotAction robotAction, required int position}) {
     final event = Event(
-      timeSince: DateTime.now().millisecondsSinceEpoch -
-          matchData.startTime.millisecondsSinceEpoch,
+      timeSince: Duration(
+          milliseconds: DateTime.now().millisecondsSinceEpoch -
+              matchData.startTime.millisecondsSinceEpoch),
       action: robotAction,
       position: position,
     );
@@ -126,17 +120,35 @@ class BusinessLogicController extends GetxController {
 
   List<String> separateEventsToQrCodes(MatchData matchData) {
     List<String> qrCodes = [];
-    var jsonString = jsonEncode(matchData.toJson(includeUploadStatus: true));
+    var jsonString = jsonEncode(matchData.toJson(includeUploadStatus: false));
     const qrCodeLimit = 2500;
 
     print("jsonString length: ${jsonString.length}");
 
+    var currentPage = 0;
+
     while (jsonString.length > qrCodeLimit) {
-      qrCodes.add(jsonString.substring(0, qrCodeLimit));
+      final jsonPage = jsonEncode({
+        "uuid": matchData.uuid,
+        "currentPage": currentPage,
+        "totalPages": (jsonString.length / qrCodeLimit).ceil(),
+        "data": jsonString.substring(0, qrCodeLimit)
+      });
+
+      currentPage++;
+
+      qrCodes.add(jsonPage);
       jsonString = jsonString.replaceRange(0, qrCodeLimit, "");
     }
 
-    qrCodes.add(jsonString);
+    final jsonPage = jsonEncode({
+      "uuid": matchData.uuid,
+      "currentPage": currentPage,
+      "totalPages": (jsonString.length / qrCodeLimit).ceil(),
+      "data": jsonString
+    });
+
+    qrCodes.add(jsonPage);
 
     print("# of QrCodes: ${qrCodes.length}");
 
@@ -146,7 +158,7 @@ class BusinessLogicController extends GetxController {
   void reset() {
     // ignore: unnecessary_string_interpolations
     final scouterName = "${matchData.scouterName.value}";
-    matchData = MatchData(competitionKey: selectedEvent);
+    matchData = MatchData();
     matchData.scouterName.value = scouterName;
     Get.offAll(() => HomeScreen());
   }

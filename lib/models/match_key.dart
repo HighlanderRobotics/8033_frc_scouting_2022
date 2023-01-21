@@ -1,5 +1,7 @@
 import 'dart:core';
 
+import 'package:frc_scouting/models/constants.dart';
+
 import 'match_type.dart';
 
 class MatchKey {
@@ -36,6 +38,9 @@ class MatchKey {
       "${matchType.localizedDescription} $matchNumber";
 
   String get shortMatchKey => "${matchType.shortName}$matchNumber";
+
+  String get longMatchKey =>
+      "${Constants.shared.tournamentKey.eventCode}_$shortMatchKey";
 
   bool get isBlank => matchNumber == 0;
 }

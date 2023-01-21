@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/models/match_data.dart';
 import 'package:frc_scouting/models/previous_matches_info.dart';
-import 'package:frc_scouting/persistence/files_helper.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -86,17 +85,22 @@ class PreviousMatchesScreen extends StatelessWidget {
       },
       child: Column(children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: TextField(
             onChanged: (_) => filterSearchResultsAndUpdateList(),
             controller: txtEditingController,
             decoration: InputDecoration(
-                labelText: "Search",
-                hintText: "Search by Match or Team ",
-                suffixIcon: filterPopupMenu(),
-                prefixIcon: const Icon(Icons.search),
+                labelText: "Search by Match or Team",
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.only(right: 18.0),
+                  child: filterPopupMenu(),
+                ),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.all(18.0),
+                  child: Icon(Icons.search, size: 24),
+                ),
                 border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)))),
+                    borderRadius: BorderRadius.all(Radius.circular(30)))),
           ),
         ),
         Obx(

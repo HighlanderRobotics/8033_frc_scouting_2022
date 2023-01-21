@@ -15,8 +15,10 @@ class ScoutShift {
   }
 
   Map<String, dynamic> toJson() => {
-        "startKey": matchShiftDuration.startTime.matchKey.shortMatchKey,
-        "endKey": matchShiftDuration.endTime.matchKey.shortMatchKey,
+        "start": matchShiftDuration.startTime.rawMatchNumber,
+        "end": matchShiftDuration.endTime.rawMatchNumber,
+        "startKey": matchShiftDuration.startTime.matchKey.longMatchKey,
+        "endKey": matchShiftDuration.endTime.matchKey.longMatchKey,
         "scouts": scouters.map((scouter) => scouter.toString()).toList(),
       };
 

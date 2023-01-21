@@ -22,7 +22,7 @@ class MatchEvent {
     required this.teamNumber,
   });
 
-  // like '{"key":"2022cc_qm1_4","gameKey":"2022cc","matchNumber":1,"teamKey":"frc254","matchType":"qm", "matchKey": "f1_1"}'
+  // like '{"key":"2022cc_qm1_4","tournamentKey":"2022cc","matchNumber":1,"teamKey":"frc254","matchType":"qm", "matchKey": "f1_1"}'
   factory MatchEvent.fromJson(Map<String, dynamic> json) {
     try {
       return MatchEvent(
@@ -41,7 +41,7 @@ class MatchEvent {
 
   Map<String, dynamic> toJson() => {
         'key': key,
-        'gameKey': gameKey,
+        'tournamentKey': gameKey,
         'matchNumber': matchKey.matchNumber,
         'teamKey': "frc$teamNumber",
         'matchType': matchKey.matchType.shortName,

@@ -7,16 +7,16 @@ import '../models/match_data.dart';
 import '../models/previous_matches_info.dart';
 import '../networking/scouting_server_api.dart';
 
-class DocumentsHelper {
+class FilesHelper {
   late Directory directory;
 
-  DocumentsHelper() {
+  FilesHelper() {
     getApplicationDocumentsDirectory().then((value) => directory = value);
   }
 
   Future<bool> saveAndUploadMatchData(MatchData matchData) async {
     try {
-      await ScoutingServerAPI.addScoutReport(matchData);
+      await ScoutingServerAPI.shared.addScoutReport(matchData);
       matchData.hasSavedToCloud.value = true;
       await deleteFile(matchData.uuid);
     } catch (e) {

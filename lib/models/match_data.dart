@@ -1,9 +1,9 @@
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
+import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/match_key.dart';
 import 'package:frc_scouting/models/match_type.dart';
 
 import 'climbing_challenge.dart';
-import 'event_key.dart';
 import 'event.dart';
 
 import 'package:get/get.dart';
@@ -13,7 +13,6 @@ import 'robot_roles.dart';
 
 class MatchData {
   var uuid = const Uuid().v4();
-  late Rx<TournamentKey> tournamentKey;
   var matchKey =
       MatchKey(matchNumber: 0, matchType: MatchType.qualifierMatch).obs;
   var teamNumber = 0.obs;
@@ -36,15 +35,10 @@ class MatchData {
     return "";
   }
 
-  MatchData({required TournamentKey competitionKey})
-      : tournamentKey = competitionKey.obs;
+  MatchData();
 
   MatchData.fromJson(Map<String, dynamic> json) {
     uuid = json['uuid'];
-    tournamentKey = TournamentKey.values
-        .firstWhere(
-            (tournamentKey) => json['tournamentKey'] == tournamentKey.eventCode)
-        .obs;
     matchKey = MatchKey.fromJsonUsingShortKeyForm(json['matchKey']).obs;
     teamNumber = RxInt(json['teamNumber']);
     scouterName = RxString(json['scouterName']);
@@ -69,7 +63,7 @@ class MatchData {
   }) =>
       {
         'uuid': uuid,
-        'tournamentKey': tournamentKey.value.eventCode,
+        'tournamentKey': Constants.shared.tournamentKey.eventCode,
         'matchKey': matchKey.value.shortMatchKey,
         'teamNumber': teamNumber.value,
         'scouterName': scouterName.value,

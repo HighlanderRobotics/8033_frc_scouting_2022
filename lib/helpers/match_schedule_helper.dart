@@ -16,7 +16,7 @@ class MatchScheduleHelper extends ServiceClass {
   @override
   void refresh({bool networkRefresh = false}) {
     try {
-      getMatchSchedule(tournamentKey: "2022cc", networkRefresh: networkRefresh);
+      getMatchSchedule(networkRefresh: networkRefresh);
     } catch (_) {}
   }
 
@@ -56,16 +56,14 @@ class MatchScheduleHelper extends ServiceClass {
     return matches;
   }
 
-  Future getMatchSchedule(
-      {bool networkRefresh = false, required String tournamentKey}) async {
+  Future getMatchSchedule({bool networkRefresh = false}) async {
     service.value
         .updateStatus(ServiceStatus.inProgress, "Fetching from localStorage");
     final localStorageSchedule = await _getParsedLocalStorageSchedule();
 
     if (localStorageSchedule.isEmpty || networkRefresh) {
       try {
-        matchSchedule.value =
-            await ScoutingServerAPI.getMatches(tournamentKey: tournamentKey);
+        matchSchedule.value = await ScoutingServerAPI.shared.getMatches();
         matchSchedule.sort((a, b) => a.key.compareTo(b.key));
         _saveParsedLocalStorageSchedule(matchSchedule.toList());
         service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
@@ -82,7 +80,8 @@ class MatchScheduleHelper extends ServiceClass {
 
   Future<List<MatchEvent>> _getParsedLocalStorageSchedule() async {
     final scheduleJson = await SharedPreferencesHelper.shared
-        .getString(SharedPreferenceKeys.matchSchedule.toShortString());
+            .getString(SharedPreferenceKeys.matchSchedule.toShortString()) ??
+        "";
 
     if (scheduleJson.isNotEmpty) {
       try {

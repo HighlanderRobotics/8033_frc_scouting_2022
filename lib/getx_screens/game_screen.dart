@@ -13,16 +13,14 @@ import 'post_game_screen.dart';
 
 import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
+import 'settings_screen.dart';
 
 class GameScreen extends StatelessWidget {
-  GameScreen({
-    required this.isInteractive,
-    required this.rotation,
-  });
-
   final BusinessLogicController controller = Get.find();
+  final SettingsScreenVariables variables = Get.find();
 
-  final GameConfigurationRotation rotation;
+  GameScreen({required this.isInteractive});
+
   final bool isInteractive;
 
   var isRobotCarryingCargo = true.obs;
@@ -43,9 +41,18 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  double getDeviceVerticalEdgeToBoxDecorationHeight() =>
-      ((Get.mediaQuery.size.height - boxDecorationSize.height) / 2) - Get.mediaQuery.padding.top -
-          Get.mediaQuery.padding.bottom;
+  // double getDeviceVerticalEdgeToBoxDecorationHeight() =>
+  //     ((Get.mediaQuery.size.height - boxDecorationSize.height) / 2) -
+  //     Get.mediaQuery.padding.top -
+  //     Get.mediaQuery.padding.bottom;
+
+  double getTopToBoxDecorationHeight() =>
+      ((Get.mediaQuery.size.height - boxDecorationSize.height) / 2) -
+      Get.mediaQuery.padding.top;
+
+  double getBottomToBoxDecorationHeight() =>
+      ((Get.mediaQuery.size.height - boxDecorationSize.height) / 2) -
+      Get.mediaQuery.padding.bottom;
 
   Timer presentPostGameScreenTimer = Timer(150.seconds, () {});
   Timer autoTimer = Timer(17.seconds, () {});
@@ -72,6 +79,9 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     controller.setLandscapeOrientation();
+
+    controller.matchData.startTime = DateTime.now();
+
     autoTimer.cancel();
 
     if (isInteractive) {
@@ -154,7 +164,10 @@ class GameScreen extends StatelessWidget {
 
             for (final index in fieldCargoCircleValues)
               createFieldCargoCircle(index),
-            draggableFloatingActionButtonWidget(),
+
+            if (isInteractive || isRobotCarryingCargo.isFalse)
+              draggableFloatingActionButtonWidget(),
+
             createSubstationRectangle(),
             Align(
               alignment: Alignment.topCenter,
@@ -179,12 +192,11 @@ class GameScreen extends StatelessWidget {
     required List<double> index,
   }) {
     return Positioned(
-      top: getDeviceVerticalEdgeToBoxDecorationHeight() +
-          boxDecorationSize.height * index[0],
-      left: rotation == GameConfigurationRotation.left
+      top: getTopToBoxDecorationHeight() + boxDecorationSize.height * index[0],
+      left: variables.rotation.value == GameConfigurationRotation.left
           ? boxDecorationSize.width * 0.185
           : null,
-      right: rotation == GameConfigurationRotation.right
+      right: variables.rotation.value == GameConfigurationRotation.right
           ? boxDecorationSize.width * 0.185
           : null,
       child: InkWell(
@@ -212,7 +224,7 @@ class GameScreen extends StatelessWidget {
   Positioned createFieldCargoCircle(List<double> index) {
     return Positioned(
       left: boxDecorationSize.width * index[0] - 4,
-      bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
+      bottom: getBottomToBoxDecorationHeight() +
           boxDecorationSize.height * index[1] -
           4,
       child: InkWell(
@@ -243,9 +255,12 @@ class GameScreen extends StatelessWidget {
 
   Positioned createSubstationRectangle() {
     return Positioned(
-      left: rotation == GameConfigurationRotation.left ? 0 : null,
-      right: rotation == GameConfigurationRotation.right ? 0 : null,
-      top: getDeviceVerticalEdgeToBoxDecorationHeight(),
+      left:
+          variables.rotation.value == GameConfigurationRotation.left ? 0 : null,
+      right: variables.rotation.value == GameConfigurationRotation.right
+          ? 0
+          : null,
+      top: getTopToBoxDecorationHeight(),
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(
@@ -276,10 +291,13 @@ class GameScreen extends StatelessWidget {
 
   Positioned createGridRectangle({required int index}) {
     return Positioned(
-      bottom: getDeviceVerticalEdgeToBoxDecorationHeight() +
+      bottom: getBottomToBoxDecorationHeight() +
           boxDecorationSize.height * index * 0.22,
-      left: rotation == GameConfigurationRotation.left ? 0 : null,
-      right: rotation == GameConfigurationRotation.right ? 0 : null,
+      left:
+          variables.rotation.value == GameConfigurationRotation.left ? 0 : null,
+      right: variables.rotation.value == GameConfigurationRotation.right
+          ? 0
+          : null,
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(
@@ -406,7 +424,7 @@ extension GameScreenDialogs on GameScreen {
         child: InkWell(
           borderRadius: BorderRadius.circular(20.0),
           onTap: () {
-            level.playHapticFeedback();
+            HapticFeedback.mediumImpact();
 
             controller.addEventToTimeline(
               robotAction: RobotAction.placedObject,
@@ -462,7 +480,7 @@ extension GameScreenDialogs on GameScreen {
           borderRadius: BorderRadius.circular(20.0),
           onTap: () {
             if (isRobotCarryingCargo.isFalse) {
-              objectType.playHapticFeedback();
+              HapticFeedback.mediumImpact();
 
               controller.addEventToTimeline(
                 robotAction: objectType == ObjectType.cube

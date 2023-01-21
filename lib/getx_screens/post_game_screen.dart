@@ -70,7 +70,6 @@ class PostGameScreen extends StatelessWidget {
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Climbing Challenge",
-          border: OutlineInputBorder(),
           filled: true,
         ),
       ),
@@ -90,7 +89,6 @@ class PostGameScreen extends StatelessWidget {
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Robot Role",
-          border: OutlineInputBorder(),
           filled: true,
         ),
       ),

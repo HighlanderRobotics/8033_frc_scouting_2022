@@ -11,12 +11,12 @@ class SharedPreferencesHelper {
 
   final sharedPreferences = SharedPreferences.getInstance();
 
-  Future<String> getString(String key) async {
+  Future<String?> getString(String key) async {
     final prefs = await sharedPreferences;
-    return prefs.getString(key) ?? "";
+    return prefs.getString(key);
   }
 
-  Future<bool> setString(String key, String value) async {
+  Future<bool?> setString(String key, String value) async {
     final prefs = await sharedPreferences;
     return prefs.setString(key, value);
   }

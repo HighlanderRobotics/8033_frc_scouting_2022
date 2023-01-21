@@ -2,6 +2,8 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
+import 'package:frc_scouting/getx_screens/service_status_screen.dart';
+import 'package:frc_scouting/getx_screens/settings_screen.dart';
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/helpers/scouters_helper.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
@@ -12,42 +14,27 @@ import 'package:get/get.dart';
 
 import '../models/match_type.dart';
 import 'game_configuration_screen.dart';
-import 'service_status_screen.dart';
 import 'previous_matches_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   late BusinessLogicController controller;
+  final SettingsScreenVariables variables = Get.put(SettingsScreenVariables());
 
   var isCustomMatchSelected = false.obs;
 
-  final matchNumberTxtFieldController = TextEditingController();
-
-  void updateMatchNumberTextField(String newValue, {bool forceUpdate = false}) {
-    if (forceUpdate) {
-      matchNumberTxtFieldController.text = newValue;
-    }
-
-    controller.matchData.matchKey.value.matchNumber =
-        int.tryParse(newValue) ?? 0;
-    controller.matchData.matchKey.refresh();
-    controller.refresh();
-  }
-
-  final teamTxtFieldController = TextEditingController();
-
-  void updateTeamTextField(String newValue, {bool forceUpdate = false}) {
-    if (forceUpdate) {
-      teamTxtFieldController.text = newValue;
-    }
-
-    controller.matchData.teamNumber.value = int.tryParse(newValue) ?? 0;
-    controller.matchData.teamNumber.refresh();
-  }
+  var matchNumberTxtController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     controller = Get.put(BusinessLogicController());
     controller.resetOrientation();
+
+    matchNumberTxtController.addListener(() {
+      controller.matchData.matchKey.value.matchNumber = int.parse(
+          matchNumberTxtController.text.isEmpty
+              ? "0"
+              : matchNumberTxtController.text);
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -66,6 +53,9 @@ class HomeScreen extends StatelessWidget {
               },
             ),
           ),
+          IconButton(
+              onPressed: () => Get.to(() => SettingsScreen()),
+              icon: const Icon(Icons.settings)),
         ],
       ),
       body: Column(
@@ -83,7 +73,7 @@ class HomeScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(10.0),
                           child: Column(
                             children: [
-                              Obx(() => scouterNameDropdown()),
+                              Obx(() => scouterNameDropdown(context)),
                               const SizedBox(height: 20),
                               matchBuilderRow(),
                               const SizedBox(height: 20),
@@ -99,7 +89,7 @@ class HomeScreen extends StatelessWidget {
                                       ),
                               ),
                               const SizedBox(height: 20),
-                              teamNumberTextField(),
+                              Obx(() => teamNumberTextField())
                             ],
                           ),
                         ),
@@ -187,16 +177,15 @@ class HomeScreen extends StatelessWidget {
       //     ? null
       //     :
       onPressed: () {
-        // if (controller.currentOrientation != Orientation.landscape) {
-        //   controller.setLandscapeOrientation();
-        //   Future.delayed(
-        //     700.milliseconds,
-        //     () => Get.to(() => GameScreen()),
-        //   );
-        // } else {
-        //   Get.to(() => GameScreen());
-        // }
-        Get.to(() => GameConfigurationScreen());
+        if (controller.currentOrientation != Orientation.landscape) {
+          controller.setLandscapeOrientation();
+          Future.delayed(
+            700.milliseconds,
+            () => Get.to(() => GameScreen(isInteractive: true)),
+          );
+        } else {
+          Get.to(() => GameScreen(isInteractive: true));
+        }
       },
       child: const Text(
         "Start",
@@ -211,7 +200,6 @@ class HomeScreen extends StatelessWidget {
         dropdownDecoratorProps: const DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(
             labelText: "Match",
-            border: OutlineInputBorder(),
             filled: true,
           ),
         ),
@@ -226,10 +214,10 @@ class HomeScreen extends StatelessWidget {
 
             if (matchScheduleAndMatchKey != null) {
               controller.matchData.matchKey.value = matchKey;
-              updateMatchNumberTextField("${matchKey.matchNumber}",
-                  forceUpdate: true);
-              updateTeamTextField("${matchScheduleAndMatchKey.teamNumber}",
-                  forceUpdate: true);
+              controller.matchData.matchKey.value.matchNumber =
+                  matchKey.matchNumber;
+              controller.matchData.teamNumber.value =
+                  matchScheduleAndMatchKey.teamNumber;
             }
           }
         },
@@ -249,7 +237,6 @@ class HomeScreen extends StatelessWidget {
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Match Type",
-          border: OutlineInputBorder(),
           filled: true,
         ),
       ),
@@ -259,10 +246,7 @@ class HomeScreen extends StatelessWidget {
       items: MatchType.values,
       onChanged: (matchType) {
         if (matchType != null) {
-          controller.matchData.matchKey.value = MatchKey(
-              matchNumber:
-                  int.tryParse(matchNumberTxtFieldController.text) ?? 0,
-              matchType: matchType);
+          controller.matchData.matchKey.value.matchType = matchType;
         }
       },
       itemAsString: (item) => item.localizedDescription,
@@ -285,49 +269,61 @@ class HomeScreen extends StatelessWidget {
 
   Widget matchNumberTextField() {
     return TextField(
+      controller: matchNumberTxtController,
       decoration: const InputDecoration(
-        hintText: "Match Number",
+        labelText: "Match Number",
         filled: true,
       ),
-      controller: matchNumberTxtFieldController,
       keyboardType: TextInputType.number,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
       ],
-      onChanged: (String matchNumberString) =>
-          updateMatchNumberTextField(matchNumberString),
+      onChanged: (String matchNumberString) => controller.matchData.matchKey
+          .value.matchNumber = int.tryParse(matchNumberString) ?? 0,
     );
   }
 
   TextField teamNumberTextField() {
+    final teamNumber = controller.matchData.teamNumber.value.toString();
     return TextField(
+      controller:
+          TextEditingController(text: teamNumber == "0" ? "" : teamNumber),
       decoration: const InputDecoration(
-        hintText: "Team Number",
+        labelText: "Team Number",
         filled: true,
       ),
-      controller: teamTxtFieldController,
       keyboardType: TextInputType.number,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
       ],
-      onChanged: (String teamNumber) => updateTeamTextField(teamNumber),
+      onChanged: (String teamNumber) =>
+          controller.matchData.teamNumber.value = int.tryParse(teamNumber) ?? 0,
     );
   }
 
-  DropdownSearch<String> scouterNameDropdown() {
+  Widget scouterNameDropdown(BuildContext context) {
     return DropdownSearch<String>(
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Scouter Name",
-          border: OutlineInputBorder(),
           filled: true,
         ),
       ),
-      popupProps: PopupProps.dialog(
+      popupProps: PopupProps.modalBottomSheet(
         emptyBuilder: (context, searchEntry) {
           return const Padding(
             padding: EdgeInsets.all(20),
             child: Text("No Scouter Found"),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+        containerBuilder: (context, popupWidget) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: popupWidget,
+            ),
           );
         },
         fit: FlexFit.loose,
@@ -335,18 +331,16 @@ class HomeScreen extends StatelessWidget {
         searchFieldProps: const TextFieldProps(
           padding: EdgeInsets.all(20),
           decoration: InputDecoration(
-            label: Text("Search"),
-            border: OutlineInputBorder(),
+            labelText: "Search Scouters",
             filled: true,
           ),
+          autofocus: true,
         ),
       ),
       items: ScoutersHelper.shared.scouters,
       selectedItem: controller.matchData.scouterName.value,
-      onChanged: (value) {
-        controller.matchData.scouterName.value = value ?? "";
-        updateMatchNumberTextField("0", forceUpdate: true);
-      },
+      onChanged: (value) =>
+          controller.matchData.scouterName.value = value ?? "",
     );
   }
 

@@ -30,7 +30,8 @@ class ScoutersScheduleHelper extends ServiceClass {
 
     if (localStorageSchedule == null || networkRefresh) {
       try {
-        matchSchedule.value = await ScoutingServerAPI.getScoutersSchedule();
+        matchSchedule.value =
+            await ScoutingServerAPI.shared.getScoutersSchedule();
         _saveParsedLocalStorageSchedule(matchSchedule.value);
         service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
       } catch (e) {
@@ -46,7 +47,8 @@ class ScoutersScheduleHelper extends ServiceClass {
 
   static Future<ScoutersSchedule?> _getParsedLocalStorageSchedule() async {
     final scheduleJson = await SharedPreferencesHelper.shared
-        .getString(SharedPreferenceKeys.scoutersSchedule.toShortString());
+            .getString(SharedPreferenceKeys.scoutersSchedule.toShortString()) ??
+        "";
 
     if (scheduleJson.isNotEmpty) {
       try {
