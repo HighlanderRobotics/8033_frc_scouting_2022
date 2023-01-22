@@ -8,22 +8,20 @@ class ScoutShift {
 
   factory ScoutShift.fromJson(Map<String, dynamic> json) {
     return ScoutShift(
-      MatchScoutShiftDuration(
-          json["start"], json["end"], json["startKey"], json["endKey"]),
+      MatchScoutShiftDuration(json["start"], json["end"]),
       json["scouts"].map<String>((scouter) => scouter.toString()).toList(),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "start": matchShiftDuration.startTime.rawMatchNumber,
-        "end": matchShiftDuration.endTime.rawMatchNumber,
-        "startKey": matchShiftDuration.startTime.matchKey.longMatchKey,
-        "endKey": matchShiftDuration.endTime.matchKey.longMatchKey,
+        "start": matchShiftDuration.startOrdinalNumber,
+        "end": matchShiftDuration.endOrdinalNumber,
         "scouts": scouters.map((scouter) => scouter.toString()).toList(),
       };
 
   String get localizedDescription =>
-      matchShiftDuration.startTime.matchKey.localizedDescription;
+      matchShiftDuration.startMatchKey?.localizedDescription ??
+      "Unknown Match Key";
 
   int scouterPlacement(String scouterName) => scouters.indexOf(scouterName);
 }

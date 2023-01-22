@@ -13,14 +13,14 @@ class Event {
 
   factory Event.fromJson(List<dynamic> json) {
     return Event(
-      timeSince: Duration(milliseconds: json[0]),
+      timeSince: Duration(seconds: json[0]),
       action: RobotAction.values[1],
       position: json[2],
     );
   }
 
   List<dynamic> toJson() => [
-        timeSince.inMilliseconds,
+        timeSince.inSeconds,
         action.index,
         position,
       ];

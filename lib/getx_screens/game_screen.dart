@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
-import 'package:frc_scouting/models/levels.dart';
+
+import 'game_configuration_screen.dart';
+import '../models/levels.dart';
 import 'package:get/get.dart';
 
 import '../models/object_type.dart';

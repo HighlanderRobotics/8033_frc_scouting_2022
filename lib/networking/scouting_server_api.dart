@@ -16,7 +16,7 @@ class ScoutingServerAPI {
   // into a List of Scouter objects
 
   // ignore: prefer_final_fields
-  var _serverAuthority = "http://localhost:4000".obs;
+  var _serverAuthority = "https://4285-2600-387-f-4811-00-8.ngrok.io".obs;
 
   Future<List<String>> getScouters() async {
     try {

@@ -1,19 +1,19 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/getx_screens/game_screen.dart';
-import 'package:frc_scouting/getx_screens/service_status_screen.dart';
-import 'package:frc_scouting/getx_screens/settings_screen.dart';
-import 'package:frc_scouting/helpers/match_schedule_helper.dart';
-import 'package:frc_scouting/helpers/scouters_helper.dart';
-import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
-import 'package:frc_scouting/models/match_event.dart';
-import 'package:frc_scouting/models/match_key.dart';
-import 'package:frc_scouting/services/getx_business_logic.dart';
 import 'package:get/get.dart';
 
+import 'game_screen.dart';
+import 'service_status_screen.dart';
+import 'settings_screen.dart';
+import '../helpers/match_schedule_helper.dart';
+import '../helpers/scouters_helper.dart';
+import '../helpers/scouters_schedule_helper.dart';
+import '../models/match_event.dart';
+import '../models/match_key.dart';
+import '../services/getx_business_logic.dart';
+
 import '../models/match_type.dart';
-import 'game_configuration_screen.dart';
 import 'previous_matches_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -154,6 +154,7 @@ class HomeScreen extends StatelessWidget {
         Obx(
           () => Switch(
               value: isCustomMatchSelected.value,
+              activeColor: Theme.of(Get.context!).colorScheme.primary,
               onChanged: (bool switchState) {
                 HapticFeedback.lightImpact();
                 isCustomMatchSelected.value = switchState;

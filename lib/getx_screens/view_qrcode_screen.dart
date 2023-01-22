@@ -60,16 +60,19 @@ class QrCodeScreen extends StatelessWidget {
                     onPressed: nextPage,
                     child: const Text("Next Page"),
                   ),
-                ElevatedButton(
-                  child: Text(canPopScope ? "Back" : "Finish"),
-                  onPressed: () {
-                    Get.closeCurrentSnackbar();
-                    if (canPopScope) {
-                      Get.back();
-                    } else {
-                      controller.reset();
-                    }
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    child: Text(canPopScope ? "Back" : "Finish"),
+                    onPressed: () {
+                      Get.closeCurrentSnackbar();
+                      if (canPopScope) {
+                        Get.back();
+                      } else {
+                        controller.reset();
+                      }
+                    },
+                  ),
                 ),
               ],
             ),

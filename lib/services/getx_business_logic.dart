@@ -122,6 +122,7 @@ class BusinessLogicController extends GetxController {
     List<String> qrCodes = [];
     var jsonString = jsonEncode(matchData.toJson(includeUploadStatus: false));
     const qrCodeLimit = 2500;
+    final totalPages = (jsonString.length / qrCodeLimit).ceil();
 
     print("jsonString length: ${jsonString.length}");
 
@@ -131,7 +132,7 @@ class BusinessLogicController extends GetxController {
       final jsonPage = jsonEncode({
         "uuid": matchData.uuid,
         "currentPage": currentPage,
-        "totalPages": (jsonString.length / qrCodeLimit).ceil(),
+        "totalPages": totalPages,
         "data": jsonString.substring(0, qrCodeLimit)
       });
 
@@ -144,7 +145,7 @@ class BusinessLogicController extends GetxController {
     final jsonPage = jsonEncode({
       "uuid": matchData.uuid,
       "currentPage": currentPage,
-      "totalPages": (jsonString.length / qrCodeLimit).ceil(),
+      "totalPages": totalPages,
       "data": jsonString
     });
 
