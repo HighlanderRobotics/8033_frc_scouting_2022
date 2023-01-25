@@ -43,6 +43,5 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 ```dart
 0 = Offense
 1 = Defense
-2 = Mixed
-3 = Feeder
+2 = Feeder
 ```
