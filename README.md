@@ -20,8 +20,8 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 3 = Placed Object
 4 = Dropped Object (On Accident)
 5 = Delivered to Team
-6 = Blocked
-7 = Pinned
+6 = Start Defense
+7 = End Defense
 8 = Crossed Community Line
 ```
 
