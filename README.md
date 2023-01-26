@@ -17,12 +17,12 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 ```dart
 0 = Picked up Cube
 1 = Picked up Cone
-3 = Placed Object
-4 = Dropped Object (On Accident)
-5 = Delivered to Team
-6 = Start Defense
-7 = End Defense
-8 = Crossed Community Line
+2 = Placed Object
+3 = Dropped Object (On Accident)
+4 = Delivered to Team
+5 = Start Defense
+6 = End Defense
+7 = Crossed Community Line
 ```
 
 ## Positions
@@ -37,6 +37,14 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 10 = Crossed Cable
 11 = Crossed Charge Pad
 12 = Crossed Near Barrier
+```
+
+#### Middle Cargo
+```dart
+13 | 17
+14 | 18
+15 | 19
+16 | 20
 ```
 
 ## Robot Role
