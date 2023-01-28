@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import 'game_configuration_screen.dart';
 import 'game_screen.dart';
 import 'service_status_screen.dart';
 import 'settings_screen.dart';
@@ -35,6 +36,10 @@ class HomeScreen extends StatelessWidget {
               ? "0"
               : matchNumberTxtController.text);
     });
+
+    if (variables.serverAuthority.value == "localhost:4000") {
+      Get.to(() => GameConfigurationScreen());
+    }
 
     return Scaffold(
       appBar: AppBar(

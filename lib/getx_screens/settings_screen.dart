@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
+import 'package:frc_scouting/models/service.dart';
 import 'package:get/get.dart';
 
 import '../helpers/shared_preferences_helper.dart';
@@ -21,6 +22,17 @@ class SettingsScreenVariables extends GetxController {
         0];
 
     super.onInit();
+  }
+
+  void saveServerAuthority() async {
+    await SharedPreferencesHelper.shared.setString(
+      "serverAuthority",
+      serverAuthority.value,
+    );
+    await SharedPreferencesHelper.shared.setString(
+      "rotation",
+      rotation.value.index.toString(),
+    );
   }
 }
 
@@ -73,7 +85,7 @@ class SettingsScreen extends StatelessWidget {
           body: SafeArea(
             child: Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -137,33 +149,28 @@ class SettingsScreen extends StatelessWidget {
   Widget saveConfigurationButton() {
     return IconButton(
       icon: const Icon(Icons.check, color: Colors.green),
-      onPressed: () {
-        showDialog(
-          context: Get.context!,
-          builder: (context) => AlertDialog(
-            title: const Text("Delete configuration?"),
-            content: const Text(
-                "If you continue, you will lose all your settings, and the app will be reset to factory settings."),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                  style: ButtonStyle(
-                    elevation: MaterialStateProperty.all(0),
-                    backgroundColor: MaterialStateProperty.resolveWith(
-                        (states) => Theme.of(context).colorScheme.error),
-                    foregroundColor: MaterialStateProperty.resolveWith(
-                        (states) => Theme.of(context).colorScheme.onError),
-                  ),
-                  child: const Text("Delete"),
-                  onPressed: () {})
-            ],
-          ),
-        );
+      onPressed: () async {
+        if (hasValidServerAuthority()) {
+          variables.saveServerAuthority();
+
+          await SharedPreferencesHelper.shared
+              .setString("serverAuthority", variables.serverAuthority.value);
+
+          await SharedPreferencesHelper.shared.setString(
+            "rotation",
+            variables.rotation.value.index.toString(),
+          );
+
+          controller.serviceHelper.refreshAll(networkRefresh: true);
+
+          ScaffoldMessenger.of(Get.context!).showSnackBar(const SnackBar(
+            content: Text("Saved Configuration"),
+          ));
+        } else {
+          ScaffoldMessenger.of(Get.context!).showSnackBar(const SnackBar(
+            content: Text("Invalid Configuration"),
+          ));
+        }
       },
     );
   }

@@ -17,7 +17,7 @@ extension RotationExtension on GameConfigurationRotation {
     }
   }
 
-  GameConfigurationRotation getToggleValue() {
+  GameConfigurationRotation getToggledValue() {
     switch (this) {
       case GameConfigurationRotation.left:
         return GameConfigurationRotation.right;
@@ -41,25 +41,23 @@ class GameConfigurationScreen extends StatelessWidget {
             icon: const Icon(Icons.rotate_right),
             tooltip: "Rotate Screen",
             onPressed: () => variables.rotation.value =
-                variables.rotation.value.getToggleValue(),
+                variables.rotation.value.getToggledValue(),
           )
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
+          GameScreen(isInteractive: false),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Obx(
-              () => Text(
-                "Currently Rotated: ${variables.rotation.value.localizedDescription}",
-                style: const TextStyle(fontWeight: FontWeight.bold),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Obx(
+                () => Text(
+                  "Currently Rotated: ${variables.rotation.value.localizedDescription}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          ),
-          Expanded(
-            child: AbsorbPointer(
-              absorbing: true,
-              child: GameScreen(isInteractive: false),
             ),
           ),
         ],

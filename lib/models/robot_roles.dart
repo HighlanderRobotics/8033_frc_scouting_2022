@@ -1,4 +1,4 @@
-enum RobotRole { offense, defense, mixed, feeder }
+enum RobotRole { offense, defense, feeder }
 
 extension RobotRoleExtension on RobotRole {
   String get localizedDescription {
@@ -7,8 +7,6 @@ extension RobotRoleExtension on RobotRole {
         return "Offense";
       case RobotRole.defense:
         return "Defense";
-      case RobotRole.mixed:
-        return "Mixed";
       case RobotRole.feeder:
         return "Feeder";
     }

@@ -4,7 +4,7 @@ enum RobotAction {
   placedObject,
   droppedObject,
   deliveredToTeam,
-  blocked,
-  pinned,
+  startDefense,
+  endDefense,
   crossedCommunityLine
 }

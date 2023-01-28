@@ -6,9 +6,12 @@ import 'settings_screen.dart';
 
 class ServerAuthoritySetupScreen extends StatelessWidget {
   final SettingsScreenVariables variables = Get.put(SettingsScreenVariables());
+  var serverAuthorityTxtController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    serverAuthorityTxtController.text = variables.serverAuthority.value;
+
     return Material(
       child: SingleChildScrollView(
         child: Expanded(
@@ -16,8 +19,7 @@ class ServerAuthoritySetupScreen extends StatelessWidget {
             children: [
               Obx(
                 () => TextField(
-                  controller: TextEditingController(
-                      text: variables.serverAuthority.value),
+                  controller: serverAuthorityTxtController,
                   decoration: InputDecoration(
                       filled: true,
                       label: const Text("Server Authority"),

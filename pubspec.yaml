@@ -51,6 +51,9 @@ dependencies:
   protobuf: ^2.1.0
   implicitly_animated_reorderable_list: ^0.4.2
   dropdown_search: ^5.0.5
+  holding_gesture: ^1.1.0
+  frc_8033_scouting_shared:
+    git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
 
 dev_dependencies:
   flutter_test:
