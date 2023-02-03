@@ -121,7 +121,14 @@ class BusinessLogicController extends GetxController {
   List<String> separateEventsToQrCodes(MatchData matchData) {
     List<String> qrCodes = [];
     var jsonString = jsonEncode(matchData.toJson(includeUploadStatus: false));
-    const qrCodeLimit = 2500;
+    const qrCodeLimit = 1000;
+    final scouterPlacement = ScoutersScheduleHelper
+        .shared.matchSchedule.value.shifts
+        .firstWhere((shift) => shift.matchShiftDuration.range
+            .contains(matchData.matchKey.value.matchNumber))
+        .scouterPlacement(
+          matchData.scouterName.value,
+        );
     final totalPages = (jsonString.length / qrCodeLimit).ceil();
 
     print("jsonString length: ${jsonString.length}");
@@ -131,6 +138,7 @@ class BusinessLogicController extends GetxController {
     while (jsonString.length > qrCodeLimit) {
       final jsonPage = jsonEncode({
         "uuid": matchData.uuid,
+        "scouterId": scouterPlacement,
         "currentPage": currentPage,
         "totalPages": totalPages,
         "data": jsonString.substring(0, qrCodeLimit)
@@ -144,6 +152,7 @@ class BusinessLogicController extends GetxController {
 
     final jsonPage = jsonEncode({
       "uuid": matchData.uuid,
+      "scouterId": scouterPlacement,
       "currentPage": currentPage,
       "totalPages": totalPages,
       "data": jsonString

@@ -3,10 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:frc_scouting/models/match_data.dart';
 import 'package:frc_scouting/models/previous_matches_info.dart';
 import 'package:get/get.dart';
+import 'package:implicitly_animated_reorderable_list_2/implicitly_animated_reorderable_list_2.dart';
+import 'package:implicitly_animated_reorderable_list_2/transitions.dart';
 import 'package:intl/intl.dart';
-
-import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
-import 'package:implicitly_animated_reorderable_list/transitions.dart';
 
 import '../models/match_key.dart';
 import 'view_qrcode_screen.dart';
@@ -135,6 +134,7 @@ class PreviousMatchesScreen extends StatelessWidget {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
+                              behavior: SnackBarBehavior.floating,
                               content: Text(
                                   "Deleted ${matchData.matchKey.value.localizedDescription}"),
                               action: SnackBarAction(

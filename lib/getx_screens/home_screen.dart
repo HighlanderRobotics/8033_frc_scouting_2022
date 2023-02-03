@@ -316,6 +316,7 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       popupProps: PopupProps.modalBottomSheet(
+        searchDelay: 0.seconds,
         emptyBuilder: (context, searchEntry) {
           return const Padding(
             padding: EdgeInsets.all(20),

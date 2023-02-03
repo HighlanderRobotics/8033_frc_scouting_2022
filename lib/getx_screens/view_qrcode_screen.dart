@@ -17,6 +17,9 @@ class QrCodeScreen extends StatelessWidget {
   void nextPage() => pageNumber.value =
       (pageNumber.value < matchQrCodes.length - 1) ? pageNumber.value + 1 : 0;
 
+  void previousPage() => pageNumber.value =
+      (pageNumber.value > 0) ? pageNumber.value - 1 : matchQrCodes.length - 1;
+
   @override
   Widget build(BuildContext context) {
     controller.setPortraitOrientation();
@@ -63,15 +66,15 @@ class QrCodeScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: ElevatedButton(
-                    child: Text(canPopScope ? "Back" : "Finish"),
                     onPressed: () {
                       Get.closeCurrentSnackbar();
                       if (canPopScope) {
-                        Get.back();
+                        previousPage();
                       } else {
                         controller.reset();
                       }
                     },
+                    child: Text(canPopScope ? "Back" : "Finish"),
                   ),
                 ),
               ],

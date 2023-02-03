@@ -62,8 +62,6 @@ class GameScreen extends StatelessWidget {
   Timer presentPostGameScreenTimer = Timer(150.seconds, () {});
   Timer autoTimer = Timer(17.seconds, () {});
 
-  final double positionedWidgetMultiplier = 0.22;
-
   final communityEntranceRectangleValues = [
     GameScreenObject(size: const Size(0.345, 0.130), position: 10),
     GameScreenObject(size: const Size(0.480, 0.355), position: 11),
@@ -213,6 +211,11 @@ class GameScreen extends StatelessWidget {
                   }
                 },
               ),
+            if (isInteractive)
+              draggableFloatingActionButtonWidget(
+                  // access the material symbol "conveyor_belt
+                  icon: const Icon(Icons.bluetooth),
+                  initialOffset: Offset(boxDecorationSize.width - 100, 0)),
             if (isInteractive)
               HoldTimeoutDetector(
                 enableHapticFeedback: true,
@@ -407,7 +410,7 @@ class GameScreen extends StatelessWidget {
     void Function()? onTapAction,
     void Function()? onLongPressAction,
     Color color = Colors.black,
-    required Icon icon,
+    required Widget icon,
   }) {
     return DraggableFloatingActionButton(
       initialOffset: initialOffset,

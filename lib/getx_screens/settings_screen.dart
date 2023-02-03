@@ -165,10 +165,12 @@ class SettingsScreen extends StatelessWidget {
 
           ScaffoldMessenger.of(Get.context!).showSnackBar(const SnackBar(
             content: Text("Saved Configuration"),
+            behavior: SnackBarBehavior.floating,
           ));
         } else {
           ScaffoldMessenger.of(Get.context!).showSnackBar(const SnackBar(
             content: Text("Invalid Configuration"),
+            behavior: SnackBarBehavior.floating,
           ));
         }
       },
