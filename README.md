@@ -41,10 +41,16 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 #### Middle Cargo
 ```dart
-13 | 17
-14 | 18
-15 | 19
-16 | 20
+13 |
+14 |
+15 |
+16 |
+```
+
+### Field Orientation Direction
+```dart
+0 = left
+1 = right
 ```
 
 ## Robot Role
