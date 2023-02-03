@@ -18,7 +18,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 0 = Picked up Cube
 1 = Picked up Cone
 2 = Placed Object
-3 = Dropped Object (On Accident)
+3 = Dropped Object
 4 = Delivered to Team
 5 = Start Defense
 6 = End Defense
@@ -41,10 +41,23 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 #### Middle Cargo
 ```dart
-13 | 17
-14 | 18
-15 | 19
-16 | 20
+13 |
+14 |
+15 |
+16 |
+```
+
+#### Field Starting Positions
+```dart
+17 = tag id 3
+18 = tag id 2
+19 = tag id 1
+```
+
+## Field Orientation Direction
+```dart
+0 = left
+1 = right
 ```
 
 ## Robot Role
