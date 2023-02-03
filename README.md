@@ -47,7 +47,14 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 16 |
 ```
 
-### Field Orientation Direction
+#### Field Starting Positions
+```dart
+17 = tag id 3
+18 = tag id 2
+19 = tag id 1
+```
+
+## Field Orientation Direction
 ```dart
 0 = left
 1 = right
