@@ -102,7 +102,7 @@ class PostGameScreen extends StatelessWidget {
             .saveAndUploadMatchData(controller.matchData)
             .then((uploadResult) {
           Get.snackbar(
-            "Upload ${uploadResult ? "Successful" : "Unsuccessful"}",
+            "Upload ${uploadResult ? "Successful" : "Failed"}",
             uploadResult
                 ? "The match has been uploaded to the server"
                 : "The match could not be uploaded to the server. Please try again later in the Previous Matches Screen",
@@ -112,8 +112,8 @@ class PostGameScreen extends StatelessWidget {
 
         Get.to(
           () => QrCodeScreen(
-              matchQrCodes:
-                  controller.separateEventsToQrCodes(controller.matchData),
+              matchQrCodes: controller.separateEventsToQrCodes(
+                  matchData: controller.matchData),
               canPopScope: false),
         );
       },

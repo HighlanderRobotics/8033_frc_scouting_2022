@@ -25,14 +25,14 @@ class MatchData {
   var challengeResult = ClimbingChallenge.noClimb.obs;
   var hasSavedToCloud = false.obs;
 
-  String get key {
+  String get tbaKey {
     if (matchKey != null.obs) {
       final match = MatchScheduleHelper.shared.matchSchedule
           .firstWhere((match) => match.matchKey == matchKey.value);
-      return match.key;
+      return match.key.substring(7).trimRight().trimRight();
     }
 
-    return "";
+    return matchKey.value.shortMatchKey;
   }
 
   MatchData();
@@ -60,11 +60,15 @@ class MatchData {
 
   Map<String, dynamic> toJson({
     required bool includeUploadStatus,
+    required bool usesTBAKey,
   }) =>
       {
         'uuid': uuid,
         'tournamentKey': Constants.shared.tournamentKey.eventCode,
-        'matchKey': matchKey.value.shortMatchKey,
+        if (usesTBAKey)
+          'matchKey': tbaKey
+        else
+          'matchKey': matchKey.value.shortMatchKey,
         'teamNumber': teamNumber.value,
         'scouterName': scouterName.value,
         'startTime': startTime.millisecondsSinceEpoch,

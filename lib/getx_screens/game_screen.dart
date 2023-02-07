@@ -211,6 +211,7 @@ class GameScreen extends StatelessWidget {
                   }
                 },
               ),
+            createSubstationRectangle(),
             if (isInteractive)
               draggableFloatingActionButtonWidget(
                   // access the material symbol "conveyor_belt
@@ -244,7 +245,6 @@ class GameScreen extends StatelessWidget {
                   ),
                 ),
               ),
-            createSubstationRectangle(),
             if (isInteractive)
               Align(
                 alignment: Alignment.topCenter,

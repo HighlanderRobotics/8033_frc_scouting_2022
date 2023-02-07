@@ -41,7 +41,8 @@ class FilesHelper {
     var filePath = "$path/frc-${matchData.uuid}.json";
     print("Writing to file: $filePath");
     File file = File(filePath);
-    file.writeAsString(jsonEncode(matchData.toJson(includeUploadStatus: true)));
+    file.writeAsString(jsonEncode(
+        matchData.toJson(includeUploadStatus: true, usesTBAKey: false)));
     print("Successfully wrote to file: $filePath");
   }
 

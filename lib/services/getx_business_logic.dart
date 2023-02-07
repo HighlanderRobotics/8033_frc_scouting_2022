@@ -118,9 +118,10 @@ class BusinessLogicController extends GetxController {
     event.debugLogDescription();
   }
 
-  List<String> separateEventsToQrCodes(MatchData matchData) {
+  List<String> separateEventsToQrCodes({required MatchData matchData}) {
     List<String> qrCodes = [];
-    var jsonString = jsonEncode(matchData.toJson(includeUploadStatus: false));
+    var jsonString = jsonEncode(
+        matchData.toJson(includeUploadStatus: false, usesTBAKey: false));
     const qrCodeLimit = 1000;
     final scouterPlacement = ScoutersScheduleHelper
         .shared.matchSchedule.value.shifts

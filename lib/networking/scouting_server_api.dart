@@ -61,7 +61,7 @@ class ScoutingServerAPI {
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(matchData.toJson(includeUploadStatus: false)),
+        body: jsonEncode(matchData.toJson(includeUploadStatus: false, usesTBAKey: true)),
       );
 
       if (response.statusCode == 200) {

@@ -191,7 +191,8 @@ class PreviousMatchesScreen extends StatelessWidget {
       child: ListTile(
         onTap: () => Get.to(
           () => QrCodeScreen(
-            matchQrCodes: controller.separateEventsToQrCodes(matchData),
+            matchQrCodes:
+                controller.separateEventsToQrCodes(matchData: matchData),
             canPopScope: true,
           ),
         ),
