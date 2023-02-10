@@ -41,97 +41,117 @@ class HomeScreen extends StatelessWidget {
       Get.to(() => GameConfigurationScreen());
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Collection App 2023"),
-        actions: [
-          Obx(
-            () => IconButton(
-              icon: Icon(
-                Icons.bolt,
-                color: controller.serviceHelper.isAllUp
-                    ? Colors.green
-                    : Colors.red,
+    return Obx(
+      () => Scaffold(
+        appBar: AppBar(
+          title: const Text("Collection App 2023"),
+          backgroundColor:
+              ScoutersScheduleHelper.shared.matchSchedule.value.getVersionColor,
+          foregroundColor: Colors.white,
+          actions: [
+            Obx(
+              () => IconButton(
+                icon: Icon(
+                  Icons.bolt,
+                  color: controller.serviceHelper.isAllUp
+                      ? Colors.green
+                      : Colors.red,
+                  shadows: const [Shadow(blurRadius: 10)],
+                ),
+                onPressed: () {
+                  Get.to(() => ServiceStatusScreen());
+                },
               ),
-              onPressed: () {
-                Get.to(() => ServiceStatusScreen());
-              },
             ),
-          ),
-          IconButton(
-              onPressed: () => Get.to(() => SettingsScreen()),
-              icon: const Icon(Icons.settings)),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            children: [
-                              Obx(() => scouterNameDropdown(context)),
-                              const SizedBox(height: 20),
-                              matchBuilderRow(),
-                              const SizedBox(height: 20),
-                              Obx(
-                                () => isCustomMatchSelected.isFalse
-                                    ? matchKeyDropdown()
-                                    : Column(
-                                        children: [
-                                          matchTypeDropdown(),
-                                          const SizedBox(height: 20),
-                                          matchNumberTextField(),
-                                        ],
-                                      ),
-                              ),
-                              const SizedBox(height: 20),
-                              Obx(() => teamNumberTextField())
-                            ],
+            IconButton(
+                onPressed: () => Get.to(() => SettingsScreen()),
+                icon: const Icon(Icons.settings,
+                    shadows: [Shadow(blurRadius: 10)])),
+          ],
+        ),
+        // backgroundColor:
+        //     ScoutersScheduleHelper.shared.matchSchedule.value.getVersionColor,
+        backgroundColor:
+            (Theme.of(context).colorScheme.brightness == Brightness.dark
+                    ? HSLColor.fromColor(ScoutersScheduleHelper
+                            .shared.matchSchedule.value.getVersionColor)
+                        .withSaturation(0.5)
+                        .withLightness(0.2)
+                    : HSLColor.fromColor(ScoutersScheduleHelper
+                            .shared.matchSchedule.value.getVersionColor)
+                        .withSaturation(0.5)
+                        .withLightness(0.8))
+                .toColor(),
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Column(
+                              children: [
+                                Obx(() => scouterNameDropdown(context)),
+                                const SizedBox(height: 20),
+                                matchBuilderRow(),
+                                const SizedBox(height: 20),
+                                Obx(
+                                  () => isCustomMatchSelected.isFalse
+                                      ? matchKeyDropdown()
+                                      : Column(
+                                          children: [
+                                            matchTypeDropdown(),
+                                            const SizedBox(height: 20),
+                                            matchNumberTextField(),
+                                          ],
+                                        ),
+                                ),
+                                const SizedBox(height: 20),
+                                Obx(() => teamNumberTextField())
+                              ],
+                            ),
                           ),
-                        ),
-                      ]),
+                        ]),
+                  ),
                 ),
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 30.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  startButton(),
-                  ElevatedButton(
-                    child: const Text("Previous Matches"),
-                    onPressed: () async {
-                      final matches =
-                          await controller.documentsHelper.getPreviousMatches();
-                      Get.to(() =>
-                          PreviousMatchesScreen(previousMatchesInfo: matches));
-                      if (matches.numberOfInvalidFiles > 0) {
-                        Get.snackbar(
-                          "Ignored Invalid Files",
-                          "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      }
-                    },
-                  ),
-                ],
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 30.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    startButton(),
+                    ElevatedButton(
+                      child: const Text("Previous Matches"),
+                      onPressed: () async {
+                        final matches = await controller.documentsHelper
+                            .getPreviousMatches();
+                        Get.to(() => PreviousMatchesScreen(
+                            previousMatchesInfo: matches));
+                        if (matches.numberOfInvalidFiles > 0) {
+                          Get.snackbar(
+                            "Ignored Invalid Files",
+                            "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

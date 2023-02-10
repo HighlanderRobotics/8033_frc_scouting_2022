@@ -1,9 +1,16 @@
+import 'dart:convert';
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
+import 'package:lzstring/lzstring.dart';
+
 import '../helpers/scouters_schedule_helper.dart';
 import 'scout_shift.dart';
 
 class ScoutersSchedule {
-  int version;
-  List<ScoutShift> shifts;
+  RxInt version;
+  RxList<ScoutShift> shifts;
 
   List<ScoutShift> filterShiftsWithScouter(String scouterName) {
     if (scouterName.isEmpty) {
@@ -21,17 +28,21 @@ class ScoutersSchedule {
 
   factory ScoutersSchedule.fromJson(Map<String, dynamic> json) {
     return ScoutersSchedule(
-      json["version"],
-      json["shifts"]
+      RxInt(json["version"]),
+      RxList(json["shifts"]
           .map<ScoutShift>((match) => ScoutShift.fromJson(match))
-          .toList(),
+          .toList()),
     );
   }
 
+  factory ScoutersSchedule.fromCompressedJSON(String compressed) =>
+      ScoutersSchedule.fromJson(
+          jsonDecode(LZString.decompressFromUTF16Sync(compressed) ?? ""));
+
   Map<String, dynamic> toJson() {
     return {
-      "version": version,
-      "shifts": shifts.map((match) => match.toJson()).toList(),
+      "version": version.value,
+      "shifts": shifts.toList().map((match) => match.toJson()).toList(),
     };
   }
 
@@ -51,4 +62,7 @@ class ScoutersSchedule {
     required String scouter,
   }) =>
       getShiftFor(matchNumber: matchNumber).scouters.indexOf(scouter);
+
+  Color get getVersionColor =>
+      HSLColor.fromAHSL(1, (version.toDouble() * 82) % 360, 0.5, 0.5).toColor();
 }

@@ -17,6 +17,8 @@ import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
 import 'settings_screen.dart';
 
+import 'package:flutter/foundation.dart' as Foundation;
+
 class GameScreenObject {
   Size size;
   int position;
@@ -155,20 +157,22 @@ class GameScreen extends StatelessWidget {
         () => Stack(
           key: draggableFABParentKey,
           children: [
-            Positioned(
-              top: getTopToBoxDecorationHeight(),
-              child: SizedBox(
-                  width: Get.mediaQuery.size.width,
-                  height: 1,
-                  child: Container(color: Colors.red)),
-            ),
-            Positioned(
-              bottom: getBottomToBoxDecorationHeight(),
-              child: SizedBox(
-                  width: Get.mediaQuery.size.width,
-                  height: 1,
-                  child: Container(color: Colors.red)),
-            ),
+            if (!Foundation.kReleaseMode)
+              Positioned(
+                top: getTopToBoxDecorationHeight(),
+                child: SizedBox(
+                    width: Get.mediaQuery.size.width,
+                    height: 1,
+                    child: Container(color: Colors.red)),
+              ),
+            if (!Foundation.kReleaseMode)
+              Positioned(
+                bottom: getBottomToBoxDecorationHeight(),
+                child: SizedBox(
+                    width: Get.mediaQuery.size.width,
+                    height: 1,
+                    child: Container(color: Colors.red)),
+              ),
             for (final index in gridRectangleValues)
               createGridRectangle(index: index),
             if (isCommunityEntranceObjectsHidden.isFalse &&
@@ -214,7 +218,7 @@ class GameScreen extends StatelessWidget {
             createSubstationRectangle(),
             if (isInteractive)
               draggableFloatingActionButtonWidget(
-                  // access the material symbol "conveyor_belt
+                  // access the material symbol "conveyor_belt"
                   icon: const Icon(Icons.bluetooth),
                   initialOffset: Offset(boxDecorationSize.width - 100, 0)),
             if (isInteractive)

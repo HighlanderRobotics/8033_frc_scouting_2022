@@ -55,6 +55,7 @@ dependencies:
   frc_8033_scouting_shared:
     git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
   material_design_icons_flutter: ^6.0.7096
+  lzstring: ^2.0.0+2
 
 dev_dependencies:
   flutter_test:

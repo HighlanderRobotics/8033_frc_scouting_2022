@@ -250,7 +250,7 @@ packages:
     source: hosted
     version: "2.0.1"
   lzstring:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: lzstring
       sha256: "3aa966276ef903485732ac1306598556451ff31a342378510f110304bcf2be27"

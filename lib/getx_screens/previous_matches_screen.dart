@@ -77,12 +77,8 @@ class PreviousMatchesScreen extends StatelessWidget {
   }
 
   Widget previousMatchesListView() {
-    return WillPopScope(
-      onWillPop: () async {
-        Get.closeCurrentSnackbar();
-        return true;
-      },
-      child: Column(children: [
+    return Column(
+      children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: TextField(
@@ -182,7 +178,7 @@ class PreviousMatchesScreen extends StatelessWidget {
             ),
           ),
         ),
-      ]),
+      ],
     );
   }
 
