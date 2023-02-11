@@ -5,13 +5,19 @@ import 'scan_qrcode_screen.dart';
 import 'settings_screen.dart';
 
 class ServerAuthoritySetupScreen extends StatelessWidget {
-  final SettingsScreenVariables variables = Get.put(SettingsScreenVariables());
+  final SettingsScreenVariables variables = Get.find();
   var serverAuthorityTxtController = TextEditingController();
+
+  ServerAuthoritySetupScreen() {
+    serverAuthorityTxtController.text = variables.serverAuthority.value;
+
+    serverAuthorityTxtController.addListener(() {
+      variables.serverAuthority.value = serverAuthorityTxtController.text;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    serverAuthorityTxtController.text = variables.serverAuthority.value;
-
     return Material(
       child: SingleChildScrollView(
         child: Column(
@@ -29,7 +35,9 @@ class ServerAuthoritySetupScreen extends StatelessWidget {
                             .hasMatch(variables.serverAuthority.value)
                         ? null
                         : "Must be a valid domain not prefixed with \"http://\" or \"https://\""),
-                onChanged: (value) => variables.serverAuthority.value = value,
+                onChanged: (value) {
+                  variables.serverAuthority.value = value;
+                },
                 autocorrect: false,
                 keyboardType: TextInputType.url,
               ),

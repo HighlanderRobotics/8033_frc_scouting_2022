@@ -9,6 +9,7 @@ import 'package:frc_scouting/models/service.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
+import '../helpers/shared_preferences_helper.dart';
 import '../persistence/files_helper.dart';
 import '../models/event.dart';
 import '../models/match_data.dart';
@@ -39,32 +40,30 @@ class BusinessLogicController extends GetxController {
   void onInit() async {
     matchData = MatchData();
 
+    matchData.scouterName.value =
+        await SharedPreferencesHelper.shared.getString("scouterName") ?? "";
+
+    try {
+      MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: false);
+      ScoutersHelper.shared.getAllScouters(networkRefresh: false);
+      ScoutersScheduleHelper.shared.getScoutersSchedule(networkRefresh: false);
+    } catch (e) {}
+
     try {
       MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: true);
     } catch (e) {
-      try {
-        MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: false);
-      } catch (e) {}
       print("Error getting event schedule: $e");
     }
 
     try {
       ScoutersHelper.shared.getAllScouters(networkRefresh: true);
     } catch (e) {
-      try {
-        ScoutersHelper.shared.getAllScouters(networkRefresh: false);
-      } catch (e) {}
       print("Error getting scouters: $e");
     }
 
     try {
       ScoutersScheduleHelper.shared.getScoutersSchedule(networkRefresh: true);
     } catch (e) {
-      try {
-        ScoutersScheduleHelper.shared
-            .getScoutersSchedule(networkRefresh: false);
-      } catch (e) {}
-
       print("Error getting scouters schedule: $e");
     }
 
@@ -167,8 +166,7 @@ class BusinessLogicController extends GetxController {
   }
 
   void reset() {
-    // ignore: unnecessary_string_interpolations
-    final scouterName = "${matchData.scouterName.value}";
+    final scouterName = matchData.scouterName.value;
     matchData = MatchData();
     matchData.scouterName.value = scouterName;
     Get.offAll(() => HomeScreen());

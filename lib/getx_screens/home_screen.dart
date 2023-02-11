@@ -1,7 +1,10 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frc_scouting/getx_screens/server_authority_setup.dart';
+import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'game_configuration_screen.dart';
 import 'game_screen.dart';
@@ -24,12 +27,9 @@ class HomeScreen extends StatelessWidget {
   var isCustomMatchSelected = false.obs;
 
   var matchNumberTxtController = TextEditingController();
+  var teamNumberTxtController = TextEditingController();
 
-  @override
-  Widget build(BuildContext context) {
-    controller = Get.put(BusinessLogicController());
-    controller.resetOrientation();
-
+  HomeScreen() {
     matchNumberTxtController.addListener(() {
       controller.matchData.matchKey.value.matchNumber = int.parse(
           matchNumberTxtController.text.isEmpty
@@ -37,9 +37,18 @@ class HomeScreen extends StatelessWidget {
               : matchNumberTxtController.text);
     });
 
-    if (variables.serverAuthority.value == "localhost:4000") {
-      Get.to(() => GameConfigurationScreen());
-    }
+    teamNumberTxtController.addListener(() {
+      controller.matchData.teamNumber.value = int.parse(
+          teamNumberTxtController.text.isEmpty
+              ? "0"
+              : teamNumberTxtController.text);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    controller = Get.put(BusinessLogicController());
+    controller.resetOrientation();
 
     return Obx(
       () => Scaffold(
@@ -113,7 +122,7 @@ class HomeScreen extends StatelessWidget {
                                         ),
                                 ),
                                 const SizedBox(height: 20),
-                                Obx(() => teamNumberTextField())
+                                teamNumberTextField(),
                               ],
                             ),
                           ),
@@ -163,14 +172,17 @@ class HomeScreen extends StatelessWidget {
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text("Match Builder"),
+            children: [
+              const Text("Match Builder"),
               Text(
                 "Use only when there is no upcoming matches available to choose from.",
                 maxLines: 2,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.grey,
+                  color: Theme.of(Get.context!).colorScheme.brightness ==
+                          Brightness.dark
+                      ? Colors.grey
+                      : Colors.grey[700],
                 ),
               ),
             ],
@@ -203,6 +215,8 @@ class HomeScreen extends StatelessWidget {
       //     ? null
       //     :
       onPressed: () {
+        // save name in shared preferences
+
         if (controller.currentOrientation != Orientation.landscape) {
           controller.setLandscapeOrientation();
           Future.delayed(
@@ -310,10 +324,8 @@ class HomeScreen extends StatelessWidget {
   }
 
   TextField teamNumberTextField() {
-    final teamNumber = controller.matchData.teamNumber.value.toString();
     return TextField(
-      controller:
-          TextEditingController(text: teamNumber == "0" ? "" : teamNumber),
+      controller: teamNumberTxtController,
       decoration: const InputDecoration(
         labelText: "Team Number",
         filled: true,
@@ -349,7 +361,19 @@ class HomeScreen extends StatelessWidget {
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: popupWidget,
+              child: Stack(children: [
+                Column(children: [
+                  const SizedBox(height: 40),
+                  Expanded(child: popupWidget),
+                ]),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                )
+              ]),
             ),
           );
         },
@@ -366,8 +390,10 @@ class HomeScreen extends StatelessWidget {
       ),
       items: ScoutersHelper.shared.scouters,
       selectedItem: controller.matchData.scouterName.value,
-      onChanged: (value) =>
-          controller.matchData.scouterName.value = value ?? "",
+      onChanged: (value) {
+        controller.matchData.scouterName.value = value ?? "";
+        SharedPreferencesHelper.shared.setString("scouterName", value ?? "");
+      },
     );
   }
 

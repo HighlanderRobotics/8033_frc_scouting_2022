@@ -26,6 +26,12 @@ class SettingsScreenVariables extends GetxController {
         ) ??
         0];
 
+    if (serverAuthority.value == "localhost:4000" || serverAuthority.isEmpty) {
+      Future.delayed(0.seconds, () {
+        Get.to(() => SettingsScreen());
+      });
+    }
+
     super.onInit();
   }
 
@@ -43,104 +49,70 @@ class SettingsScreenVariables extends GetxController {
 
 class SettingsScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
-  final SettingsScreenVariables variables = Get.find();
+  final SettingsScreenVariables variables = Get.put(SettingsScreenVariables());
 
   bool get isDataValid => hasValidServerAuthority();
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (hasValidServerAuthority()) {
-          return true;
-        } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text("Invalid server authority"),
-              content: const Text(
-                  "The server authority you entered is invalid. Please enter a valid server authority."),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text("OK"),
-                ),
-              ],
-            ),
-          );
-          return false;
-        }
-      },
-      child: Obx(
-        () => Scaffold(
-          appBar: AppBar(
-            title: const Text("Settings"),
-            actions: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
-                child: saveConfigurationButton(),
-              ),
-            ],
-            automaticallyImplyLeading:
-                validServerAuthority.hasMatch(variables.serverAuthority.value),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Settings"),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
+            child: saveConfigurationButton(),
           ),
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ServerAuthoritySetupScreen(),
-                    ElevatedButton(
-                        onPressed: () => Get.to(GameConfigurationScreen()),
-                        child: const Text("Edit Game Configuration")),
-                    const SizedBox(height: 10),
-                    ElevatedButton.icon(
-                        icon: const Icon(Icons.qr_code),
-                        onPressed: () async {
-                          final qrCodeResult = await Get.to(ScanQrCodeScreen());
-                          if (qrCodeResult is String &&
-                              qrCodeResult.isNotEmpty) {
-                            // decode qr code string
-                            try {
-                              ScoutersScheduleHelper
-                                      .shared.matchSchedule.value =
-                                  ScoutersSchedule.fromCompressedJSON(
-                                      qrCodeResult);
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ServerAuthoritySetupScreen(),
+                ElevatedButton(
+                    onPressed: () => Get.to(GameConfigurationScreen()),
+                    child: const Text("Edit Game Configuration")),
+                const SizedBox(height: 10),
+                ElevatedButton.icon(
+                    icon: const Icon(Icons.qr_code),
+                    onPressed: () async {
+                      final qrCodeResult = await Get.to(ScanQrCodeScreen());
+                      if (qrCodeResult is String && qrCodeResult.isNotEmpty) {
+                        // decode qr code string
+                        try {
+                          ScoutersScheduleHelper.shared.matchSchedule.value =
+                              ScoutersSchedule.fromCompressedJSON(qrCodeResult);
 
+                          ScoutersScheduleHelper.saveParsedLocalStorageSchedule(
                               ScoutersScheduleHelper
-                                  .saveParsedLocalStorageSchedule(
-                                      ScoutersScheduleHelper
-                                          .shared.matchSchedule.value);
+                                  .shared.matchSchedule.value);
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      "Successfully updated Scouters Schedule \nVersion ${ScoutersScheduleHelper.shared.matchSchedule.value.version.value}"),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      "Failed to update Scouters Schedule. \nError: ${e.toString()}"),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        label: const Text("Scan Scouter Schedule QR Code")),
-                    const SizedBox(height: 30),
-                    deleteConfigurationButton(),
-                  ],
-                ),
-              ),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Successfully updated Scouters Schedule \nVersion ${ScoutersScheduleHelper.shared.matchSchedule.value.version.value}"),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  "Failed to update Scouters Schedule. \nError: ${e.toString()}"),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    label: const Text("Scan Scouter Schedule QR Code")),
+                const SizedBox(height: 30),
+                deleteConfigurationButton(),
+              ],
             ),
           ),
         ),
@@ -173,7 +145,12 @@ class SettingsScreen extends StatelessWidget {
                         (states) => Theme.of(context).colorScheme.onError),
                   ),
                   child: const Text("Delete"),
-                  onPressed: () {})
+                  onPressed: () async {
+                    final sharedPreferences =
+                        await SharedPreferencesHelper.shared.sharedPreferences;
+                    sharedPreferences.clear();
+                    controller.reset();
+                  })
             ],
           ),
         );
@@ -191,7 +168,12 @@ class SettingsScreen extends StatelessWidget {
 
   Widget saveConfigurationButton() {
     return IconButton(
-      icon: const Icon(Icons.check, color: Colors.green),
+      icon: Icon(
+        Icons.check,
+        color: validServerAuthority.hasMatch(variables.serverAuthority.value)
+            ? Colors.green
+            : Colors.grey,
+      ),
       onPressed: () async {
         if (hasValidServerAuthority()) {
           variables.saveServerAuthority();
@@ -216,6 +198,8 @@ class SettingsScreen extends StatelessWidget {
             behavior: SnackBarBehavior.floating,
           ));
         }
+
+        Navigator.of(Get.context!).pop();
       },
     );
   }

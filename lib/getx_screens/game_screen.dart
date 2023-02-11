@@ -341,8 +341,8 @@ class GameScreen extends StatelessWidget {
   Positioned createSubstationRectangle() {
     return Positioned(
       left:
-          variables.rotation.value == GameConfigurationRotation.left ? 0 : null,
-      right: variables.rotation.value == GameConfigurationRotation.right
+          variables.rotation.value == GameConfigurationRotation.right ? 0 : null,
+      right: variables.rotation.value == GameConfigurationRotation.left
           ? 0
           : null,
       top: getTopToBoxDecorationHeight(),

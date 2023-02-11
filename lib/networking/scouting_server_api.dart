@@ -20,7 +20,7 @@ class ScoutingServerAPI {
   Future<List<String>> getScouters() async {
     try {
       var response = await http.get(Uri.parse(
-          'https://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getScouters'));
+          'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getScouters'));
 
       if (response.statusCode == 200) {
         return (jsonDecode(response.body) as List<dynamic>)
@@ -39,7 +39,7 @@ class ScoutingServerAPI {
   Future<ScoutersSchedule> getScoutersSchedule() async {
     try {
       var response = await http.get(Uri.parse(
-          'https://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getScoutersSchedule'));
+          'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getScoutersSchedule'));
 
       if (response.statusCode == 200) {
         return ScoutersSchedule.fromJson(jsonDecode(response.body));
@@ -57,11 +57,12 @@ class ScoutingServerAPI {
     try {
       final response = await http.post(
         Uri.parse(
-            'https://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/addScoutReport'),
+            'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/addScoutReport'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(matchData.toJson(includeUploadStatus: false, usesTBAKey: true)),
+        body: jsonEncode(
+            matchData.toJson(includeUploadStatus: false, usesTBAKey: true)),
       );
 
       if (response.statusCode == 200) {
@@ -78,7 +79,7 @@ class ScoutingServerAPI {
 
   Future<List<MatchEvent>> getMatches() async {
     final response = await http.get(Uri.parse(
-        'https://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getMatches/?tournamentKey=${Constants.shared.tournamentKey.eventCode}'));
+        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getMatches/?tournamentKey=${Constants.shared.tournamentKey.eventCode}'));
 
     if (response.statusCode == 200) {
       try {
@@ -109,7 +110,7 @@ class ScoutingServerAPI {
     required List<String> matchKeys,
   }) async {
     final response = await http.get(Uri.parse(
-        "https://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.eventCode}&scouterName=$scouterName&matchKeys=[${matchKeys.join(",")}]"));
+        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.eventCode}&scouterName=$scouterName&matchKeys=[${matchKeys.join(",")}]"));
 
     if (response.statusCode == 200) {
       try {
