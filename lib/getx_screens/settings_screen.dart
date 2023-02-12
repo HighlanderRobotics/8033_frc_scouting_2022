@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
 import 'package:frc_scouting/getx_screens/scan_qrcode_screen.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/models/scout_schedule.dart';
-import 'package:frc_scouting/models/service.dart';
 import 'package:get/get.dart';
-import 'package:lzstring/lzstring.dart';
 
 import '../helpers/shared_preferences_helper.dart';
 import '../services/getx_business_logic.dart';
@@ -19,8 +16,7 @@ class SettingsScreenVariables extends GetxController {
   @override
   void onInit() async {
     serverAuthority.value =
-        await SharedPreferencesHelper.shared.getString("serverAuthority") ??
-            "localhost:4000";
+        await SharedPreferencesHelper.shared.getString("serverAuthority") ?? "";
     rotation.value = GameConfigurationRotation.values[int.tryParse(
           await SharedPreferencesHelper.shared.getString("rotation") ?? "0",
         ) ??
@@ -85,7 +81,7 @@ class SettingsScreen extends StatelessWidget {
                     label: const Text("Edit Game Configuration")),
                 const SizedBox(height: 10),
                 ElevatedButton.icon(
-                    icon: const Icon(Icons.qr_code),
+                    icon: const Icon(Icons.qr_code_scanner),
                     onPressed: () async {
                       final qrCodeResult = await Get.to(ScanQrCodeScreen());
                       if (qrCodeResult is String && qrCodeResult.isNotEmpty) {

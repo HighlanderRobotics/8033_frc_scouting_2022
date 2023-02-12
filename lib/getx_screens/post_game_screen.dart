@@ -15,41 +15,48 @@ class PostGameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     controller.resetOrientation();
+    controller.setPortraitOrientation();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Post Game"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: SafeArea(
-          child: Obx(
-            (() => Column(
-                  children: [
-                    climbingChallengeDropdown(),
-                    const SizedBox(height: 20),
-                    robotRoleDropdown(),
-                    const SizedBox(height: 20),
-                    TextField(
-                      decoration: const InputDecoration(
-                        labelText: "Notes",
-                        filled: true,
+    return WillPopScope(
+      onWillPop: () async {
+        controller.setLandscapeOrientation();
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Post Game"),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: SafeArea(
+            child: Obx(
+              (() => Column(
+                    children: [
+                      climbingChallengeDropdown(),
+                      const SizedBox(height: 20),
+                      robotRoleDropdown(),
+                      const SizedBox(height: 20),
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: "Notes",
+                          filled: true,
+                        ),
+                        controller: notesController,
+                        onChanged: (text) =>
+                            controller.matchData.notes.value = text,
                       ),
-                      controller: notesController,
-                      onChanged: (text) =>
-                          controller.matchData.notes.value = text,
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
+                      Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: showQrCodeButton(),
+                          padding: const EdgeInsets.all(15.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: showQrCodeButton(),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                )),
+                    ],
+                  )),
+            ),
           ),
         ),
       ),

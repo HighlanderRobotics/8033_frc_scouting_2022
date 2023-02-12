@@ -23,7 +23,10 @@ class GameScreenObject {
   Size size;
   int position;
 
-  GameScreenObject({required this.size, required this.position});
+  GameScreenObject({
+    required this.size,
+    required this.position,
+  });
 }
 
 class GameScreen extends StatelessWidget {
@@ -225,8 +228,9 @@ class GameScreen extends StatelessWidget {
               ),
             createSubstationRectangle(),
             if (isInteractive && isRobotCarryingCargo.isTrue)
-              InkWell(
-                onTap: () {
+              draggableFloatingActionButtonWidget(
+                icon: const Icon(Icons.conveyor_belt),
+                onTapAction: () {
                   if (isRobotCarryingCargo.isTrue) {
                     HapticFeedback.mediumImpact();
 
@@ -249,15 +253,7 @@ class GameScreen extends StatelessWidget {
                     );
                   }
                 },
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: const BoxDecoration(
-                    color: Colors.black,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.conveyor_belt),
-                ),
+                initialOffset: Offset(boxDecorationSize.width - 100, 0),
               ),
             // draggableFloatingActionButtonWidget(
             //   icon: const Icon(Icons.conveyor_belt),
