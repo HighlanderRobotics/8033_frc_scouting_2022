@@ -75,11 +75,19 @@ class GameScreen extends StatelessWidget {
     GameScreenObject(size: const Size(0.408, 0.385), position: 14),
     GameScreenObject(size: const Size(0.408, 0.235), position: 15),
     GameScreenObject(size: const Size(0.408, 0.087), position: 16),
-    GameScreenObject(size: const Size(0.553, 0.530), position: 17),
-    GameScreenObject(size: const Size(0.553, 0.385), position: 18),
-    GameScreenObject(size: const Size(0.553, 0.235), position: 19),
-    GameScreenObject(size: const Size(0.553, 0.087), position: 20),
+    GameScreenObject(size: const Size(0.553, 0.530), position: 13),
+    GameScreenObject(size: const Size(0.553, 0.385), position: 14),
+    GameScreenObject(size: const Size(0.553, 0.235), position: 15),
+    GameScreenObject(size: const Size(0.553, 0.087), position: 16),
   ].obs;
+
+  List<GameScreenObject> get midCargoRotatonValues {
+    if (variables.rotation.value == GameConfigurationRotation.left) {
+      return midFieldCargoValues.take(4).toList();
+    } else {
+      return midFieldCargoValues.skip(4).toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +187,7 @@ class GameScreen extends StatelessWidget {
                 isInteractive == true)
               for (final index in communityEntranceRectangleValues)
                 createCommunityEntranceMethodRectangle(object: index),
-            for (final index in midFieldCargoValues)
+            for (final index in midCargoRotatonValues)
               createFieldCargoCircle(index),
             if (isInteractive)
               draggableFloatingActionButtonWidget(
@@ -216,11 +224,68 @@ class GameScreen extends StatelessWidget {
                 },
               ),
             createSubstationRectangle(),
-            if (isInteractive)
-              draggableFloatingActionButtonWidget(
-                  // access the material symbol "conveyor_belt"
-                  icon: const Icon(Icons.bluetooth),
-                  initialOffset: Offset(boxDecorationSize.width - 100, 0)),
+            if (isInteractive && isRobotCarryingCargo.isTrue)
+              InkWell(
+                onTap: () {
+                  if (isRobotCarryingCargo.isTrue) {
+                    HapticFeedback.mediumImpact();
+
+                    controller.addEventToTimeline(
+                      robotAction: RobotAction.deliveredToTeam,
+                      position: 0,
+                    );
+
+                    isRobotCarryingCargo.value = false;
+                  } else {
+                    showDialog(
+                      context: Get.context!,
+                      builder: (context) => createGameImmersiveDialog(
+                        widgets: ObjectType.values
+                            .map((objectType) =>
+                                objectDialogRectangle(objectType))
+                            .toList(),
+                        context: context,
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.conveyor_belt),
+                ),
+              ),
+            // draggableFloatingActionButtonWidget(
+            //   icon: const Icon(Icons.conveyor_belt),
+            //   initialOffset: Offset(boxDecorationSize.width - 100, 0),
+            //   onTapAction: () {
+            // if (isRobotCarryingCargo.isTrue) {
+            //   HapticFeedback.mediumImpact();
+
+            //   controller.addEventToTimeline(
+            //     robotAction: RobotAction.deliveredToTeam,
+            //     position: 0,
+            //   );
+
+            //   isRobotCarryingCargo.value = false;
+            // } else {
+            //   showDialog(
+            //     context: Get.context!,
+            //     builder: (context) => createGameImmersiveDialog(
+            //       widgets: ObjectType.values
+            //           .map(
+            //               (objectType) => objectDialogRectangle(objectType))
+            //           .toList(),
+            //       context: context,
+            //     ),
+            //   );
+            // }
+            //   },
+            // ),
             if (isInteractive)
               HoldTimeoutDetector(
                 enableHapticFeedback: true,
@@ -238,9 +303,14 @@ class GameScreen extends StatelessWidget {
                       robotAction: RobotAction.endDefense, position: 0);
                   HapticFeedback.mediumImpact();
                 },
-                child: draggableFloatingActionButtonWidget(
-                  color: isRobotDefending.isTrue ? Colors.red : Colors.black,
-                  icon: Icon(
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: isRobotDefending.isTrue ? Colors.red : Colors.black,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
                     isRobotDefending.isTrue
                         ? CupertinoIcons.shield
                         : CupertinoIcons.shield_fill,
@@ -340,11 +410,11 @@ class GameScreen extends StatelessWidget {
 
   Positioned createSubstationRectangle() {
     return Positioned(
-      left:
-          variables.rotation.value == GameConfigurationRotation.right ? 0 : null,
-      right: variables.rotation.value == GameConfigurationRotation.left
+      left: variables.rotation.value == GameConfigurationRotation.right
           ? 0
           : null,
+      right:
+          variables.rotation.value == GameConfigurationRotation.left ? 0 : null,
       top: getTopToBoxDecorationHeight(),
       child: InkWell(
         child: Obx(
