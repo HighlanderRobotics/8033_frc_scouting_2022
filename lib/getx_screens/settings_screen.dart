@@ -10,7 +10,7 @@ import 'package:lzstring/lzstring.dart';
 
 import '../helpers/shared_preferences_helper.dart';
 import '../services/getx_business_logic.dart';
-import 'server_authority_setup.dart';
+import 'server_authority_setup_screen.dart';
 
 class SettingsScreenVariables extends GetxController {
   var serverAuthority = "".obs;
@@ -35,7 +35,7 @@ class SettingsScreenVariables extends GetxController {
     super.onInit();
   }
 
-  void saveServerAuthority() async {
+  Future saveServerAuthority() async {
     await SharedPreferencesHelper.shared.setString(
       "serverAuthority",
       serverAuthority.value,
@@ -45,11 +45,17 @@ class SettingsScreenVariables extends GetxController {
       rotation.value.index.toString(),
     );
   }
+
+  Future resetValues() async {
+    rotation.value = GameConfigurationRotation.left;
+    serverAuthority.value = "localhost:4000";
+    saveServerAuthority();
+  }
 }
 
 class SettingsScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
-  final SettingsScreenVariables variables = Get.put(SettingsScreenVariables());
+  final SettingsScreenVariables variables = Get.find();
 
   bool get isDataValid => hasValidServerAuthority();
 
@@ -73,9 +79,10 @@ class SettingsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ServerAuthoritySetupScreen(),
-                ElevatedButton(
+                ElevatedButton.icon(
+                    icon: const Icon(Icons.edit),
                     onPressed: () => Get.to(GameConfigurationScreen()),
-                    child: const Text("Edit Game Configuration")),
+                    label: const Text("Edit Game Configuration")),
                 const SizedBox(height: 10),
                 ElevatedButton.icon(
                     icon: const Icon(Icons.qr_code),
@@ -121,7 +128,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget deleteConfigurationButton() {
-    return ElevatedButton(
+    return ElevatedButton.icon(
+      icon: const Icon(Icons.delete),
       onPressed: () {
         showDialog(
           context: Get.context!,
@@ -148,7 +156,8 @@ class SettingsScreen extends StatelessWidget {
                   onPressed: () async {
                     final sharedPreferences =
                         await SharedPreferencesHelper.shared.sharedPreferences;
-                    sharedPreferences.clear();
+                    await sharedPreferences.clear();
+                    await variables.resetValues();
                     controller.reset();
                   })
             ],
@@ -162,7 +171,7 @@ class SettingsScreen extends StatelessWidget {
         foregroundColor: MaterialStateProperty.resolveWith(
             (states) => Theme.of(Get.context!).colorScheme.onError),
       ),
-      child: const Text("Delete Configuration"),
+      label: const Text("Delete Configuration"),
     );
   }
 
@@ -192,14 +201,14 @@ class SettingsScreen extends StatelessWidget {
             content: Text("Saved Configuration"),
             behavior: SnackBarBehavior.floating,
           ));
+
+          Navigator.of(Get.context!).pop();
         } else {
           ScaffoldMessenger.of(Get.context!).showSnackBar(const SnackBar(
             content: Text("Invalid Configuration"),
             behavior: SnackBarBehavior.floating,
           ));
         }
-
-        Navigator.of(Get.context!).pop();
       },
     );
   }

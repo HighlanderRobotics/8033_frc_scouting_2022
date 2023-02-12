@@ -166,9 +166,13 @@ class BusinessLogicController extends GetxController {
   }
 
   void reset() {
-    final scouterName = matchData.scouterName.value;
     matchData = MatchData();
-    matchData.scouterName.value = scouterName;
-    Get.offAll(() => HomeScreen());
+    // Get.offAll(() => HomeScreen());
+    Navigator.pushAndRemoveUntil(
+        Get.context!,
+        MaterialPageRoute<dynamic>(
+          builder: (context) => HomeScreen(),
+        ),
+        (route) => false);
   }
 }

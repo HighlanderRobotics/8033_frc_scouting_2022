@@ -1,7 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/getx_screens/server_authority_setup.dart';
+import 'package:frc_scouting/getx_screens/server_authority_setup_screen.dart';
 import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';

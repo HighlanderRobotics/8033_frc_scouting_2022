@@ -50,20 +50,22 @@ class ServerAuthoritySetupScreen extends StatelessWidget {
                   child: Text(
                       "Ask your server manager if you don't know what to put here."),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final result = await Get.to(() => ScanQrCodeScreen());
-                      if (result != null) {
-                        variables.serverAuthority.value = result;
-                      }
-                    },
-                    icon: const Icon(Icons.qr_code_scanner),
-                    label: const Text("Use QR code"),
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final result = await Get.to(() => ScanQrCodeScreen());
+                        if (result != null) {
+                          serverAuthorityTxtController.text = result;
+                        }
+                      },
+                      icon: const Icon(Icons.qr_code_scanner),
+                      label: const Text("Scan Server Authority QR Code"),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-                const SizedBox(height: 40),
               ],
             ),
           ],
