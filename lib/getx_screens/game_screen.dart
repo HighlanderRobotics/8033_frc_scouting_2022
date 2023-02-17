@@ -255,7 +255,7 @@ class GameScreen extends StatelessWidget {
                     );
                   }
                 },
-                initialOffset: Offset(boxDecorationSize.width - 100, 0),
+                initialOffset: Offset(boxDecorationSize.width - 150, 0),
               ),
             // draggableFloatingActionButtonWidget(
             //   icon: const Icon(Icons.conveyor_belt),
