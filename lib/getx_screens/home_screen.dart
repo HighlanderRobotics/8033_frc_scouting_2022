@@ -145,7 +145,7 @@ class HomeScreen extends StatelessWidget {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(
                                 "Ignored ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""}"),
-                                behavior: SnackBarBehavior.floating,
+                            behavior: SnackBarBehavior.floating,
                           ));
                         }
                       },
@@ -251,8 +251,8 @@ class HomeScreen extends StatelessWidget {
               controller.matchData.matchKey.value = matchKey;
               controller.matchData.matchKey.value.matchNumber =
                   matchKey.matchNumber;
-              controller.matchData.teamNumber.value =
-                  matchScheduleAndMatchKey.teamNumber;
+              teamNumberTxtController.text =
+                  matchScheduleAndMatchKey.teamNumber.toString();
             }
           }
         },
