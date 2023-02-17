@@ -50,7 +50,7 @@ class PostGameScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(15.0),
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
-                            child: showQrCodeButton(),
+                            child: showQrCodeButton(context),
                           ),
                         ),
                       ),
@@ -102,19 +102,16 @@ class PostGameScreen extends StatelessWidget {
     );
   }
 
-  ElevatedButton showQrCodeButton() {
+  ElevatedButton showQrCodeButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         controller.documentsHelper
             .saveAndUploadMatchData(controller.matchData)
             .then((uploadResult) {
-          Get.snackbar(
-            "Upload ${uploadResult ? "Successful" : "Failed"}",
-            uploadResult
-                ? "The match has been uploaded to the server"
-                : "The match could not be uploaded to the server. Please try again later in the Previous Matches Screen",
-            snackPosition: SnackPosition.BOTTOM,
-          );
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Upload ${uploadResult ? "Successful" : "Failed"}"),
+            behavior: SnackBarBehavior.floating,
+          ));
         });
 
         Get.to(

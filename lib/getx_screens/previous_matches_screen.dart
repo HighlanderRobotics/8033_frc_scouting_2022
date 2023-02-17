@@ -168,8 +168,8 @@ class PreviousMatchesScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child:
-                            matchRowView(matchData, matchData.matchKey.value),
+                        child: matchRowView(
+                            context, matchData, matchData.matchKey.value),
                       )),
                 );
               },
@@ -182,7 +182,8 @@ class PreviousMatchesScreen extends StatelessWidget {
     );
   }
 
-  Widget matchRowView(MatchData matchData, MatchKey matchKey) {
+  Widget matchRowView(
+      BuildContext context, MatchData matchData, MatchKey matchKey) {
     return InkWell(
       child: ListTile(
         onTap: () => Get.to(
@@ -227,23 +228,21 @@ class PreviousMatchesScreen extends StatelessWidget {
                   await controller.documentsHelper.deleteFile(matchData.uuid);
                   await controller.documentsHelper.writeToFile(matchData);
                   if (matchData.hasSavedToCloud.isTrue) {
-                    Get.snackbar(
-                      "Match Already Uploaded",
-                      "Match ${matchData.matchKey.value.localizedDescription} has been uploaded to the cloud",
-                      duration: const Duration(seconds: 2),
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          "Match ${matchData.matchKey.value.localizedDescription} has been uploaded to the server"),
+                      behavior: SnackBarBehavior.floating,
+                    ));
                   } else {
                     controller.documentsHelper
                         .saveAndUploadMatchData(matchData)
                         .then((uploadStatus) {
                       filterSearchResultsAndUpdateList();
-                      Get.snackbar(
-                        "Match Uploaded ${uploadStatus ? "Successfully" : "Unsuccessfully"}",
-                        "Match ${matchData.matchKey.value.localizedDescription} has ${uploadStatus ? "uploaded" : "failed to upload"} to the cloud",
-                        duration: const Duration(seconds: 2),
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                            "Match ${matchData.matchKey.value.localizedDescription} has ${uploadStatus ? "uploaded" : "failed to upload"} to the server"),
+                        behavior: SnackBarBehavior.floating,
+                      ));
                     });
                   }
                 },

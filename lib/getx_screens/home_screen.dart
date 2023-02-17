@@ -1,12 +1,9 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/getx_screens/server_authority_setup_screen.dart';
 import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'game_configuration_screen.dart';
 import 'game_screen.dart';
 import 'service_status_screen.dart';
 import 'settings_screen.dart';
@@ -78,8 +75,6 @@ class HomeScreen extends StatelessWidget {
                     shadows: [Shadow(blurRadius: 10)])),
           ],
         ),
-        // backgroundColor:
-        //     ScoutersScheduleHelper.shared.matchSchedule.value.getVersionColor,
         backgroundColor:
             (Theme.of(context).colorScheme.brightness == Brightness.dark
                     ? HSLColor.fromColor(ScoutersScheduleHelper
@@ -147,11 +142,11 @@ class HomeScreen extends StatelessWidget {
                         Get.to(() => PreviousMatchesScreen(
                             previousMatchesInfo: matches));
                         if (matches.numberOfInvalidFiles > 0) {
-                          Get.snackbar(
-                            "Ignored Invalid Files",
-                            "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Ignored ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""}"),
+                                behavior: SnackBarBehavior.floating,
+                          ));
                         }
                       },
                     ),
