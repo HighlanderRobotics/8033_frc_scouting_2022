@@ -35,7 +35,8 @@ class MyObserver extends GetObserver {
 
     if (route.settings.name == "/SettingsScreen" ||
         route.settings.name == "/GameScreen" ||
-        route.settings.name == "/GameConfigurationScreen") {
+        route.settings.name == "/GameConfigurationScreen" ||
+        route.settings.name == "PreviousMatchScreen") {
       SystemChrome.setPreferredOrientations(
         [
           DeviceOrientation.portraitUp,
