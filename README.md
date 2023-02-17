@@ -23,6 +23,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 5 = Start Defense
 6 = End Defense
 7 = Crossed Community Line
+8 = Starting Position
 ```
 
 ## Positions
