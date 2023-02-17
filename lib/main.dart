@@ -19,24 +19,24 @@ void main() async {
         useMaterial3: true,
       ),
       home: HomeScreen(),
-      navigatorObservers: [
-        MyObserver(),
-      ],
+      navigatorObservers: [ResetScreenOrientationObserver()],
     ),
   );
 }
 
-class MyObserver extends GetObserver {
+class ResetScreenOrientationObserver extends GetObserver {
   @override
   void didPop(Route route, Route? previousRoute) {
-    print("didPop $route $previousRoute");
-
     // check if the popped route is the settings screen
 
-    if (route.settings.name == "/SettingsScreen" ||
-        route.settings.name == "/GameScreen" ||
-        route.settings.name == "/GameConfigurationScreen" ||
-        route.settings.name == "PreviousMatchScreen") {
+    final routes = [
+      "/SettingsScreen",
+      "/GameScreen",
+      "/GameConfigurationScreen",
+      "/PreviousMatchScreen"
+    ];
+
+    if (routes.contains(route.settings.name)) {
       SystemChrome.setPreferredOrientations(
         [
           DeviceOrientation.portraitUp,
