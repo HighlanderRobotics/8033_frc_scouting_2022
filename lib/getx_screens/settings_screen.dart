@@ -76,11 +76,6 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 ServerAuthoritySetupScreen(),
                 ElevatedButton.icon(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => Get.to(GameConfigurationScreen()),
-                    label: const Text("Edit Game Configuration")),
-                const SizedBox(height: 10),
-                ElevatedButton.icon(
                     icon: const Icon(Icons.qr_code_scanner),
                     onPressed: () async {
                       final qrCodeResult = await Get.to(ScanQrCodeScreen());
@@ -113,6 +108,11 @@ class SettingsScreen extends StatelessWidget {
                       }
                     },
                     label: const Text("Scan Scouter Schedule QR Code")),
+                ElevatedButton.icon(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () => Get.to(GameConfigurationScreen()),
+                    label: const Text("Edit Game Configuration")),
+                const SizedBox(height: 10),
                 const SizedBox(height: 30),
                 deleteConfigurationButton(),
               ],
@@ -135,9 +135,7 @@ class SettingsScreen extends StatelessWidget {
                 "If you continue, you will lose all your settings, and the app will be reset to factory settings."),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Navigator.of(context).pop(),
                 child: const Text("Cancel"),
               ),
               ElevatedButton(
@@ -155,6 +153,10 @@ class SettingsScreen extends StatelessWidget {
                     await sharedPreferences.clear();
                     await variables.resetValues();
                     controller.reset();
+                    
+                    Future.delayed(500.milliseconds, () {
+                      Get.to(() => SettingsScreen());
+                    });
                   })
             ],
           ),
@@ -172,40 +174,46 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget saveConfigurationButton() {
-    return IconButton(
-      icon: Icon(
-        Icons.check,
-        color: validServerAuthority.hasMatch(variables.serverAuthority.value)
-            ? Colors.green
-            : Colors.grey,
+    return Obx(
+      () => IconButton(
+        icon: Icon(
+          Icons.check,
+          color: validServerAuthority.hasMatch(variables.serverAuthority.value)
+              ? Colors.green
+              : Colors.grey,
+        ),
+        onPressed: () async {
+          if (hasValidServerAuthority()) {
+            variables.saveServerAuthority();
+
+            await SharedPreferencesHelper.shared
+                .setString("serverAuthority", variables.serverAuthority.value);
+
+            await SharedPreferencesHelper.shared.setString(
+              "rotation",
+              variables.rotation.value.index.toString(),
+            );
+
+            controller.serviceHelper.refreshAll(networkRefresh: true);
+
+            ScaffoldMessenger.of(Get.context!).showSnackBar(
+              const SnackBar(
+                content: Text("Saved Configuration"),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+
+            Navigator.of(Get.context!).pop();
+          } else {
+            ScaffoldMessenger.of(Get.context!).showSnackBar(
+              const SnackBar(
+                content: Text("Invalid Configuration"),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
       ),
-      onPressed: () async {
-        if (hasValidServerAuthority()) {
-          variables.saveServerAuthority();
-
-          await SharedPreferencesHelper.shared
-              .setString("serverAuthority", variables.serverAuthority.value);
-
-          await SharedPreferencesHelper.shared.setString(
-            "rotation",
-            variables.rotation.value.index.toString(),
-          );
-
-          controller.serviceHelper.refreshAll(networkRefresh: true);
-
-          ScaffoldMessenger.of(Get.context!).showSnackBar(const SnackBar(
-            content: Text("Saved Configuration"),
-            behavior: SnackBarBehavior.floating,
-          ));
-
-          Navigator.of(Get.context!).pop();
-        } else {
-          ScaffoldMessenger.of(Get.context!).showSnackBar(const SnackBar(
-            content: Text("Invalid Configuration"),
-            behavior: SnackBarBehavior.floating,
-          ));
-        }
-      },
     );
   }
 

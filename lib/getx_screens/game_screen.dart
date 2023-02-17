@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:holding_gesture/holding_gesture.dart';
 
 import 'game_configuration_screen.dart';
@@ -37,6 +38,7 @@ class GameScreen extends StatelessWidget {
 
   final bool isInteractive;
 
+  var isUserSelectingStartPosition = true.obs;
   var isRobotCarryingCargo = true.obs;
   var isRobotDefending = false.obs;
   var isCommunityEntranceObjectsHidden = false.obs;
@@ -321,7 +323,9 @@ class GameScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    "Team: ${controller.matchData.teamNumber.toString()} • ${isCommunityEntranceObjectsHidden.isTrue ? "Teleop" : "Auto"}",
+                    isUserSelectingStartPosition.isTrue
+                        ? "Select Start Position"
+                        : "Team: ${controller.matchData.teamNumber.toString()} • ${isCommunityEntranceObjectsHidden.isTrue ? "Teleop" : "Auto"}",
                     style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -459,7 +463,22 @@ class GameScreen extends StatelessWidget {
           ),
         ),
         onTap: () {
-          if (isRobotCarryingCargo.isTrue && isInteractive == true) {
+          if (isUserSelectingStartPosition.isTrue) {
+            HapticFeedback.mediumImpact();
+
+            final positions = {
+              0: 19,
+              1: 18,
+              2: 17,
+            };
+
+            controller.addEventToTimeline(
+              robotAction: RobotAction.startingPosition,
+              position: positions[index]!,
+            );
+
+            isUserSelectingStartPosition.value = false;
+          } else if (isRobotCarryingCargo.isTrue && isInteractive == true) {
             showDialog(
               context: Get.context!,
               builder: (context) => createGameImmersiveDialog(

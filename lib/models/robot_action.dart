@@ -6,5 +6,6 @@ enum RobotAction {
   deliveredToTeam,
   startDefense,
   endDefense,
-  crossedCommunityLine
+  crossedCommunityLine,
+  startingPosition,
 }
