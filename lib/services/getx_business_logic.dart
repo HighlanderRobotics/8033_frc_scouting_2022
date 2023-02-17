@@ -95,10 +95,17 @@ class BusinessLogicController extends GetxController {
   void resetOrientation() {
     SystemChrome.setPreferredOrientations(
       [
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
+      ],
+    );
+
+    SystemChrome.setPreferredOrientations(
+      [
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
       ],
     );
   }
