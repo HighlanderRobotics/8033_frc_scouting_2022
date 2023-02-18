@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:holding_gesture/holding_gesture.dart';
 
 import 'game_configuration_screen.dart';
@@ -34,7 +33,28 @@ class GameScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   final SettingsScreenVariables variables = Get.find();
 
-  GameScreen({required this.isInteractive});
+  GameScreen({required this.isInteractive}) {
+    controller.matchData.startTime = DateTime.now();
+    controller.matchData.events.value = [];
+
+    presentPostGameScreenTimer.cancel();
+    autoTimer.cancel();
+
+    if (isInteractive) {
+      presentPostGameScreenTimer = Timer(150.seconds, () {
+        if (isInteractive) {
+          HapticFeedback.mediumImpact();
+          Get.to(() => PostGameScreen());
+        }
+      });
+      autoTimer = Timer(17.seconds, () {
+        if (isInteractive) {
+          HapticFeedback.mediumImpact();
+          isCommunityEntranceObjectsHidden.value = true;
+        }
+      });
+    }
+  }
 
   final bool isInteractive;
 
@@ -98,27 +118,6 @@ class GameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     controller.setLandscapeOrientation();
 
-    controller.matchData.startTime = DateTime.now();
-    controller.matchData.events.value = [];
-
-    presentPostGameScreenTimer.cancel();
-    autoTimer.cancel();
-
-    if (isInteractive) {
-      presentPostGameScreenTimer = Timer(150.seconds, () {
-        if (isInteractive) {
-          HapticFeedback.mediumImpact();
-          Get.to(() => PostGameScreen());
-        }
-      });
-      autoTimer = Timer(17.seconds, () {
-        if (isInteractive) {
-          HapticFeedback.mediumImpact();
-          isCommunityEntranceObjectsHidden.value = true;
-        }
-      });
-    }
-
     return WillPopScope(
       onWillPop: () async {
         presentPostGameScreenTimer.cancel();
@@ -127,6 +126,7 @@ class GameScreen extends StatelessWidget {
         return true;
       },
       child: Scaffold(
+        // body: paintWidget(),
         body: SafeArea(
           // keep the bottom and top safe area insets the same
           bottom: true,
@@ -203,7 +203,11 @@ class GameScreen extends StatelessWidget {
                   size: 35,
                   color: Colors.white,
                 ),
-                initialOffset: Offset(boxDecorationSize.width - 70, 0),
+                initialOffset: Offset(
+                    variables.rotation.value == GameConfigurationRotation.left
+                        ? 100
+                        : boxDecorationSize.width - 70,
+                    0),
                 onTapAction: () {
                   if (isRobotCarryingCargo.isTrue) {
                     HapticFeedback.mediumImpact();
@@ -463,7 +467,7 @@ class GameScreen extends StatelessWidget {
           ),
         ),
         onTap: () {
-          if (isUserSelectingStartPosition.isTrue) {
+          if (isUserSelectingStartPosition.isTrue && isInteractive == true) {
             HapticFeedback.mediumImpact();
 
             final positions = {
@@ -477,7 +481,23 @@ class GameScreen extends StatelessWidget {
               position: positions[index]!,
             );
 
-            isUserSelectingStartPosition.value = false;
+            showDialog(
+              context: Get.context!,
+              builder: (context) => createGameImmersiveDialog(
+                widgets: Level.values
+                    .map((level) => levelDialogRectangle(
+                          level,
+                          index + 1,
+                          additionalOnTapAction: () {
+                            controller.matchData.events.last.timeSince =
+                                0.seconds;
+                            isUserSelectingStartPosition.value = false;
+                          },
+                        ))
+                    .toList(),
+                context: context,
+              ),
+            );
           } else if (isRobotCarryingCargo.isTrue && isInteractive == true) {
             showDialog(
               context: Get.context!,
@@ -561,17 +581,18 @@ class GameScreen extends StatelessWidget {
             icon: const Icon(Icons.close, size: 50),
           ),
         ),
-        Expanded(
-            child: Row(
-          children: widgets,
-        )),
+        Expanded(child: Row(children: widgets)),
       ]),
     );
   }
 }
 
 extension GameScreenDialogs on GameScreen {
-  Widget levelDialogRectangle(Level level, int index) {
+  Widget levelDialogRectangle(
+    Level level,
+    int index, {
+    void Function()? additionalOnTapAction,
+  }) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -590,8 +611,11 @@ extension GameScreenDialogs on GameScreen {
               position: indexToLevelAssociations[index]![level.index],
             );
 
-            isRobotCarryingCargo.value = false;
+            if (additionalOnTapAction != null) additionalOnTapAction();
+
             Navigator.of(Get.context!).pop();
+
+            isRobotCarryingCargo.value = false;
           },
           child: Container(
             decoration: BoxDecoration(

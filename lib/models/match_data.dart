@@ -28,8 +28,14 @@ class MatchData {
   String get tbaKey {
     if (matchKey != null.obs) {
       final match = MatchScheduleHelper.shared.matchSchedule
-          .firstWhere((match) => match.matchKey == matchKey.value);
-      return match.key.substring(7).trimRight().trimRight();
+          .firstWhereOrNull((match) => match.matchKey == matchKey.value);
+      if (match != null) {
+        final rawKey =
+            match.key.substring(Constants.shared.tournamentKey.key.length + 1);
+        return rawKey.substring(0, rawKey.length - 2);
+      } else {
+        return matchKey.value.shortMatchKey;
+      }
     }
 
     return matchKey.value.shortMatchKey;
@@ -64,7 +70,7 @@ class MatchData {
   }) =>
       {
         'uuid': uuid,
-        'tournamentKey': Constants.shared.tournamentKey.eventCode,
+        'tournamentKey': Constants.shared.tournamentKey.key,
         if (usesTBAKey)
           'matchKey': tbaKey
         else

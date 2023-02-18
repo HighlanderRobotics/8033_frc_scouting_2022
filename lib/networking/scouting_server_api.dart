@@ -79,7 +79,7 @@ class ScoutingServerAPI {
 
   Future<List<MatchEvent>> getMatches() async {
     final response = await http.get(Uri.parse(
-        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getMatches/?tournamentKey=${Constants.shared.tournamentKey.eventCode}'));
+        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getMatches/?tournamentKey=${Constants.shared.tournamentKey.key}'));
 
     if (response.statusCode == 200) {
       try {
@@ -110,7 +110,7 @@ class ScoutingServerAPI {
     required List<String> matchKeys,
   }) async {
     final response = await http.get(Uri.parse(
-        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.eventCode}&scouterName=$scouterName&matchKeys=[${matchKeys.join(",")}]"));
+        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.key}&scouterName=$scouterName&matchKeys=[${matchKeys.join(",")}]"));
 
     if (response.statusCode == 200) {
       try {

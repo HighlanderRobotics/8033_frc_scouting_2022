@@ -40,7 +40,7 @@ class MatchKey {
   String get shortMatchKey => "${matchType.shortName}$matchNumber";
 
   String get longMatchKey =>
-      "${Constants.shared.tournamentKey.eventCode}_$shortMatchKey";
+      "${Constants.shared.tournamentKey.key}_$shortMatchKey";
 
   bool get isBlank => matchNumber == 0;
 }

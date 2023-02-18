@@ -209,18 +209,12 @@ class HomeScreen extends StatelessWidget {
       //         controller.matchData.teamNumber.value == 0
       //     ? null
       //     :
-      onPressed: () {
-        // save name in shared preferences
-
-        if (controller.currentOrientation != Orientation.landscape) {
-          controller.setLandscapeOrientation();
-          Future.delayed(
-            700.milliseconds,
-            () => Get.to(() => GameScreen(isInteractive: true)),
-          );
-        } else {
+      onPressed: () async {
+        controller.setLandscapeOrientation();
+        
+        Future.delayed(700.milliseconds, () {
           Get.to(() => GameScreen(isInteractive: true));
-        }
+        });
       },
       child: const Text(
         "Start",
