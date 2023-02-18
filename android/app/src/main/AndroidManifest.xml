@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.company.frc_scouting">
+    package="com.jacobtrentini.scouting_app_2023">
    <application
-        android:label="frc_scouting"
+        android:label="scouting_app_2023"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
