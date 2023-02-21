@@ -110,7 +110,7 @@ class ScoutingServerAPI {
     required List<String> matchKeys,
   }) async {
     final response = await http.get(Uri.parse(
-        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.key}&scouterName=$scouterName&matchKeys=[${matchKeys.join(",")}]"));
+        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
 
     if (response.statusCode == 200) {
       try {

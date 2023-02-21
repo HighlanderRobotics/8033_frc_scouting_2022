@@ -481,19 +481,21 @@ class GameScreen extends StatelessWidget {
               position: positions[index]!,
             );
 
+            isRobotCarryingCargo.value = false;
+
             showDialog(
               context: Get.context!,
               builder: (context) => createGameImmersiveDialog(
-                widgets: Level.values
-                    .map((level) => levelDialogRectangle(
-                          level,
-                          index + 1,
-                          additionalOnTapAction: () {
+                widgets: ObjectType.values
+                    .map((objectType) => objectDialogRectangle(
+                          objectType,
+                          onTapAction: () {
                             controller.matchData.events.last.timeSince =
                                 0.seconds;
                             isUserSelectingStartPosition.value = false;
                           },
                         ))
+                    .toList()
                     .toList(),
                 context: context,
               ),
@@ -650,7 +652,11 @@ extension GameScreenDialogs on GameScreen {
     );
   }
 
-  Widget objectDialogRectangle(ObjectType objectType, {int position = 0}) {
+  Widget objectDialogRectangle(
+    ObjectType objectType, {
+    int position = 0,
+    void Function()? onTapAction,
+  }) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -675,6 +681,8 @@ extension GameScreenDialogs on GameScreen {
               isRobotCarryingCargo.value = true;
 
               Navigator.of(Get.context!).pop();
+
+              if (onTapAction != null) onTapAction();
             }
           },
           child: Container(

@@ -14,9 +14,13 @@ class FilesHelper {
     getApplicationDocumentsDirectory().then((value) => directory = value);
   }
 
-  Future<bool> saveAndUploadMatchData(MatchData matchData) async {
+  Future<bool> saveAndUploadMatchData(MatchData matchData,
+      {bool ignoreNetworkAddScoutReport = false}) async {
     try {
-      await ScoutingServerAPI.shared.addScoutReport(matchData);
+      if (!ignoreNetworkAddScoutReport) {
+        await ScoutingServerAPI.shared.addScoutReport(matchData);
+      }
+      
       matchData.hasSavedToCloud.value = true;
       await deleteFile(matchData.uuid);
     } catch (e) {

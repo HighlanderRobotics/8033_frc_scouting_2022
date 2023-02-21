@@ -31,6 +31,7 @@ class MatchEvent {
         matchKey: MatchKey(
           matchType: MatchTypeExtension.fromShortName(json['matchType']),
           matchNumber: json['matchNumber'],
+          rawShortMatchKey: json['matchKey'],
         ),
         teamNumber: int.parse((json['teamKey'] as String).substring(3)),
       );

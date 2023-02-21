@@ -44,7 +44,7 @@ class SettingsScreenVariables extends GetxController {
 
   Future resetValues() async {
     rotation.value = GameConfigurationRotation.left;
-    serverAuthority.value = "localhost:4000";
+    serverAuthority.value = "";
     saveServerAuthority();
   }
 }

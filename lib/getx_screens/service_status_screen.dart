@@ -10,9 +10,7 @@ class ServiceStatusScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Service Status"),
-      ),
+      appBar: AppBar(title: const Text("Service Status")),
       body: SingleChildScrollView(
         child: SafeArea(
           child: Column(

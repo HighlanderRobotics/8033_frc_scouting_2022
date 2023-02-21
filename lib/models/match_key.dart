@@ -1,23 +1,26 @@
 import 'dart:core';
 
 import 'package:frc_scouting/models/constants.dart';
+import 'package:get/get.dart';
 
 import 'match_type.dart';
 
 class MatchKey {
   late MatchType matchType;
   late int matchNumber;
+  late String rawShortMatchKey;
 
-  MatchKey({
-    required this.matchType,
-    required this.matchNumber,
-  });
+  MatchKey(
+      {required this.matchType,
+      required this.matchNumber,
+      required this.rawShortMatchKey});
 
   // like 'qf1'
   MatchKey.fromJsonUsingShortKeyForm(String jsonString) {
     try {
       matchType = MatchTypeExtension.fromShortName(jsonString.substring(0, 2));
       matchNumber = int.parse(jsonString.substring(2));
+      rawShortMatchKey = jsonString;
     } catch (e) {
       throw Exception("Failed to parse short form match key.");
     }
@@ -29,13 +32,14 @@ class MatchKey {
           MatchKey.fromJsonUsingShortKeyForm(jsonString.substring(7));
       matchType = matchKey.matchType;
       matchNumber = matchKey.matchNumber;
+      rawShortMatchKey = matchKey.rawShortMatchKey;
     } catch (e) {
       throw Exception("Failed to parse long form match key.");
     }
   }
 
   String get localizedDescription =>
-      "${matchType.localizedDescription} $matchNumber";
+      "${matchType.localizedDescription} ${RegExp("(?<=[a-z]+)\\d{1,3}").firstMatch(rawShortMatchKey)?[0]}";
 
   String get shortMatchKey => "${matchType.shortName}$matchNumber";
 

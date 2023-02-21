@@ -193,7 +193,9 @@ class HomeScreen extends StatelessWidget {
 
                 if (!switchState) {
                   controller.matchData.matchKey = MatchKey(
-                          matchType: MatchType.qualifierMatch, matchNumber: 0)
+                          matchType: MatchType.qualifierMatch,
+                          matchNumber: 0,
+                          rawShortMatchKey: "")
                       .obs;
                 }
               }),
@@ -211,7 +213,7 @@ class HomeScreen extends StatelessWidget {
       //     :
       onPressed: () async {
         controller.setLandscapeOrientation();
-        
+
         Future.delayed(700.milliseconds, () {
           Get.to(() => GameScreen(isInteractive: true));
         });
@@ -231,6 +233,18 @@ class HomeScreen extends StatelessWidget {
             labelText: "Match",
             filled: true,
           ),
+        ),
+        popupProps: PopupProps.modalBottomSheet(
+          searchDelay: 0.seconds,
+          emptyBuilder: (context, searchEntry) {
+            return const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                  "No Matches Found. Try selecting your name first. If you are using a Backup Scouter or internet is unavailable, try using Match Builder."),
+            );
+          },
+          modalBottomSheetProps: ModalBottomSheetProps(
+              backgroundColor: Theme.of(Get.context!).scaffoldBackgroundColor),
         ),
         items:
             matchesFromShifts.map((matchEvent) => matchEvent.matchKey).toList(),
@@ -377,7 +391,12 @@ class HomeScreen extends StatelessWidget {
           autofocus: true,
         ),
       ),
-      items: ScoutersHelper.shared.scouters,
+      items: [
+        ...ScoutersHelper.shared.scouters,
+        "Backup Scouter 1",
+        "Backup Scouter 2",
+        "Backup Scouter 3"
+      ],
       selectedItem: controller.matchData.scouterName.value,
       onChanged: (value) {
         controller.matchData.scouterName.value = value ?? "";

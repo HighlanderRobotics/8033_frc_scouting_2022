@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/models/match_data.dart';
+import 'package:frc_scouting/models/match_scouted.dart';
 import 'package:frc_scouting/models/previous_matches_info.dart';
 import 'package:get/get.dart';
 import 'package:implicitly_animated_reorderable_list_2/implicitly_animated_reorderable_list_2.dart';
@@ -8,6 +9,7 @@ import 'package:implicitly_animated_reorderable_list_2/transitions.dart';
 import 'package:intl/intl.dart';
 
 import '../models/match_key.dart';
+import '../networking/scouting_server_api.dart';
 import 'view_qrcode_screen.dart';
 import '../services/getx_business_logic.dart';
 
@@ -22,6 +24,35 @@ class PreviousMatchesScreen extends StatelessWidget {
 
   PreviousMatchesScreen({required PreviousMatchesInfo previousMatchesInfo}) {
     this.previousMatchesInfo = previousMatchesInfo.obs;
+
+    ScoutingServerAPI.shared
+        .isMatchesScouted(
+            scouterName: controller.matchData.scouterName.value,
+            matchKeys: previousMatchesInfo.validMatches
+                .map((e) => e.matchKey.value.longMatchKey)
+                .toList())
+        .then((value) {
+      // if we find a local match that we think has not been uploaded
+      // we check it against the server results and update
+      // it if it has been uploaded
+
+      for (final validMatch in previousMatchesInfo.validMatches) {
+        if (validMatch.hasSavedToCloud.isFalse &&
+            value.firstWhereOrNull((element) =>
+                    element.matchKey ==
+                    validMatch.matchKey.value.longMatchKey) !=
+                null) {
+          validMatch.hasSavedToCloud.value = true;
+          controller.documentsHelper
+              .saveAndUploadMatchData(validMatch,
+                  ignoreNetworkAddScoutReport: true)
+              .then((uploadStatus) {
+            validMatch.hasSavedToCloud.value = true;
+            filterSearchResultsAndUpdateList();
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -230,7 +261,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                   if (matchData.hasSavedToCloud.isTrue) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(
-                          "Match ${matchData.matchKey.value.localizedDescription} has been uploaded to the server"),
+                          "Match ${matchData.matchKey.value.localizedDescription} has already been uploaded to the server"),
                       behavior: SnackBarBehavior.floating,
                     ));
                   } else {
