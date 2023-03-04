@@ -58,9 +58,10 @@ class ScanQrCodeScreen extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           MobileScanner(
-            allowDuplicates: false,
+            // allowDuplicates: false,
             controller: cameraController,
-            onDetect: (barcode, args) {
+            onDetect: (BarcodeCapture barcodeCapture) {
+              final barcode = barcodeCapture.barcodes.first;
               if (barcode.rawValue == null) {
                 debugPrint('Failed to scan Barcode');
               } else {

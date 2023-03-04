@@ -35,7 +35,7 @@ class MatchScheduleHelper extends ServiceClass {
       for (var shift in shifts) {
         if (match.key.contains("_${shift.scouterPlacement(scouterName)}") &&
             shift.matchShiftDuration.range
-                .contains(match.matchKey.matchNumber)) {
+                .contains(match.matchKey.ordinalMatchNumber)) {
           matches.add(match);
           break;
         }
@@ -46,8 +46,8 @@ class MatchScheduleHelper extends ServiceClass {
       final filteredMatches = matches
           .where((match) => match.matchKey.matchType == matchType)
           .toList();
-      filteredMatches.sort(
-          (a, b) => a.matchKey.matchNumber.compareTo(b.matchKey.matchNumber));
+      filteredMatches.sort((a, b) => a.matchKey.ordinalMatchNumber
+          .compareTo(b.matchKey.ordinalMatchNumber));
 
       matches.removeWhere((match) => match.matchKey.matchType == matchType);
       matches.addAll(filteredMatches);
@@ -108,6 +108,6 @@ class MatchScheduleHelper extends ServiceClass {
     required int scouterId,
   }) =>
       matchSchedule[matchSchedule.indexWhere(
-              (element) => element.matchKey.matchNumber == matchNumber) +
+              (element) => element.matchKey.ordinalMatchNumber == matchNumber) +
           scouterId];
 }

@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
 
   HomeScreen() {
     matchNumberTxtController.addListener(() {
-      controller.matchData.matchKey.value.matchNumber = int.parse(
+      controller.matchData.matchKey.value.ordinalMatchNumber = int.parse(
           matchNumberTxtController.text.isEmpty
               ? "0"
               : matchNumberTxtController.text);
@@ -40,13 +40,12 @@ class HomeScreen extends StatelessWidget {
               ? "0"
               : teamNumberTxtController.text);
     });
+
+    controller = Get.put(BusinessLogicController());
   }
 
   @override
   Widget build(BuildContext context) {
-    controller = Get.put(BusinessLogicController());
-    controller.resetOrientation();
-
     return Obx(
       () => Scaffold(
         appBar: AppBar(
@@ -64,9 +63,7 @@ class HomeScreen extends StatelessWidget {
                       : Colors.red,
                   shadows: const [Shadow(blurRadius: 10)],
                 ),
-                onPressed: () {
-                  Get.to(() => ServiceStatusScreen());
-                },
+                onPressed: () => Get.to(() => ServiceStatusScreen()),
               ),
             ),
             IconButton(
@@ -133,7 +130,7 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    startButton(),
+                    Obx(() => startButton()),
                     ElevatedButton(
                       child: const Text("Previous Matches"),
                       onPressed: () async {
@@ -144,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                         if (matches.numberOfInvalidFiles > 0) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(
-                                "Ignored ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""}"),
+                                "Ignored ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 0 ? "s" : ""}"),
                             behavior: SnackBarBehavior.floating,
                           ));
                         }
@@ -194,7 +191,7 @@ class HomeScreen extends StatelessWidget {
                 if (!switchState) {
                   controller.matchData.matchKey = MatchKey(
                           matchType: MatchType.qualifierMatch,
-                          matchNumber: 0,
+                          ordinalMatchNumber: 0,
                           rawShortMatchKey: "")
                       .obs;
                 }
@@ -206,22 +203,16 @@ class HomeScreen extends StatelessWidget {
 
   Widget startButton() {
     return ElevatedButton(
-      // controller.matchData.matchKey.value.isBlank ||
-      //         controller.matchData.scouterName.isEmpty ||
-      //         controller.matchData.teamNumber.value == 0
-      //     ? null
-      //     :
-      onPressed: () async {
-        controller.setLandscapeOrientation();
+      onPressed: controller.matchData.isPreliminaryDataValid
+          ? () async {
+              controller.setLandscapeOrientation();
 
-        Future.delayed(700.milliseconds, () {
-          Get.to(() => GameScreen(isInteractive: true));
-        });
-      },
-      child: const Text(
-        "Start",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
+              Future.delayed(700.milliseconds, () {
+                Get.to(() => GameScreen(isInteractive: true));
+              });
+            }
+          : null,
+      child: const Text("Start", style: TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 
@@ -257,8 +248,8 @@ class HomeScreen extends StatelessWidget {
 
             if (matchScheduleAndMatchKey != null) {
               controller.matchData.matchKey.value = matchKey;
-              controller.matchData.matchKey.value.matchNumber =
-                  matchKey.matchNumber;
+              controller.matchData.matchKey.value.ordinalMatchNumber =
+                  matchKey.ordinalMatchNumber;
               teamNumberTxtController.text =
                   matchScheduleAndMatchKey.teamNumber.toString();
             }
@@ -322,7 +313,7 @@ class HomeScreen extends StatelessWidget {
         FilteringTextInputFormatter.digitsOnly,
       ],
       onChanged: (String matchNumberString) => controller.matchData.matchKey
-          .value.matchNumber = int.tryParse(matchNumberString) ?? 0,
+          .value.ordinalMatchNumber = int.tryParse(matchNumberString) ?? 0,
     );
   }
 

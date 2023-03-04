@@ -13,8 +13,11 @@ import 'robot_roles.dart';
 
 class MatchData {
   var uuid = const Uuid().v4();
-  var matchKey =
-      MatchKey(matchNumber: 0, matchType: MatchType.qualifierMatch, rawShortMatchKey: "").obs;
+  var matchKey = MatchKey(
+    ordinalMatchNumber: 0,
+    matchType: MatchType.qualifierMatch,
+    rawShortMatchKey: "",
+  ).obs;
   var teamNumber = 0.obs;
   var scouterName = "".obs;
   var startTime = DateTime.now();
@@ -37,6 +40,12 @@ class MatchData {
     }
 
     return matchKey.value.shortMatchKey;
+  }
+
+  bool get isPreliminaryDataValid {
+    return teamNumber.value != 0 &&
+        scouterName.value != "" &&
+        matchKey.value.ordinalMatchNumber != 0;
   }
 
   MatchData();

@@ -7,19 +7,19 @@ import 'match_type.dart';
 
 class MatchKey {
   late MatchType matchType;
-  late int matchNumber;
+  late int ordinalMatchNumber;
   late String rawShortMatchKey;
 
   MatchKey(
       {required this.matchType,
-      required this.matchNumber,
+      required this.ordinalMatchNumber,
       required this.rawShortMatchKey});
 
   // like 'qf1'
   MatchKey.fromJsonUsingShortKeyForm(String jsonString) {
     try {
       matchType = MatchTypeExtension.fromShortName(jsonString.substring(0, 2));
-      matchNumber = int.parse(jsonString.substring(2));
+      ordinalMatchNumber = int.parse(jsonString.substring(2));
       rawShortMatchKey = jsonString;
     } catch (e) {
       throw Exception("Failed to parse short form match key.");
@@ -31,7 +31,7 @@ class MatchKey {
       final matchKey =
           MatchKey.fromJsonUsingShortKeyForm(jsonString.substring(7));
       matchType = matchKey.matchType;
-      matchNumber = matchKey.matchNumber;
+      ordinalMatchNumber = matchKey.ordinalMatchNumber;
       rawShortMatchKey = matchKey.rawShortMatchKey;
     } catch (e) {
       throw Exception("Failed to parse long form match key.");
@@ -41,10 +41,10 @@ class MatchKey {
   String get localizedDescription =>
       "${matchType.localizedDescription} ${RegExp("(?<=[a-z]+)\\d{1,3}").firstMatch(rawShortMatchKey)?[0]}";
 
-  String get shortMatchKey => "${matchType.shortName}$matchNumber";
+  String get shortMatchKey => "${matchType.shortName}$ordinalMatchNumber";
 
   String get longMatchKey =>
       "${Constants.shared.tournamentKey.key}_$shortMatchKey";
 
-  bool get isBlank => matchNumber == 0;
+  bool get isBlank => ordinalMatchNumber == 0;
 }

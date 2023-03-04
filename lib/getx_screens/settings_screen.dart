@@ -110,7 +110,13 @@ class SettingsScreen extends StatelessWidget {
                     label: const Text("Scan Scouter Schedule QR Code")),
                 ElevatedButton.icon(
                     icon: const Icon(Icons.edit),
-                    onPressed: () => Get.to(GameConfigurationScreen()),
+                    onPressed: () {
+                      controller.setLandscapeOrientation();
+
+                      Future.delayed(700.milliseconds, () {
+                        Get.to(GameConfigurationScreen());
+                      });
+                    },
                     label: const Text("Edit Game Configuration")),
                 const SizedBox(height: 10),
                 const SizedBox(height: 30),
@@ -153,7 +159,7 @@ class SettingsScreen extends StatelessWidget {
                     await sharedPreferences.clear();
                     await variables.resetValues();
                     controller.reset();
-                    
+
                     Future.delayed(500.milliseconds, () {
                       Get.to(() => SettingsScreen());
                     });

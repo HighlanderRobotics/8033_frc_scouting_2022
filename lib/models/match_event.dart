@@ -30,7 +30,7 @@ class MatchEvent {
         gameKey: json['tournamentKey'],
         matchKey: MatchKey(
           matchType: MatchTypeExtension.fromShortName(json['matchType']),
-          matchNumber: json['matchNumber'],
+          ordinalMatchNumber: json['matchNumber'],
           rawShortMatchKey: json['matchKey'],
         ),
         teamNumber: int.parse((json['teamKey'] as String).substring(3)),
@@ -43,7 +43,7 @@ class MatchEvent {
   Map<String, dynamic> toJson() => {
         'key': key,
         'tournamentKey': gameKey,
-        'matchNumber': matchKey.matchNumber,
+        'matchNumber': matchKey.ordinalMatchNumber,
         'teamKey': "frc$teamNumber",
         'matchType': matchKey.matchType.shortName,
       };

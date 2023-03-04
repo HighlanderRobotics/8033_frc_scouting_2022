@@ -36,9 +36,24 @@ class GameScreen extends StatelessWidget {
   GameScreen({required this.isInteractive}) {
     controller.matchData.startTime = DateTime.now();
     controller.matchData.events.value = [];
+  }
+
+  final bool isInteractive;
+
+  var isUserSelectingStartPosition = true.obs;
+  var isRobotCarryingCargo = true.obs;
+  var isRobotDefending = false.obs;
+  var isAutoInProgress = true.obs;
+
+  final GlobalKey draggableFABParentKey = GlobalKey();
+
+  void resetAndStartTimer() {
+    print("Resetting and Starting Auto Timer");
 
     presentPostGameScreenTimer.cancel();
     autoTimer.cancel();
+
+    isAutoInProgress.value = true;
 
     if (isInteractive) {
       presentPostGameScreenTimer = Timer(150.seconds, () {
@@ -48,22 +63,14 @@ class GameScreen extends StatelessWidget {
         }
       });
       autoTimer = Timer(17.seconds, () {
+        print("Finishing Auto Timer");
         if (isInteractive) {
           HapticFeedback.mediumImpact();
-          isCommunityEntranceObjectsHidden.value = true;
+          isAutoInProgress.value = false;
         }
       });
     }
   }
-
-  final bool isInteractive;
-
-  var isUserSelectingStartPosition = true.obs;
-  var isRobotCarryingCargo = true.obs;
-  var isRobotDefending = false.obs;
-  var isCommunityEntranceObjectsHidden = false.obs;
-
-  final GlobalKey draggableFABParentKey = GlobalKey();
 
   Size get boxDecorationSize {
     return Size(
@@ -107,17 +114,13 @@ class GameScreen extends StatelessWidget {
   ].obs;
 
   List<GameScreenObject> get midCargoRotatonValues {
-    if (variables.rotation.value == GameConfigurationRotation.left) {
-      return midFieldCargoValues.take(4).toList();
-    } else {
-      return midFieldCargoValues.skip(4).toList();
-    }
+    return variables.rotation.value == GameConfigurationRotation.left
+        ? midFieldCargoValues.take(4).toList()
+        : midFieldCargoValues.skip(4).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    controller.setLandscapeOrientation();
-
     return WillPopScope(
       onWillPop: () async {
         presentPostGameScreenTimer.cancel();
@@ -188,13 +191,14 @@ class GameScreen extends StatelessWidget {
               ),
             for (final index in gridRectangleValues)
               createGridRectangle(index: index),
-            if (isCommunityEntranceObjectsHidden.isFalse &&
-                isInteractive == true)
+            if (isAutoInProgress.isTrue &&
+                isInteractive == true &&
+                isUserSelectingStartPosition.isFalse)
               for (final index in communityEntranceRectangleValues)
                 createCommunityEntranceMethodRectangle(object: index),
             for (final index in midCargoRotatonValues)
               createFieldCargoCircle(index),
-            if (isInteractive)
+            if (isInteractive && isUserSelectingStartPosition.isFalse)
               draggableFloatingActionButtonWidget(
                 icon: Icon(
                   isRobotCarryingCargo.isTrue
@@ -204,10 +208,11 @@ class GameScreen extends StatelessWidget {
                   color: Colors.white,
                 ),
                 initialOffset: Offset(
-                    variables.rotation.value == GameConfigurationRotation.left
-                        ? 100
-                        : boxDecorationSize.width - 70,
-                    0),
+                  variables.rotation.value == GameConfigurationRotation.left
+                      ? 70
+                      : boxDecorationSize.width - 150,
+                  0,
+                ),
                 onTapAction: () {
                   if (isRobotCarryingCargo.isTrue) {
                     HapticFeedback.mediumImpact();
@@ -232,8 +237,9 @@ class GameScreen extends StatelessWidget {
                   }
                 },
               ),
-            createSubstationRectangle(),
-            if (isInteractive && isRobotCarryingCargo.isTrue)
+            if (isInteractive &&
+                isRobotCarryingCargo.isTrue &&
+                isUserSelectingStartPosition.isFalse)
               draggableFloatingActionButtonWidget(
                 icon: const Icon(Icons.conveyor_belt),
                 onTapAction: () {
@@ -259,8 +265,17 @@ class GameScreen extends StatelessWidget {
                     );
                   }
                 },
-                initialOffset: Offset(boxDecorationSize.width - 150, 0),
+                // initialOffset: Offset(boxDecorationSize.width - 150, 0),
+                initialOffset: Offset(
+                  variables.rotation.value == GameConfigurationRotation.left
+                      ? 140
+                      : boxDecorationSize.width - 80,
+                  0,
+                ),
               ),
+
+            if (isInteractive && isAutoInProgress.isFalse)
+              createSubstationRectangle(),
             // draggableFloatingActionButtonWidget(
             //   icon: const Icon(Icons.conveyor_belt),
             //   initialOffset: Offset(boxDecorationSize.width - 100, 0),
@@ -288,15 +303,17 @@ class GameScreen extends StatelessWidget {
             // }
             //   },
             // ),
-            if (isInteractive)
+            if (isInteractive && isUserSelectingStartPosition.isFalse)
               HoldTimeoutDetector(
                 enableHapticFeedback: true,
                 onTimeout: () {},
-                onTap: () {},
+                onTap: () => {},
                 onTimerInitiated: () {
                   isRobotDefending.value = true;
                   controller.addEventToTimeline(
-                      robotAction: RobotAction.startDefense, position: 0);
+                    robotAction: RobotAction.startDefense,
+                    position: 0,
+                  );
                   HapticFeedback.mediumImpact();
                 },
                 onCancel: () {
@@ -329,7 +346,7 @@ class GameScreen extends StatelessWidget {
                   child: Text(
                     isUserSelectingStartPosition.isTrue
                         ? "Select Start Position"
-                        : "Team: ${controller.matchData.teamNumber.toString()} • ${isCommunityEntranceObjectsHidden.isTrue ? "Teleop" : "Auto"}",
+                        : "Team: ${controller.matchData.teamNumber.toString()} • ${isAutoInProgress.isTrue ? "Auto" : "Teleop"}",
                     style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -361,11 +378,11 @@ class GameScreen extends StatelessWidget {
             boxShape: BoxShape.rectangle,
             width: boxDecorationSize.height * 0.2,
             height: boxDecorationSize.height * object.size.height,
-            isDisabled: isCommunityEntranceObjectsHidden.isTrue,
+            isDisabled: isAutoInProgress.isFalse,
           ),
         ),
         onTap: () {
-          if (isCommunityEntranceObjectsHidden.isFalse) {
+          if (isAutoInProgress.isTrue) {
             HapticFeedback.mediumImpact();
             controller.addEventToTimeline(
               robotAction: RobotAction.crossedCommunityLine,
@@ -493,6 +510,8 @@ class GameScreen extends StatelessWidget {
                             controller.matchData.events.last.timeSince =
                                 0.seconds;
                             isUserSelectingStartPosition.value = false;
+
+                            resetAndStartTimer();
                           },
                         ))
                     .toList()

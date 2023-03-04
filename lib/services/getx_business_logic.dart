@@ -67,6 +67,9 @@ class BusinessLogicController extends GetxController {
       print("Error getting scouters schedule: $e");
     }
 
+    resetOrientation();
+    setPortraitOrientation();
+
     super.onInit();
   }
 
@@ -127,12 +130,12 @@ class BusinessLogicController extends GetxController {
   List<String> separateEventsToQrCodes({required MatchData matchData}) {
     List<String> qrCodes = [];
     var jsonString = jsonEncode(
-        matchData.toJson(includeUploadStatus: false, usesTBAKey: false));
+        matchData.toJson(includeUploadStatus: false, usesTBAKey: true));
     const qrCodeLimit = 1000;
     final scouterPlacement = ScoutersScheduleHelper
         .shared.matchSchedule.value.shifts
         .firstWhere((shift) => shift.matchShiftDuration.range
-            .contains(matchData.matchKey.value.matchNumber))
+            .contains(matchData.matchKey.value.ordinalMatchNumber))
         .scouterPlacement(
           matchData.scouterName.value,
         );

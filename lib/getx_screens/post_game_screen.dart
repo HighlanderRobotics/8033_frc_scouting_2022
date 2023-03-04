@@ -13,11 +13,13 @@ class PostGameScreen extends StatelessWidget {
 
   final BusinessLogicController controller = Get.find();
 
-  @override
-  Widget build(BuildContext context) {
+  PostGameScreen() {
     controller.resetOrientation();
     controller.setPortraitOrientation();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         controller.setLandscapeOrientation();
@@ -118,7 +120,8 @@ class PostGameScreen extends StatelessWidget {
         Get.to(
           () => QrCodeScreen(
               matchQrCodes: controller.separateEventsToQrCodes(
-                  matchData: controller.matchData),
+                matchData: controller.matchData,
+              ),
               canPopScope: false),
         );
       },
