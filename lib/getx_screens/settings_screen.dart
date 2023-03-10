@@ -1,8 +1,11 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
 import 'package:frc_scouting/getx_screens/scan_qrcode_screen.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
+import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/scout_schedule.dart';
+import 'package:frc_scouting/models/tournament_key.dart';
 import 'package:get/get.dart';
 
 import '../helpers/shared_preferences_helper.dart';
@@ -12,6 +15,7 @@ import 'server_authority_setup_screen.dart';
 class SettingsScreenVariables extends GetxController {
   var serverAuthority = "".obs;
   var rotation = GameConfigurationRotation.left.obs;
+  var selectedTournamentKey = TournamentKey("2023 Week 0", "2023week0").obs;
 
   @override
   void onInit() async {
@@ -74,6 +78,19 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                DropdownSearch<TournamentKey>(
+                  items: Constants.shared.tournamentKeys,
+                  itemAsString: (item) => item.name,
+                  onChanged: (value) => variables.selectedTournamentKey,
+                  selectedItem: variables.selectedTournamentKey.value,
+                  dropdownDecoratorProps: const DropDownDecoratorProps(
+                    dropdownSearchDecoration: InputDecoration(
+                      labelText: "Tournament Key",
+                      filled: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 ServerAuthoritySetupScreen(),
                 ElevatedButton.icon(
                     icon: const Icon(Icons.qr_code_scanner),

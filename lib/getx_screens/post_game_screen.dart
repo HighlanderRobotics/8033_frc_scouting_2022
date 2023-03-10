@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
 import 'package:frc_scouting/models/climbing_challenge.dart';
 import 'package:frc_scouting/models/robot_roles.dart';
-import 'package:frc_scouting/networking/scouting_server_api.dart';
 import 'package:get/get.dart';
 
 import '../services/getx_business_logic.dart';
@@ -35,6 +34,8 @@ class PostGameScreen extends StatelessWidget {
             child: Obx(
               (() => Column(
                     children: [
+                      autoClimbingChallengeDropdown(),
+                      const SizedBox(height: 20),
                       climbingChallengeDropdown(),
                       const SizedBox(height: 20),
                       robotRoleDropdown(),
@@ -80,6 +81,26 @@ class PostGameScreen extends StatelessWidget {
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Climbing Challenge",
+          filled: true,
+        ),
+      ),
+    );
+  }
+
+  DropdownSearch<ClimbingChallenge> autoClimbingChallengeDropdown() {
+    return DropdownSearch<ClimbingChallenge>(
+      items: ClimbingChallenge.values,
+      itemAsString: (climbingChallenge) =>
+          climbingChallenge.localizedDescription,
+      selectedItem: controller.matchData.autoChallengeResult.value,
+      onChanged: (climbingChallenge) {
+        if (climbingChallenge != null) {
+          controller.matchData.autoChallengeResult.value = climbingChallenge;
+        }
+      },
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Auto Climbing Challenge",
           filled: true,
         ),
       ),

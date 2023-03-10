@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:frc_scouting/models/constants.dart';
+import 'package:get/get.dart';
 
+import '../getx_screens/settings_screen.dart';
 import '../helpers/shared_preferences_helper.dart';
 import '../models/match_data.dart';
 import 'package:http/http.dart' as http;
@@ -79,7 +81,7 @@ class ScoutingServerAPI {
 
   Future<List<MatchEvent>> getMatches() async {
     final response = await http.get(Uri.parse(
-        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getMatches/?tournamentKey=${Constants.shared.tournamentKey.key}'));
+        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getMatches/?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}'));
 
     if (response.statusCode == 200) {
       try {
@@ -110,7 +112,7 @@ class ScoutingServerAPI {
     required List<String> matchKeys,
   }) async {
     final response = await http.get(Uri.parse(
-        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Constants.shared.tournamentKey.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
+        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
 
     if (response.statusCode == 200) {
       try {

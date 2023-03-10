@@ -29,7 +29,8 @@ class PreviousMatchesScreen extends StatelessWidget {
         .isMatchesScouted(
             scouterName: controller.matchData.scouterName.value,
             matchKeys: previousMatchesInfo.validMatches
-                .map((e) => e.matchKey.value.longMatchKey)
+                .map((e) =>
+                    e.matchKey.value.longMatchKeyForTournament(e.tournamentKey))
                 .toList())
         .then((value) {
       // if we find a local match that we think has not been uploaded
@@ -40,7 +41,8 @@ class PreviousMatchesScreen extends StatelessWidget {
         if (validMatch.hasSavedToCloud.isFalse &&
             value.firstWhereOrNull((element) =>
                     element.matchKey ==
-                    validMatch.matchKey.value.longMatchKey) !=
+                    validMatch.matchKey.value
+                        .longMatchKeyForTournament(validMatch.tournamentKey)) !=
                 null) {
           validMatch.hasSavedToCloud.value = true;
           controller.documentsHelper

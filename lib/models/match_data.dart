@@ -1,7 +1,9 @@
+import 'package:frc_scouting/getx_screens/settings_screen.dart';
 import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/match_key.dart';
 import 'package:frc_scouting/models/match_type.dart';
+import 'package:frc_scouting/models/tournament_key.dart';
 
 import 'climbing_challenge.dart';
 import 'event.dart';
@@ -27,14 +29,14 @@ class MatchData {
   var autoChallengeResult = ClimbingChallenge.noClimb.obs;
   var challengeResult = ClimbingChallenge.noClimb.obs;
   var hasSavedToCloud = false.obs;
+  var tournamentKey = TournamentKey("", "");
 
   String get tbaKey {
     if (matchKey != null.obs) {
       final match = MatchScheduleHelper.shared.matchSchedule
           .firstWhereOrNull((match) => match.matchKey == matchKey.value);
       if (match != null) {
-        final rawKey =
-            match.key.substring(Constants.shared.tournamentKey.key.length + 1);
+        final rawKey = match.key.substring(tournamentKey.key.length + 1);
         return rawKey.substring(0, rawKey.length - 2);
       }
     }
@@ -52,6 +54,7 @@ class MatchData {
 
   MatchData.fromJson(Map<String, dynamic> json) {
     uuid = json['uuid'];
+    tournamentKey = TournamentKey.fromJson(json['tournamentKey']);
     matchKey = MatchKey.fromJsonUsingShortKeyForm(json['matchKey']).obs;
     teamNumber = RxInt(json['teamNumber']);
     scouterName = RxString(json['scouterName']);
@@ -77,7 +80,7 @@ class MatchData {
   }) =>
       {
         'uuid': uuid,
-        'tournamentKey': Constants.shared.tournamentKey.key,
+        'tournamentKey': tournamentKey,
         if (usesTBAKey)
           'matchKey': tbaKey
         else

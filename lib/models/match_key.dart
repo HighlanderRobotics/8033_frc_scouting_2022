@@ -3,7 +3,9 @@ import 'dart:core';
 import 'package:frc_scouting/models/constants.dart';
 import 'package:get/get.dart';
 
+import '../getx_screens/settings_screen.dart';
 import 'match_type.dart';
+import 'tournament_key.dart';
 
 class MatchKey {
   late MatchType matchType;
@@ -43,8 +45,11 @@ class MatchKey {
 
   String get shortMatchKey => "${matchType.shortName}$ordinalMatchNumber";
 
-  String get longMatchKey =>
-      "${Constants.shared.tournamentKey.key}_$shortMatchKey";
+  String longMatchKeyForTournament(TournamentKey tournamentKey) =>
+      "${tournamentKey.key}_$shortMatchKey";
+
+  // String get longMatchKey =>
+  //     "${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}_$shortMatchKey";
 
   bool get isBlank => ordinalMatchNumber == 0;
 }

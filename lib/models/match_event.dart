@@ -45,6 +45,7 @@ class MatchEvent {
         'tournamentKey': gameKey,
         'matchNumber': matchKey.ordinalMatchNumber,
         'teamKey': "frc$teamNumber",
+        'matchKey': matchKey.rawShortMatchKey,
         'matchType': matchKey.matchType.shortName,
       };
 }
