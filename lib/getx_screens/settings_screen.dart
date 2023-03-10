@@ -10,11 +10,12 @@ import 'package:get/get.dart';
 
 import '../helpers/shared_preferences_helper.dart';
 import '../services/getx_business_logic.dart';
+import 'game_configuration_rotation.dart';
 import 'server_authority_setup_screen.dart';
 
 class SettingsScreenVariables extends GetxController {
   var serverAuthority = "".obs;
-  var rotation = GameConfigurationRotation.left.obs;
+  var rotation = GameConfigurationRotation.upright.obs;
   var selectedTournamentKey = Tournament("2023 Week 0", "2023week0").obs;
 
   @override
@@ -47,7 +48,7 @@ class SettingsScreenVariables extends GetxController {
   }
 
   Future resetValues() async {
-    rotation.value = GameConfigurationRotation.left;
+    rotation.value = GameConfigurationRotation.upright;
     serverAuthority.value = "";
     saveServerAuthority();
   }

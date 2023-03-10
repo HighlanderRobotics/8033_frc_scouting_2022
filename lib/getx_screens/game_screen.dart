@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frc_scouting/models/alliance_color.dart';
 import 'package:holding_gesture/holding_gesture.dart';
 
+import 'game_configuration_rotation.dart';
 import 'game_configuration_screen.dart';
 import '../models/levels.dart';
 import 'package:get/get.dart';
@@ -33,12 +35,16 @@ class GameScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   final SettingsScreenVariables variables = Get.find();
 
-  GameScreen({required this.isInteractive}) {
+  GameScreen({
+    required this.isInteractive,
+    this.alliance = AllianceColor.blue,
+  }) {
     controller.matchData.startTime = DateTime.now();
     controller.matchData.events.value = [];
   }
 
   final bool isInteractive;
+  final AllianceColor alliance;
 
   var isUserSelectingStartPosition = true.obs;
   var isRobotCarryingCargo = true.obs;
@@ -114,7 +120,7 @@ class GameScreen extends StatelessWidget {
   ].obs;
 
   List<GameScreenObject> get midCargoRotatonValues {
-    return variables.rotation.value == GameConfigurationRotation.left
+    return alliance == AllianceColor.blue
         ? midFieldCargoValues.take(4).toList()
         : midFieldCargoValues.skip(4).toList();
   }
@@ -134,7 +140,7 @@ class GameScreen extends StatelessWidget {
           // keep the bottom and top safe area insets the same
           bottom: true,
           top: true,
-          child: paintWidget(),
+          child: Obx(() => paintWidget()),
         ),
         floatingActionButton: !isInteractive
             ? null
@@ -145,10 +151,19 @@ class GameScreen extends StatelessWidget {
                   child: const Icon(Icons.arrow_forward),
                   onLongPress: () {
                     if (isInteractive) {
-                      presentPostGameScreenTimer.cancel();
-                      autoTimer.cancel();
-                      HapticFeedback.heavyImpact();
-                      Get.to(() => PostGameScreen());
+                      if (isAutoInProgress.isTrue) {
+                        print("Finishing Auto Timer");
+                        if (isInteractive) {
+                          HapticFeedback.mediumImpact();
+                          isAutoInProgress.value = false;
+                        }
+                      } else {
+                        print("Finishing Teleop and Wrapping Up");
+                        presentPostGameScreenTimer.cancel();
+                        autoTimer.cancel();
+                        HapticFeedback.heavyImpact();
+                        Get.to(() => PostGameScreen());
+                      }
                     }
                   },
                 ),
@@ -157,22 +172,165 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  Container paintWidget() {
-    return Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        image: const DecorationImage(
-          image: AssetImage('assets/field23.png'),
-          alignment: Alignment.center,
-          fit: BoxFit.fitWidth,
-          opacity: 0.4,
+  Widget paintWidget() {
+    return Transform.rotate(
+      angle: variables.rotation.value == GameConfigurationRotation.upright ? 0 : 3.14159265359,
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          image: const DecorationImage(
+            image: AssetImage('assets/field23.png'),
+            alignment: Alignment.center,
+            fit: BoxFit.fitWidth,
+            opacity: 0.4,
+          ),
+          color: Colors.grey[850],
         ),
-        color: Colors.grey[850],
-      ),
-      child: Obx(
-        () => Stack(
+        child: Stack(
           key: draggableFABParentKey,
           children: [
+            Transform.rotate(
+              angle: variables.rotation.value == GameConfigurationRotation.upright ? 0 : 3.14159265359,
+              child: Stack(
+                children: [
+                  if (isInteractive && isUserSelectingStartPosition.isFalse)
+                    draggableFloatingActionButtonWidget(
+                      icon: Icon(
+                        isRobotCarryingCargo.isTrue
+                            ? CupertinoIcons.bag_badge_minus
+                            : CupertinoIcons.bag_badge_plus,
+                        size: 35,
+                        color: Colors.white,
+                      ),
+                      initialOffset: Offset(
+                        alliance == AllianceColor.blue
+                            ? 70
+                            : boxDecorationSize.width - 150,
+                        0,
+                      ),
+                      onTapAction: () {
+                        if (isRobotCarryingCargo.isTrue) {
+                          HapticFeedback.mediumImpact();
+
+                          controller.addEventToTimeline(
+                            robotAction: RobotAction.droppedObject,
+                            position: 0,
+                          );
+
+                          isRobotCarryingCargo.value = false;
+                        } else {
+                          showDialog(
+                            context: Get.context!,
+                            builder: (context) => createGameImmersiveDialog(
+                              widgets: ObjectType.values
+                                  .map((objectType) =>
+                                      objectDialogRectangle(objectType))
+                                  .toList(),
+                              context: context,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  if (isInteractive &&
+                      isRobotCarryingCargo.isTrue &&
+                      isUserSelectingStartPosition.isFalse)
+                    draggableFloatingActionButtonWidget(
+                      icon: const Icon(Icons.conveyor_belt),
+                      onTapAction: () {
+                        if (isAutoInProgress.isTrue) {
+                          print("Finishing Auto Timer");
+
+                          if (isInteractive) {
+                            HapticFeedback.mediumImpact();
+                            isAutoInProgress.value = false;
+                          }
+                        }
+                        if (isRobotCarryingCargo.isTrue) {
+                          HapticFeedback.mediumImpact();
+
+                          controller.addEventToTimeline(
+                            robotAction: RobotAction.deliveredToTeam,
+                            position: 0,
+                          );
+
+                          isRobotCarryingCargo.value = false;
+                        } else {
+                          showDialog(
+                            context: Get.context!,
+                            builder: (context) => createGameImmersiveDialog(
+                              widgets: ObjectType.values
+                                  .map((objectType) =>
+                                      objectDialogRectangle(objectType))
+                                  .toList(),
+                              context: context,
+                            ),
+                          );
+                        }
+                      },
+                      initialOffset: Offset(
+                        alliance == AllianceColor.blue
+                            ? 140
+                            : boxDecorationSize.width - 80,
+                        0,
+                      ),
+                    ),
+                  if (isInteractive && isUserSelectingStartPosition.isFalse)
+                    HoldTimeoutDetector(
+                      enableHapticFeedback: true,
+                      onTimeout: () {},
+                      onTap: () => {},
+                      onTimerInitiated: () {
+                        isRobotDefending.value = true;
+                        controller.addEventToTimeline(
+                          robotAction: RobotAction.startDefense,
+                          position: 0,
+                        );
+                        HapticFeedback.mediumImpact();
+                      },
+                      onCancel: () {
+                        isRobotDefending.value = false;
+                        controller.addEventToTimeline(
+                            robotAction: RobotAction.endDefense, position: 0);
+                        HapticFeedback.mediumImpact();
+                      },
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: isRobotDefending.isTrue
+                              ? Colors.red
+                              : Colors.black,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isRobotDefending.isTrue
+                              ? CupertinoIcons.shield
+                              : CupertinoIcons.shield_fill,
+                          size: 35,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  if (isInteractive)
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          isUserSelectingStartPosition.isTrue
+                              ? "Select Start Position"
+                              : "Team: ${controller.matchData.teamNumber.toString()} • ${isAutoInProgress.isTrue ? "Auton" : "Teleop"}",
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              shadows: [Shadow(blurRadius: 15)]),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             if (!Foundation.kReleaseMode)
               Positioned(
                 top: getTopToBoxDecorationHeight(),
@@ -198,170 +356,8 @@ class GameScreen extends StatelessWidget {
                 createCommunityEntranceMethodRectangle(object: index),
             for (final index in midCargoRotatonValues)
               createFieldCargoCircle(index),
-            if (isInteractive && isUserSelectingStartPosition.isFalse)
-              draggableFloatingActionButtonWidget(
-                icon: Icon(
-                  isRobotCarryingCargo.isTrue
-                      ? CupertinoIcons.bag_badge_minus
-                      : CupertinoIcons.bag_badge_plus,
-                  size: 35,
-                  color: Colors.white,
-                ),
-                initialOffset: Offset(
-                  variables.rotation.value == GameConfigurationRotation.left
-                      ? 70
-                      : boxDecorationSize.width - 150,
-                  0,
-                ),
-                onTapAction: () {
-                  if (isRobotCarryingCargo.isTrue) {
-                    HapticFeedback.mediumImpact();
-
-                    controller.addEventToTimeline(
-                      robotAction: RobotAction.droppedObject,
-                      position: 0,
-                    );
-
-                    isRobotCarryingCargo.value = false;
-                  } else {
-                    showDialog(
-                      context: Get.context!,
-                      builder: (context) => createGameImmersiveDialog(
-                        widgets: ObjectType.values
-                            .map((objectType) =>
-                                objectDialogRectangle(objectType))
-                            .toList(),
-                        context: context,
-                      ),
-                    );
-                  }
-                },
-              ),
-            if (isInteractive &&
-                isRobotCarryingCargo.isTrue &&
-                isUserSelectingStartPosition.isFalse)
-              draggableFloatingActionButtonWidget(
-                icon: const Icon(Icons.conveyor_belt),
-                onTapAction: () {
-                  if (isAutoInProgress.isTrue) {
-                    print("Finishing Auto Timer");
-
-                    if (isInteractive) {
-                      HapticFeedback.mediumImpact();
-                      isAutoInProgress.value = false;
-                    }
-                  }
-                  if (isRobotCarryingCargo.isTrue) {
-                    HapticFeedback.mediumImpact();
-
-                    controller.addEventToTimeline(
-                      robotAction: RobotAction.deliveredToTeam,
-                      position: 0,
-                    );
-
-                    isRobotCarryingCargo.value = false;
-                  } else {
-                    showDialog(
-                      context: Get.context!,
-                      builder: (context) => createGameImmersiveDialog(
-                        widgets: ObjectType.values
-                            .map((objectType) =>
-                                objectDialogRectangle(objectType))
-                            .toList(),
-                        context: context,
-                      ),
-                    );
-                  }
-                },
-                // initialOffset: Offset(boxDecorationSize.width - 150, 0),
-                initialOffset: Offset(
-                  variables.rotation.value == GameConfigurationRotation.left
-                      ? 140
-                      : boxDecorationSize.width - 80,
-                  0,
-                ),
-              ),
-
             if (isInteractive && isAutoInProgress.isFalse)
               createSubstationRectangle(),
-            // draggableFloatingActionButtonWidget(
-            //   icon: const Icon(Icons.conveyor_belt),
-            //   initialOffset: Offset(boxDecorationSize.width - 100, 0),
-            //   onTapAction: () {
-            // if (isRobotCarryingCargo.isTrue) {
-            //   HapticFeedback.mediumImpact();
-
-            //   controller.addEventToTimeline(
-            //     robotAction: RobotAction.deliveredToTeam,
-            //     position: 0,
-            //   );
-
-            //   isRobotCarryingCargo.value = false;
-            // } else {
-            //   showDialog(
-            //     context: Get.context!,
-            //     builder: (context) => createGameImmersiveDialog(
-            //       widgets: ObjectType.values
-            //           .map(
-            //               (objectType) => objectDialogRectangle(objectType))
-            //           .toList(),
-            //       context: context,
-            //     ),
-            //   );
-            // }
-            //   },
-            // ),
-            if (isInteractive && isUserSelectingStartPosition.isFalse)
-              HoldTimeoutDetector(
-                enableHapticFeedback: true,
-                onTimeout: () {},
-                onTap: () => {},
-                onTimerInitiated: () {
-                  isRobotDefending.value = true;
-                  controller.addEventToTimeline(
-                    robotAction: RobotAction.startDefense,
-                    position: 0,
-                  );
-                  HapticFeedback.mediumImpact();
-                },
-                onCancel: () {
-                  isRobotDefending.value = false;
-                  controller.addEventToTimeline(
-                      robotAction: RobotAction.endDefense, position: 0);
-                  HapticFeedback.mediumImpact();
-                },
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: isRobotDefending.isTrue ? Colors.red : Colors.black,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    isRobotDefending.isTrue
-                        ? CupertinoIcons.shield
-                        : CupertinoIcons.shield_fill,
-                    size: 35,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            if (isInteractive)
-              Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    isUserSelectingStartPosition.isTrue
-                        ? "Select Start Position"
-                        : "Team: ${controller.matchData.teamNumber.toString()} • ${isAutoInProgress.isTrue ? "Auto" : "Teleop"}",
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        shadows: [Shadow(blurRadius: 15)]),
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -374,10 +370,10 @@ class GameScreen extends StatelessWidget {
     return Positioned(
       top: getTopToBoxDecorationHeight() +
           boxDecorationSize.height * object.size.width,
-      left: variables.rotation.value == GameConfigurationRotation.left
+      left: alliance == AllianceColor.blue
           ? boxDecorationSize.width * 0.185
           : null,
-      right: variables.rotation.value == GameConfigurationRotation.right
+      right: alliance == AllianceColor.red
           ? boxDecorationSize.width * 0.185
           : null,
       child: InkWell(
@@ -439,11 +435,12 @@ class GameScreen extends StatelessWidget {
 
   Positioned createSubstationRectangle() {
     return Positioned(
-      left: variables.rotation.value == GameConfigurationRotation.right
+      left: alliance == AllianceColor.red
           ? 0
           : null,
-      right:
-          variables.rotation.value == GameConfigurationRotation.left ? 0 : null,
+      right: alliance == AllianceColor.blue
+          ? 0
+          : null,
       top: getTopToBoxDecorationHeight(),
       child: InkWell(
         child: Obx(
@@ -477,9 +474,10 @@ class GameScreen extends StatelessWidget {
     return Positioned(
       bottom: getBottomToBoxDecorationHeight() +
           boxDecorationSize.height * index * 0.22,
-      left:
-          variables.rotation.value == GameConfigurationRotation.left ? 0 : null,
-      right: variables.rotation.value == GameConfigurationRotation.right
+      left: alliance == AllianceColor.blue
+          ? 0
+          : null,
+      right: alliance == AllianceColor.red
           ? 0
           : null,
       child: InkWell(

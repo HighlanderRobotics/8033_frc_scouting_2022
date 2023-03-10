@@ -2,6 +2,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
+import 'package:frc_scouting/models/alliance_color.dart';
 import 'package:get/get.dart';
 
 import 'game_screen.dart';
@@ -25,6 +26,8 @@ class HomeScreen extends StatelessWidget {
 
   var matchNumberTxtController = TextEditingController();
   var teamNumberTxtController = TextEditingController();
+
+  var allianceColor = AllianceColor.blue;
 
   HomeScreen() {
     matchNumberTxtController.addListener(() {
@@ -115,6 +118,12 @@ class HomeScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 20),
                                 teamNumberTextField(),
+                                const SizedBox(height: 20),
+                                Obx(
+                                  () => isCustomMatchSelected.isTrue
+                                      ? allianceColorDropdown()
+                                      : Container(),
+                                ),
                               ],
                             ),
                           ),
@@ -208,7 +217,18 @@ class HomeScreen extends StatelessWidget {
               controller.setLandscapeOrientation();
 
               Future.delayed(700.milliseconds, () {
-                Get.to(() => GameScreen(isInteractive: true));
+                Get.to(() => GameScreen(
+                      isInteractive: true,
+                      alliance: (int.tryParse(controller
+                                      .matchData.matchKey.value.rawShortMatchKey
+                                      .substring(controller.matchData.matchKey
+                                              .value.rawShortMatchKey.length -
+                                          1)) ??
+                                  0) <=
+                              2
+                          ? AllianceColor.red
+                          : AllianceColor.blue,
+                    ));
               });
             }
           : null,
@@ -330,6 +350,25 @@ class HomeScreen extends StatelessWidget {
       ],
       onChanged: (String teamNumber) =>
           controller.matchData.teamNumber.value = int.tryParse(teamNumber) ?? 0,
+    );
+  }
+
+  Widget allianceColorDropdown() {
+    return DropdownSearch<AllianceColor>(
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Alliance Color",
+          filled: true,
+        ),
+      ),
+      items: AllianceColor.values,
+      onChanged: (allianceColor) {
+        if (allianceColor != null) {
+          this.allianceColor = allianceColor;
+        }
+      },
+      itemAsString: (item) => item.localizedDescription,
+      selectedItem: allianceColor,
     );
   }
 

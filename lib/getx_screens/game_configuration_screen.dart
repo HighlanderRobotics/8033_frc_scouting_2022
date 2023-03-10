@@ -2,30 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
 import 'package:frc_scouting/getx_screens/settings_screen.dart';
 import 'package:get/get.dart';
+import 'game_configuration_rotation.dart';
 
 import '../services/getx_business_logic.dart';
-
-enum GameConfigurationRotation { left, right }
-
-extension RotationExtension on GameConfigurationRotation {
-  String get localizedDescription {
-    switch (this) {
-      case GameConfigurationRotation.left:
-        return "Left";
-      case GameConfigurationRotation.right:
-        return "Right";
-    }
-  }
-
-  GameConfigurationRotation getToggledValue() {
-    switch (this) {
-      case GameConfigurationRotation.left:
-        return GameConfigurationRotation.right;
-      case GameConfigurationRotation.right:
-        return GameConfigurationRotation.left;
-    }
-  }
-}
 
 class GameConfigurationScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
