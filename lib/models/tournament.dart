@@ -1,10 +1,10 @@
-class TournamentKey {
+class Tournament {
   String name;
   String key;
 
-  TournamentKey(this.name, this.key);
+  Tournament(this.name, this.key);
 
-  TournamentKey.fromJson(Map<String, dynamic> json)
+  Tournament.fromJson(Map<String, dynamic> json)
       : name = json['localizedDescription'],
         key = json['eventCode'];
 

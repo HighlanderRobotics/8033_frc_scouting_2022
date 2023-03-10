@@ -243,6 +243,14 @@ class GameScreen extends StatelessWidget {
               draggableFloatingActionButtonWidget(
                 icon: const Icon(Icons.conveyor_belt),
                 onTapAction: () {
+                  if (isAutoInProgress.isTrue) {
+                    print("Finishing Auto Timer");
+
+                    if (isInteractive) {
+                      HapticFeedback.mediumImpact();
+                      isAutoInProgress.value = false;
+                    }
+                  }
                   if (isRobotCarryingCargo.isTrue) {
                     HapticFeedback.mediumImpact();
 
@@ -485,21 +493,6 @@ class GameScreen extends StatelessWidget {
         ),
         onTap: () {
           if (isUserSelectingStartPosition.isTrue && isInteractive == true) {
-            HapticFeedback.mediumImpact();
-
-            final positions = {
-              0: 19,
-              1: 18,
-              2: 17,
-            };
-
-            controller.addEventToTimeline(
-              robotAction: RobotAction.startingPosition,
-              position: positions[index]!,
-            );
-
-            isRobotCarryingCargo.value = false;
-
             showDialog(
               context: Get.context!,
               builder: (context) => createGameImmersiveDialog(
@@ -507,6 +500,21 @@ class GameScreen extends StatelessWidget {
                     .map((objectType) => objectDialogRectangle(
                           objectType,
                           onTapAction: () {
+                            HapticFeedback.mediumImpact();
+
+                            final positions = {
+                              0: 19,
+                              1: 18,
+                              2: 17,
+                            };
+
+                            controller.addEventToTimeline(
+                              robotAction: RobotAction.startingPosition,
+                              position: positions[index]!,
+                            );
+
+                            isRobotCarryingCargo.value = false;
+
                             controller.matchData.events.last.timeSince =
                                 0.seconds;
                             isUserSelectingStartPosition.value = false;
@@ -687,22 +695,20 @@ extension GameScreenDialogs on GameScreen {
         child: InkWell(
           borderRadius: BorderRadius.circular(20.0),
           onTap: () {
-            if (isRobotCarryingCargo.isFalse) {
-              HapticFeedback.mediumImpact();
+            HapticFeedback.mediumImpact();
 
-              controller.addEventToTimeline(
-                robotAction: objectType == ObjectType.cube
-                    ? RobotAction.pickedUpCube
-                    : RobotAction.pickedUpCone,
-                position: position,
-              );
+            controller.addEventToTimeline(
+              robotAction: objectType == ObjectType.cube
+                  ? RobotAction.pickedUpCube
+                  : RobotAction.pickedUpCone,
+              position: position,
+            );
 
-              isRobotCarryingCargo.value = true;
+            isRobotCarryingCargo.value = true;
 
-              Navigator.of(Get.context!).pop();
+            Navigator.of(Get.context!).pop();
 
-              if (onTapAction != null) onTapAction();
-            }
+            if (onTapAction != null) onTapAction();
           },
           child: Container(
             decoration: BoxDecoration(

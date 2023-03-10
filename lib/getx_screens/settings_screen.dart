@@ -5,7 +5,7 @@ import 'package:frc_scouting/getx_screens/scan_qrcode_screen.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/scout_schedule.dart';
-import 'package:frc_scouting/models/tournament_key.dart';
+import 'package:frc_scouting/models/tournament.dart';
 import 'package:get/get.dart';
 
 import '../helpers/shared_preferences_helper.dart';
@@ -15,7 +15,7 @@ import 'server_authority_setup_screen.dart';
 class SettingsScreenVariables extends GetxController {
   var serverAuthority = "".obs;
   var rotation = GameConfigurationRotation.left.obs;
-  var selectedTournamentKey = TournamentKey("2023 Week 0", "2023week0").obs;
+  var selectedTournamentKey = Tournament("2023 Week 0", "2023week0").obs;
 
   @override
   void onInit() async {
@@ -78,7 +78,7 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DropdownSearch<TournamentKey>(
+                DropdownSearch<Tournament>(
                   items: Constants.shared.tournamentKeys,
                   itemAsString: (item) => item.name,
                   onChanged: (value) => variables.selectedTournamentKey,

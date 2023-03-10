@@ -6,7 +6,7 @@ import 'package:frc_scouting/helpers/match_schedule_helper.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/models/robot_action.dart';
 import 'package:frc_scouting/models/service.dart';
-import 'package:frc_scouting/models/tournament_key.dart';
+import 'package:frc_scouting/models/tournament.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
@@ -45,9 +45,10 @@ class BusinessLogicController extends GetxController {
     matchData.scouterName.value =
         await SharedPreferencesHelper.shared.getString("scouterName") ?? "";
 
-    matchData.tournamentKey = TournamentKey.fromJson(jsonDecode(
+    matchData.tournamentKey = Tournament.fromJson(jsonDecode(
         await SharedPreferencesHelper.shared
-                .getString("selectedTournamentKey") ?? ""));
+                .getString("selectedTournamentKey") ??
+            ""));
 
     try {
       MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: false);

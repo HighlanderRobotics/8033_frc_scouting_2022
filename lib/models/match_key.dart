@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 import '../getx_screens/settings_screen.dart';
 import 'match_type.dart';
-import 'tournament_key.dart';
+import 'tournament.dart';
 
 class MatchKey {
   late MatchType matchType;
@@ -45,7 +45,7 @@ class MatchKey {
 
   String get shortMatchKey => "${matchType.shortName}$ordinalMatchNumber";
 
-  String longMatchKeyForTournament(TournamentKey tournamentKey) =>
+  String longMatchKeyForTournament(Tournament tournamentKey) =>
       "${tournamentKey.key}_$shortMatchKey";
 
   // String get longMatchKey =>
