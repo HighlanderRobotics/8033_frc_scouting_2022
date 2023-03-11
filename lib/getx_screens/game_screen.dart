@@ -174,7 +174,9 @@ class GameScreen extends StatelessWidget {
 
   Widget paintWidget() {
     return Transform.rotate(
-      angle: variables.rotation.value == GameConfigurationRotation.upright ? 0 : 3.14159265359,
+      angle: variables.rotation.value == GameConfigurationRotation.standard
+          ? 0
+          : 3.14159265359,
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -190,7 +192,10 @@ class GameScreen extends StatelessWidget {
           key: draggableFABParentKey,
           children: [
             Transform.rotate(
-              angle: variables.rotation.value == GameConfigurationRotation.upright ? 0 : 3.14159265359,
+              angle:
+                  variables.rotation.value == GameConfigurationRotation.standard
+                      ? 0
+                      : 3.14159265359,
               child: Stack(
                 children: [
                   if (isInteractive && isUserSelectingStartPosition.isFalse)
@@ -435,12 +440,8 @@ class GameScreen extends StatelessWidget {
 
   Positioned createSubstationRectangle() {
     return Positioned(
-      left: alliance == AllianceColor.red
-          ? 0
-          : null,
-      right: alliance == AllianceColor.blue
-          ? 0
-          : null,
+      left: alliance == AllianceColor.red ? 0 : null,
+      right: alliance == AllianceColor.blue ? 0 : null,
       top: getTopToBoxDecorationHeight(),
       child: InkWell(
         child: Obx(
@@ -474,12 +475,8 @@ class GameScreen extends StatelessWidget {
     return Positioned(
       bottom: getBottomToBoxDecorationHeight() +
           boxDecorationSize.height * index * 0.22,
-      left: alliance == AllianceColor.blue
-          ? 0
-          : null,
-      right: alliance == AllianceColor.red
-          ? 0
-          : null,
+      left: alliance == AllianceColor.blue ? 0 : null,
+      right: alliance == AllianceColor.red ? 0 : null,
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(

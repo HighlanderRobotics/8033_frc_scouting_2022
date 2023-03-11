@@ -219,15 +219,21 @@ class HomeScreen extends StatelessWidget {
               Future.delayed(700.milliseconds, () {
                 Get.to(() => GameScreen(
                       isInteractive: true,
-                      alliance: (int.tryParse(controller
-                                      .matchData.matchKey.value.rawShortMatchKey
-                                      .substring(controller.matchData.matchKey
-                                              .value.rawShortMatchKey.length -
-                                          1)) ??
-                                  0) <=
-                              2
-                          ? AllianceColor.red
-                          : AllianceColor.blue,
+                      alliance: isCustomMatchSelected.isTrue
+                          ? allianceColor
+                          : ((int.tryParse(controller.matchData.matchKey.value
+                                          .rawShortMatchKey
+                                          .substring(controller
+                                                  .matchData
+                                                  .matchKey
+                                                  .value
+                                                  .rawShortMatchKey
+                                                  .length -
+                                              1)) ??
+                                      0) <=
+                                  2)
+                              ? AllianceColor.red
+                              : AllianceColor.blue,
                     ));
               });
             }

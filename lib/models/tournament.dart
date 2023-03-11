@@ -6,7 +6,7 @@ class Tournament {
 
   Tournament.fromJson(Map<String, dynamic> json)
       : name = json['localizedDescription'],
-        key = json['eventCode'];
+        key = json['key'];
 
   Map<String, dynamic> toJson() => {
         'localizedDescription': name,

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
@@ -15,8 +17,8 @@ import 'server_authority_setup_screen.dart';
 
 class SettingsScreenVariables extends GetxController {
   var serverAuthority = "".obs;
-  var rotation = GameConfigurationRotation.upright.obs;
-  var selectedTournamentKey = Tournament("2023 Week 0", "2023week0").obs;
+  var rotation = GameConfigurationRotation.standard.obs;
+  var selectedTournamentKey = Rx(Constants.shared.tournamentKeys.first);
 
   @override
   void onInit() async {
@@ -26,17 +28,19 @@ class SettingsScreenVariables extends GetxController {
           await SharedPreferencesHelper.shared.getString("rotation") ?? "0",
         ) ??
         0];
+    selectedTournamentKey.value = Tournament.fromJson((jsonDecode(
+        await SharedPreferencesHelper.shared
+                .getString("selectedTournamentKey") ??
+            "")));
 
     if (serverAuthority.value == "localhost:4000" || serverAuthority.isEmpty) {
-      Future.delayed(0.seconds, () {
-        Get.to(() => SettingsScreen());
-      });
+      Get.to(() => SettingsScreen());
     }
 
     super.onInit();
   }
 
-  Future saveServerAuthority() async {
+  Future saveValues() async {
     await SharedPreferencesHelper.shared.setString(
       "serverAuthority",
       serverAuthority.value,
@@ -45,12 +49,17 @@ class SettingsScreenVariables extends GetxController {
       "rotation",
       rotation.value.index.toString(),
     );
+    await SharedPreferencesHelper.shared.setString(
+      "selectedTournamentKey",
+      jsonEncode(selectedTournamentKey.value.toJson()),
+    );
   }
 
   Future resetValues() async {
-    rotation.value = GameConfigurationRotation.upright;
+    rotation.value = GameConfigurationRotation.standard;
     serverAuthority.value = "";
-    saveServerAuthority();
+    selectedTournamentKey.value = Constants.shared.tournamentKeys.first;
+    await saveValues();
   }
 }
 
@@ -79,15 +88,18 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DropdownSearch<Tournament>(
-                  items: Constants.shared.tournamentKeys,
-                  itemAsString: (item) => item.name,
-                  onChanged: (value) => variables.selectedTournamentKey,
-                  selectedItem: variables.selectedTournamentKey.value,
-                  dropdownDecoratorProps: const DropDownDecoratorProps(
-                    dropdownSearchDecoration: InputDecoration(
-                      labelText: "Tournament Key",
-                      filled: true,
+                Obx(
+                  () => DropdownSearch<Tournament>(
+                    items: Constants.shared.tournamentKeys,
+                    itemAsString: (item) => item.name,
+                    onChanged: (value) =>
+                        variables.selectedTournamentKey.value == value,
+                    selectedItem: variables.selectedTournamentKey.value,
+                    dropdownDecoratorProps: const DropDownDecoratorProps(
+                      dropdownSearchDecoration: InputDecoration(
+                        labelText: "Tournament",
+                        filled: true,
+                      ),
                     ),
                   ),
                 ),
@@ -208,15 +220,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         onPressed: () async {
           if (hasValidServerAuthority()) {
-            variables.saveServerAuthority();
-
-            await SharedPreferencesHelper.shared
-                .setString("serverAuthority", variables.serverAuthority.value);
-
-            await SharedPreferencesHelper.shared.setString(
-              "rotation",
-              variables.rotation.value.index.toString(),
-            );
+            await variables.saveValues();
 
             controller.serviceHelper.refreshAll(networkRefresh: true);
 
