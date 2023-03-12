@@ -58,8 +58,10 @@ class ScoutingServerAPI {
   Future addScoutReport(MatchData matchData) async {
     try {
       final response = await http.post(
-        Uri.parse(
-            'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/addScoutReport'),
+        Uri.http(
+            (await SharedPreferencesHelper.shared
+                .getString("serverAuthority"))!,
+            '/API/manager/addScoutReport'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
@@ -70,8 +72,9 @@ class ScoutingServerAPI {
       if (response.statusCode == 200) {
         print("Successfully added scout report");
       } else {
-        print("HTTP ${response.statusCode} response");
-        throw Exception("HTTP ${response.statusCode} response");
+        print("HTTP ${response.statusCode} response ${response.reasonPhrase}");
+        throw Exception(
+            "HTTP ${response.statusCode} response ${response.reasonPhrase}");
       }
     } catch (e) {
       print("Failed adding scout report - network response error $e");
@@ -111,8 +114,15 @@ class ScoutingServerAPI {
     required String scouterName,
     required List<String> matchKeys,
   }) async {
-    final response = await http.get(Uri.parse(
-        "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
+    http.Response response;
+
+    try {
+      response = await http.get(Uri.parse(
+          "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
+    } catch (e) {
+      print("Failed isMatchesScouted - network response error: $e");
+      throw Exception("Failed isMatchesScouted - network response error: $e");
+    }
 
     if (response.statusCode == 200) {
       try {

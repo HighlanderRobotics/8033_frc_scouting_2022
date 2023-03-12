@@ -33,7 +33,7 @@ class SettingsScreenVariables extends GetxController {
                 .getString("selectedTournamentKey") ??
             "")));
 
-    if (serverAuthority.value == "localhost:4000" || serverAuthority.isEmpty) {
+    if (serverAuthority.isEmpty) {
       Get.to(() => SettingsScreen());
     }
 

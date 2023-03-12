@@ -29,14 +29,14 @@ class MatchData {
   var autoChallengeResult = ClimbingChallenge.noClimb.obs;
   var challengeResult = ClimbingChallenge.noClimb.obs;
   var hasSavedToCloud = false.obs;
-  var tournamentKey = Tournament("", "");
+  var tournament = Constants.shared.tournamentKeys.first;
 
   String get tbaKey {
     if (matchKey != null.obs) {
       final match = MatchScheduleHelper.shared.matchSchedule
           .firstWhereOrNull((match) => match.matchKey == matchKey.value);
       if (match != null) {
-        final rawKey = match.key.substring(tournamentKey.key.length + 1);
+        final rawKey = match.key.substring(tournament.key.length + 1);
         return rawKey.substring(0, rawKey.length - 2);
       }
     }
@@ -54,7 +54,8 @@ class MatchData {
 
   MatchData.fromJson(Map<String, dynamic> json) {
     uuid = json['uuid'];
-    tournamentKey = Tournament.fromJson(json['tournamentKey']);
+    tournament = Constants.shared.tournamentKeys
+        .firstWhere((element) => element.key == json['tournamentKey']);
     matchKey = MatchKey.fromJsonUsingShortKeyForm(json['matchKey']).obs;
     teamNumber = RxInt(json['teamNumber']);
     scouterName = RxString(json['scouterName']);
@@ -80,7 +81,7 @@ class MatchData {
   }) =>
       {
         'uuid': uuid,
-        'tournamentKey': tournamentKey,
+        'tournamentKey': tournament.key,
         if (usesTBAKey)
           'matchKey': tbaKey
         else

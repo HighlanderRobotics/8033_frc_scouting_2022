@@ -215,6 +215,8 @@ class HomeScreen extends StatelessWidget {
       onPressed: controller.matchData.isPreliminaryDataValid
           ? () async {
               controller.setLandscapeOrientation();
+              controller.matchData.tournament =
+                  variables.selectedTournamentKey.value;
 
               Future.delayed(700.milliseconds, () {
                 Get.to(() => GameScreen(
@@ -431,7 +433,10 @@ class HomeScreen extends StatelessWidget {
         ...ScoutersHelper.shared.scouters,
         "Backup Scouter 1",
         "Backup Scouter 2",
-        "Backup Scouter 3"
+        "Backup Scouter 3",
+        "Backup Scouter 4",
+        "Backup Scouter 5",
+        "Backup Scouter 6",
       ],
       selectedItem: controller.matchData.scouterName.value,
       onChanged: (value) {

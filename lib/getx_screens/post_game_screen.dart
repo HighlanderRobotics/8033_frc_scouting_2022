@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
@@ -34,7 +36,7 @@ class PostGameScreen extends StatelessWidget {
             child: Obx(
               (() => Column(
                     children: [
-                      autoClimbingChallengeDropdown(),
+                      autonClimbingChallengeDropdown(),
                       const SizedBox(height: 20),
                       climbingChallengeDropdown(),
                       const SizedBox(height: 20),
@@ -87,7 +89,7 @@ class PostGameScreen extends StatelessWidget {
     );
   }
 
-  DropdownSearch<ClimbingChallenge> autoClimbingChallengeDropdown() {
+  DropdownSearch<ClimbingChallenge> autonClimbingChallengeDropdown() {
     return DropdownSearch<ClimbingChallenge>(
       items: ClimbingChallenge.values,
       itemAsString: (climbingChallenge) =>
@@ -100,7 +102,7 @@ class PostGameScreen extends StatelessWidget {
       },
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
-          labelText: "Auto Climbing Challenge",
+          labelText: "Auton Climbing Challenge",
           filled: true,
         ),
       ),

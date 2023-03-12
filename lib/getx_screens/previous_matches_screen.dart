@@ -25,36 +25,48 @@ class PreviousMatchesScreen extends StatelessWidget {
   PreviousMatchesScreen({required PreviousMatchesInfo previousMatchesInfo}) {
     this.previousMatchesInfo = previousMatchesInfo.obs;
 
-    ScoutingServerAPI.shared
-        .isMatchesScouted(
-            scouterName: controller.matchData.scouterName.value,
-            matchKeys: previousMatchesInfo.validMatches
-                .map((e) =>
-                    e.matchKey.value.longMatchKeyForTournament(e.tournamentKey))
-                .toList())
-        .then((value) {
-      // if we find a local match that we think has not been uploaded
-      // we check it against the server results and update
-      // it if it has been uploaded
+    if (this.previousMatchesInfo.value.validMatches.isNotEmpty) {
+      try {
+        ScoutingServerAPI.shared
+            .isMatchesScouted(
+                scouterName: controller.matchData.scouterName.value,
+                matchKeys: previousMatchesInfo.validMatches
+                    .map((e) => e.matchKey.value
+                        .longMatchKeyForTournament(e.tournament))
+                    .toList())
+            .then((value) {
+          // first, we find a local match that we think has not been uploaded
+          // then, we check it against the server results
+          // lastly, update it if it has been uploaded
 
-      for (final validMatch in previousMatchesInfo.validMatches) {
-        if (validMatch.hasSavedToCloud.isFalse &&
-            value.firstWhereOrNull((element) =>
-                    element.matchKey ==
-                    validMatch.matchKey.value
-                        .longMatchKeyForTournament(validMatch.tournamentKey)) !=
-                null) {
-          validMatch.hasSavedToCloud.value = true;
-          controller.documentsHelper
-              .saveAndUploadMatchData(validMatch,
-                  ignoreNetworkAddScoutReport: true)
-              .then((uploadStatus) {
-            validMatch.hasSavedToCloud.value = true;
-            filterSearchResultsAndUpdateList();
-          });
-        }
+          for (final validMatch in previousMatchesInfo.validMatches) {
+            if (validMatch.hasSavedToCloud.isFalse &&
+                value.firstWhereOrNull((element) =>
+                        element.matchKey ==
+                        validMatch.matchKey.value.longMatchKeyForTournament(
+                            validMatch.tournament)) !=
+                    null) {
+              validMatch.hasSavedToCloud.value = true;
+              controller.documentsHelper
+                  .saveAndUploadMatchData(validMatch)
+                  .then((uploadStatus) {
+                validMatch.hasSavedToCloud.value = true;
+                filterSearchResultsAndUpdateList();
+              });
+            }
+          }
+        });
+      } on Exception catch (e) {
+        print("Error: $e");
+
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: Text("Error: $e"),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
-    });
+    }
   }
 
   @override

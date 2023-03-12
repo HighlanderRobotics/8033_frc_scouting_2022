@@ -142,32 +142,58 @@ class GameScreen extends StatelessWidget {
           top: true,
           child: Obx(() => paintWidget()),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: !isInteractive
             ? null
-            : FloatingActionButton(
-                onPressed: null,
-                mini: true,
-                child: GestureDetector(
-                  child: const Icon(Icons.arrow_forward),
-                  onLongPress: () {
-                    if (isInteractive) {
-                      if (isAutoInProgress.isTrue) {
-                        print("Finishing Auto Timer");
-                        if (isInteractive) {
-                          HapticFeedback.mediumImpact();
-                          isAutoInProgress.value = false;
-                        }
-                      } else {
-                        print("Finishing Teleop and Wrapping Up");
-                        presentPostGameScreenTimer.cancel();
-                        autoTimer.cancel();
-                        HapticFeedback.heavyImpact();
-                        Get.to(() => PostGameScreen());
-                      }
-                    }
-                  },
+            : Obx(
+                () => Row(
+                  children: [
+                    const SizedBox(width: 15),
+                    if (isAutoInProgress.isFalse)
+                      previousFloatingActionButton(),
+                    const Spacer(),
+                    nextFloatingActionButton(),
+                    const SizedBox(width: 15),
+                  ],
                 ),
               ),
+      ),
+    );
+  }
+
+  FloatingActionButton previousFloatingActionButton() {
+    return FloatingActionButton(
+      onPressed: null,
+      mini: true,
+      child: GestureDetector(
+        child: const Icon(Icons.arrow_back),
+        onLongPress: () {
+          if (isInteractive && isAutoInProgress.isFalse) {
+            print("Reverting and resetting auton timer");
+            HapticFeedback.mediumImpact();
+            isAutoInProgress.value = true;
+            controller.matchData.startTime = DateTime.now();
+          }
+        },
+      ),
+    );
+  }
+
+  FloatingActionButton nextFloatingActionButton() {
+    return FloatingActionButton(
+      onPressed: null,
+      mini: true,
+      child: GestureDetector(
+        child: const Icon(Icons.arrow_forward),
+        onLongPress: () {
+          if (isInteractive) {
+            print("Finishing and Wrapping Up");
+            presentPostGameScreenTimer.cancel();
+            autoTimer.cancel();
+            HapticFeedback.heavyImpact();
+            Get.to(() => PostGameScreen());
+          }
+        },
       ),
     );
   }
@@ -191,6 +217,33 @@ class GameScreen extends StatelessWidget {
         child: Stack(
           key: draggableFABParentKey,
           children: [
+            if (!Foundation.kReleaseMode)
+              Positioned(
+                top: getTopToBoxDecorationHeight(),
+                child: SizedBox(
+                    width: Get.mediaQuery.size.width,
+                    height: 1,
+                    child: Container(color: Colors.red)),
+              ),
+            if (!Foundation.kReleaseMode)
+              Positioned(
+                bottom: getBottomToBoxDecorationHeight(),
+                child: SizedBox(
+                    width: Get.mediaQuery.size.width,
+                    height: 1,
+                    child: Container(color: Colors.red)),
+              ),
+            for (final index in gridRectangleValues)
+              createGridRectangle(index: index),
+            if (isAutoInProgress.isTrue &&
+                isInteractive == true &&
+                isUserSelectingStartPosition.isFalse)
+              for (final index in communityEntranceRectangleValues)
+                createCommunityEntranceMethodRectangle(object: index),
+            for (final index in midCargoRotatonValues)
+              createFieldCargoCircle(index),
+            if (isInteractive && isAutoInProgress.isFalse)
+              createSubstationRectangle(),
             Transform.rotate(
               angle:
                   variables.rotation.value == GameConfigurationRotation.standard
@@ -336,33 +389,6 @@ class GameScreen extends StatelessWidget {
                 ],
               ),
             ),
-            if (!Foundation.kReleaseMode)
-              Positioned(
-                top: getTopToBoxDecorationHeight(),
-                child: SizedBox(
-                    width: Get.mediaQuery.size.width,
-                    height: 1,
-                    child: Container(color: Colors.red)),
-              ),
-            if (!Foundation.kReleaseMode)
-              Positioned(
-                bottom: getBottomToBoxDecorationHeight(),
-                child: SizedBox(
-                    width: Get.mediaQuery.size.width,
-                    height: 1,
-                    child: Container(color: Colors.red)),
-              ),
-            for (final index in gridRectangleValues)
-              createGridRectangle(index: index),
-            if (isAutoInProgress.isTrue &&
-                isInteractive == true &&
-                isUserSelectingStartPosition.isFalse)
-              for (final index in communityEntranceRectangleValues)
-                createCommunityEntranceMethodRectangle(object: index),
-            for (final index in midCargoRotatonValues)
-              createFieldCargoCircle(index),
-            if (isInteractive && isAutoInProgress.isFalse)
-              createSubstationRectangle(),
           ],
         ),
       ),
@@ -491,33 +517,34 @@ class GameScreen extends StatelessWidget {
             showDialog(
               context: Get.context!,
               builder: (context) => createGameImmersiveDialog(
-                widgets: ObjectType.values
-                    .map((objectType) => objectDialogRectangle(
-                          objectType,
-                          onTapAction: () {
-                            HapticFeedback.mediumImpact();
+                widgets: [...ObjectType.values, null]
+                    .map((objectType) => objectType == null
+                        ? noStartingObjectDialogRectangle()
+                        : objectDialogRectangle(
+                            objectType,
+                            onTapAction: () {
+                              HapticFeedback.mediumImpact();
 
-                            final positions = {
-                              0: 19,
-                              1: 18,
-                              2: 17,
-                            };
+                              final positions = {
+                                0: 19,
+                                1: 18,
+                                2: 17,
+                              };
 
-                            controller.addEventToTimeline(
-                              robotAction: RobotAction.startingPosition,
-                              position: positions[index]!,
-                            );
+                              controller.addEventToTimeline(
+                                robotAction: RobotAction.startingPosition,
+                                position: positions[index]!,
+                              );
 
-                            isRobotCarryingCargo.value = false;
+                              isRobotCarryingCargo.value = true;
 
-                            controller.matchData.events.last.timeSince =
-                                0.seconds;
-                            isUserSelectingStartPosition.value = false;
+                              controller.matchData.events.last.timeSince =
+                                  0.seconds;
+                              isUserSelectingStartPosition.value = false;
 
-                            resetAndStartTimer();
-                          },
-                        ))
-                    .toList()
+                              resetAndStartTimer();
+                            },
+                          ))
                     .toList(),
                 context: context,
               ),
@@ -534,6 +561,46 @@ class GameScreen extends StatelessWidget {
             );
           }
         },
+      ),
+    );
+  }
+
+  Widget noStartingObjectDialogRectangle() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(
+          bottom: 15.0,
+          left: 15.0,
+          right: 15.0,
+          top: 5,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20.0),
+          onTap: () {
+            isRobotCarryingCargo.value = false;
+            isUserSelectingStartPosition.value = false;
+            Navigator.of(Get.context!).pop();
+
+            resetAndStartTimer();
+            HapticFeedback.mediumImpact();
+          },
+          child: Container(
+            decoration: const BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.all(Radius.circular(20.0))),
+            child: const Padding(
+              padding: EdgeInsets.all(30.0),
+              child: Text(
+                'No Starting Object',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -595,16 +662,18 @@ class GameScreen extends StatelessWidget {
   Dialog createGameImmersiveDialog({
     required List<Widget> widgets,
     required BuildContext context,
+    bool showsCloseButton = true,
   }) {
     return Dialog(
       child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 8, right: 8),
-          child: IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close, size: 50),
+        if (showsCloseButton)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, right: 8),
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close, size: 50),
+            ),
           ),
-        ),
         Expanded(child: Row(children: widgets)),
       ]),
     );
@@ -651,19 +720,23 @@ extension GameScreenDialogs on GameScreen {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Level ${level.index}",
-                        style: const TextStyle(
-                          fontSize: 30,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        )),
+                    Text(
+                      "Level ${level.index + 1}",
+                      style: const TextStyle(
+                        fontSize: 30,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 50),
-                    Text(level.localizedDescription,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        )),
+                    Text(
+                      level.localizedDescription,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ],

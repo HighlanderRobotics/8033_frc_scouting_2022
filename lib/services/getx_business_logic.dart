@@ -45,7 +45,7 @@ class BusinessLogicController extends GetxController {
     matchData.scouterName.value =
         await SharedPreferencesHelper.shared.getString("scouterName") ?? "";
 
-    matchData.tournamentKey = Tournament.fromJson(jsonDecode(
+    matchData.tournament = Tournament.fromJson(jsonDecode(
         await SharedPreferencesHelper.shared
                 .getString("selectedTournamentKey") ??
             ""));

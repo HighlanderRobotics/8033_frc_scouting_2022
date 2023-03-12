@@ -12,11 +12,11 @@ extension LevelExtension on Level {
   String get localizedDescription {
     switch (this) {
       case Level.bottomRow:
-        return "Bottom Row";
+        return "Hybrid";
       case Level.middleRow:
-        return "Middle Row";
+        return "Middle";
       case Level.topRow:
-        return "Top Row";
+        return "Top";
     }
   }
 
