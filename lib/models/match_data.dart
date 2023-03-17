@@ -4,6 +4,7 @@ import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/match_key.dart';
 import 'package:frc_scouting/models/match_type.dart';
 import 'package:frc_scouting/models/tournament.dart';
+import 'package:collection/collection.dart';
 
 import 'climbing_challenge.dart';
 import 'event.dart';
@@ -89,7 +90,9 @@ class MatchData {
         'teamNumber': teamNumber.value,
         'scouterName': scouterName.value,
         'startTime': startTime.millisecondsSinceEpoch,
-        'events': events.map((e) => e.toJson()).toList(),
+        'events': events
+            .sorted((a, b) => a.timeSince.compareTo(b.timeSince))
+            .toList(),
         'robotRole': robotRole.value.index,
         'notes': notes.value,
         'autoChallengeResult': autoChallengeResult.value.index,

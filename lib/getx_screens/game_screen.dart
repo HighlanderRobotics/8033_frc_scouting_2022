@@ -519,7 +519,7 @@ class GameScreen extends StatelessWidget {
               builder: (context) => createGameImmersiveDialog(
                 widgets: [...ObjectType.values, null]
                     .map((objectType) => objectType == null
-                        ? noStartingObjectDialogRectangle()
+                        ? noStartingObjectDialogRectangle(Get.context!)
                         : objectDialogRectangle(
                             objectType,
                             onTapAction: () {
@@ -565,7 +565,7 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  Widget noStartingObjectDialogRectangle() {
+  Widget noStartingObjectDialogRectangle(BuildContext context) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -579,7 +579,7 @@ class GameScreen extends StatelessWidget {
           onTap: () {
             isRobotCarryingCargo.value = false;
             isUserSelectingStartPosition.value = false;
-            Navigator.of(Get.context!).pop();
+            Navigator.of(context).pop();
 
             resetAndStartTimer();
             HapticFeedback.mediumImpact();
