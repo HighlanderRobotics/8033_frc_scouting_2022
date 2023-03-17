@@ -2,7 +2,10 @@ class Tournament {
   String name;
   String key;
 
-  Tournament(this.name, this.key);
+  Tournament({
+    required this.name,
+    required this.key,
+  });
 
   Tournament.fromJson(Map<String, dynamic> json)
       : name = json['localizedDescription'],

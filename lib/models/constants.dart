@@ -5,9 +5,9 @@ class Constants {
   static Constants shared = Constants();
 
   final tournamentKeys = [
-    Tournament("Monterey", "2023camb"),
-    Tournament("Fresno", "2023cafr"),
-    Tournament("2023 Week 0", "2023week0"),
-    if (kDebugMode) Tournament("Chezy 2022 (debug)", "2022cc"),
+    Tournament(name: "Monterey", key: "2023camb"),
+    Tournament(name: "Fresno", key: "2023cafr"),
+    Tournament(name: "2023 Week 0", key: "2023week0"),
+    if (kDebugMode) Tournament(name: "Chezy 2022 (debug)", key: "2022cc"),
   ];
 }

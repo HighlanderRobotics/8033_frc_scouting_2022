@@ -18,7 +18,7 @@ import 'server_authority_setup_screen.dart';
 class SettingsScreenVariables extends GetxController {
   var serverAuthority = "".obs;
   var rotation = GameConfigurationRotation.standard.obs;
-  var selectedTournamentKey = Rx(Constants.shared.tournamentKeys.first);
+  var selectedTournamentKey = Tournament(name: "name", key: "key").obs;
 
   @override
   void onInit() async {
@@ -32,6 +32,8 @@ class SettingsScreenVariables extends GetxController {
         await SharedPreferencesHelper.shared
                 .getString("selectedTournamentKey") ??
             "")));
+
+    print(selectedTournamentKey.value.key);
 
     if (serverAuthority.isEmpty) {
       Get.to(() => SettingsScreen());
@@ -92,8 +94,11 @@ class SettingsScreen extends StatelessWidget {
                   () => DropdownSearch<Tournament>(
                     items: Constants.shared.tournamentKeys,
                     itemAsString: (item) => item.name,
-                    onChanged: (value) =>
-                        variables.selectedTournamentKey.value == value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        variables.selectedTournamentKey = value.obs;
+                      }
+                    },
                     selectedItem: variables.selectedTournamentKey.value,
                     dropdownDecoratorProps: const DropDownDecoratorProps(
                       dropdownSearchDecoration: InputDecoration(
