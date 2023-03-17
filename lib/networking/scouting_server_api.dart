@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:frc_scouting/models/constants.dart';
+import 'package:frc_scouting/models/tournament.dart';
 import 'package:get/get.dart';
 
 import '../getx_screens/settings_screen.dart';
@@ -11,6 +12,7 @@ import 'package:http/http.dart' as http;
 import '../models/match_event.dart';
 import '../models/match_scouted.dart';
 import '../models/scout_schedule.dart';
+import 'package:collection/collection.dart';
 
 class ScoutingServerAPI {
   static final shared = ScoutingServerAPI();
@@ -131,6 +133,33 @@ class ScoutingServerAPI {
             .toList();
       } catch (e) {
         print("Failed decoding isMatchesScouted - network response error: $e");
+        throw Exception(e);
+      }
+    } else {
+      print("HTTP ${response.statusCode} response");
+      throw Exception("HTTP ${response.statusCode} response");
+    }
+  }
+
+  Future<List<Tournament>> getTournaments() async {
+    final response = await http.get(Uri.parse(
+        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getTournaments'));
+
+    if (response.statusCode == 200) {
+      try {
+        var tournaments = <Tournament>[];
+
+        for (final jsonObject in (jsonDecode(response.body) as List<dynamic>)) {
+          try {
+            tournaments.add(Tournament.fromJson(jsonObject));
+          } catch (e) {
+            print(e.toString());
+          }
+        }
+
+        return tournaments;
+      } catch (e) {
+        print("Failed decoding tournaments - network response error: $e");
         throw Exception(e);
       }
     } else {

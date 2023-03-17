@@ -8,6 +8,7 @@ import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
 import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/scout_schedule.dart';
 import 'package:frc_scouting/models/tournament.dart';
+import 'package:frc_scouting/networking/scouting_server_api.dart';
 import 'package:get/get.dart';
 
 import '../helpers/shared_preferences_helper.dart';
@@ -93,6 +94,8 @@ class SettingsScreen extends StatelessWidget {
                 Obx(
                   () => DropdownSearch<Tournament>(
                     items: Constants.shared.tournamentKeys,
+                    asyncItems: (_) =>
+                        ScoutingServerAPI.shared.getTournaments(),
                     itemAsString: (item) => item.name,
                     onChanged: (value) {
                       if (value != null) {
@@ -104,6 +107,49 @@ class SettingsScreen extends StatelessWidget {
                       dropdownSearchDecoration: InputDecoration(
                         labelText: "Tournament",
                         filled: true,
+                      ),
+                    ),
+                    popupProps: PopupProps.modalBottomSheet(
+                      searchDelay: 0.seconds,
+                      emptyBuilder: (context, searchEntry) {
+                        return const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Text(
+                              "No Tournaments found. Please check your search query or internet connection."),
+                        );
+                      },
+                      modalBottomSheetProps: ModalBottomSheetProps(
+                          backgroundColor:
+                              Theme.of(Get.context!).scaffoldBackgroundColor),
+                      containerBuilder: (context, popupWidget) {
+                        return SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Stack(children: [
+                              Column(children: [
+                                const SizedBox(height: 40),
+                                Expanded(child: popupWidget),
+                              ]),
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                ),
+                              )
+                            ]),
+                          ),
+                        );
+                      },
+                      fit: FlexFit.loose,
+                      showSearchBox: true,
+                      searchFieldProps: const TextFieldProps(
+                        padding: EdgeInsets.all(20),
+                        decoration: InputDecoration(
+                          labelText: "Search Tournaments",
+                          filled: true,
+                        ),
+                        autofocus: true,
                       ),
                     ),
                   ),

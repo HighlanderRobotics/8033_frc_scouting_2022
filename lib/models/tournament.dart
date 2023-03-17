@@ -8,11 +8,11 @@ class Tournament {
   });
 
   Tournament.fromJson(Map<String, dynamic> json)
-      : name = json['localizedDescription'],
+      : name = json['name'] ?? json['localizedDescription'],
         key = json['key'];
 
   Map<String, dynamic> toJson() => {
-        'localizedDescription': name,
+        'name': name,
         'key': key,
       };
 }
