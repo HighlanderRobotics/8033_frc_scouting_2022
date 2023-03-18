@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
 import 'package:frc_scouting/getx_screens/scan_qrcode_screen.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
@@ -96,12 +98,26 @@ class SettingsScreen extends StatelessWidget {
                     items: Constants.shared.tournamentKeys,
                     asyncItems: (_) =>
                         ScoutingServerAPI.shared.getTournaments(),
-                    itemAsString: (item) => item.name,
+                    dropdownBuilder: (context, selectedItem) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 5),
+                          Text(selectedItem?.name ?? ""),
+                          Text(
+                            selectedItem?.key ?? "",
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 14),
+                          ),
+                        ],
+                      );
+                    },
                     onChanged: (value) {
                       if (value != null) {
                         variables.selectedTournamentKey = value.obs;
                       }
                     },
+                    compareFn: (item1, item2) => item1.key == item2.key,
                     selectedItem: variables.selectedTournamentKey.value,
                     dropdownDecoratorProps: const DropDownDecoratorProps(
                       dropdownSearchDecoration: InputDecoration(
@@ -109,7 +125,35 @@ class SettingsScreen extends StatelessWidget {
                         filled: true,
                       ),
                     ),
+                    itemAsString: (item) => "${item.name}${item.key}",
                     popupProps: PopupProps.modalBottomSheet(
+                      errorBuilder: (context, searchEntry, exception) {
+                        Navigator.of(context).pop();
+                        Fluttertoast.showToast(
+                          msg: "Failed to fetch server tournaments: $exception",
+                          gravity: ToastGravity.TOP,
+                          timeInSecForIosWeb: 5,
+                          backgroundColor: Colors.grey,
+                          fontSize: 15.0,
+                        );
+                        return Container();
+                      },
+                      loadingBuilder: (context, searchEntry) {
+                        return const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      },
+                      itemBuilder: (context, item, isSelected) {
+                        return ListTile(
+                          title: Text(item.name),
+                          subtitle: Text(
+                            item.key,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          onTap: () => Navigator.of(context).pop(),
+                        );
+                      },
                       searchDelay: 0.seconds,
                       emptyBuilder: (context, searchEntry) {
                         return const Padding(

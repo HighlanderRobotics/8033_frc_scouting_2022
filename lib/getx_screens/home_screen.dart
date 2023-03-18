@@ -393,7 +393,7 @@ class HomeScreen extends StatelessWidget {
         emptyBuilder: (context, searchEntry) {
           return const Padding(
             padding: EdgeInsets.all(20),
-            child: Text("No Scouter Found"),
+            child: Text("No Scouters Found"),
           );
         },
         modalBottomSheetProps: ModalBottomSheetProps(
