@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
 import 'package:frc_scouting/getx_screens/settings_screen.dart';
 import 'package:get/get.dart';
-import 'game_configuration_rotation.dart';
+import '../models/settings_screen_variables.dart';
+import '../models/game_configuration_rotation.dart';
 
 import '../services/getx_business_logic.dart';
 

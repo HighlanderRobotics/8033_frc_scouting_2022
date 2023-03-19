@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:frc_scouting/models/alliance_color.dart';
 import 'package:holding_gesture/holding_gesture.dart';
 
-import 'game_configuration_rotation.dart';
-import 'game_configuration_screen.dart';
+import '../models/settings_screen_variables.dart';
+import '../models/game_configuration_rotation.dart';
 import '../models/levels.dart';
 import 'package:get/get.dart';
 
@@ -17,7 +17,6 @@ import 'post_game_screen.dart';
 
 import '../services/draggable_floating_action_button.dart';
 import '../services/getx_business_logic.dart';
-import 'settings_screen.dart';
 
 import 'package:flutter/foundation.dart' as Foundation;
 

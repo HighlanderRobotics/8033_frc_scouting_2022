@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
 import 'package:frc_scouting/getx_screens/scan_qrcode_screen.dart';
@@ -11,63 +10,13 @@ import 'package:frc_scouting/helpers/tournaments_helper.dart';
 import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/scout_schedule.dart';
 import 'package:frc_scouting/models/tournament.dart';
-import 'package:frc_scouting/networking/scouting_server_api.dart';
 import 'package:get/get.dart';
 
 import '../helpers/shared_preferences_helper.dart';
+import '../models/settings_screen_variables.dart';
 import '../services/getx_business_logic.dart';
-import 'game_configuration_rotation.dart';
+import '../models/game_configuration_rotation.dart';
 import 'server_authority_setup_screen.dart';
-
-class SettingsScreenVariables extends GetxController {
-  var serverAuthority = "".obs;
-  var rotation = GameConfigurationRotation.standard.obs;
-  var selectedTournamentKey = Tournament(name: "name", key: "key").obs;
-
-  @override
-  void onInit() async {
-    serverAuthority.value =
-        await SharedPreferencesHelper.shared.getString("serverAuthority") ?? "";
-    rotation.value = GameConfigurationRotation.values[int.tryParse(
-          await SharedPreferencesHelper.shared.getString("rotation") ?? "0",
-        ) ??
-        0];
-    selectedTournamentKey.value = Tournament.fromJson((jsonDecode(
-        await SharedPreferencesHelper.shared
-                .getString("selectedTournamentKey") ??
-            "")));
-
-    print(selectedTournamentKey.value.key);
-
-    if (serverAuthority.isEmpty) {
-      Get.to(() => SettingsScreen());
-    }
-
-    super.onInit();
-  }
-
-  Future saveValues() async {
-    await SharedPreferencesHelper.shared.setString(
-      "serverAuthority",
-      serverAuthority.value,
-    );
-    await SharedPreferencesHelper.shared.setString(
-      "rotation",
-      rotation.value.index.toString(),
-    );
-    await SharedPreferencesHelper.shared.setString(
-      "selectedTournamentKey",
-      jsonEncode(selectedTournamentKey.value.toJson()),
-    );
-  }
-
-  Future resetValues() async {
-    rotation.value = GameConfigurationRotation.standard;
-    serverAuthority.value = "";
-    selectedTournamentKey.value = Constants.shared.tournamentKeys.first;
-    await saveValues();
-  }
-}
 
 class SettingsScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
@@ -100,6 +49,11 @@ class SettingsScreen extends StatelessWidget {
                       ...Constants.shared.tournamentKeys,
                       ...TournamentsHelper.shared.tournaments.toList()
                     ],
+                    onChanged: (value) async {
+                      if (value != null) {
+                        variables.selectedTournamentKey.value = value;
+                      }
+                    },
                     dropdownBuilder: (context, selectedItem) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +106,6 @@ class SettingsScreen extends StatelessWidget {
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.outline),
                           ),
-                          onTap: () => Navigator.of(context).pop(),
                         );
                       },
                       searchDelay: 0.seconds,

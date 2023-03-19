@@ -31,6 +31,7 @@ class MatchData {
   var challengeResult = ClimbingChallenge.noClimb.obs;
   var hasSavedToCloud = false.obs;
   var tournament = Constants.shared.tournamentKeys.first;
+  var isRobotDisabled = RxBool(false);
 
   String get tbaKey {
     if (matchKey != null.obs) {
@@ -68,6 +69,7 @@ class MatchData {
     autoChallengeResult =
         ClimbingChallenge.values[json['autoChallengeResult']].obs;
     challengeResult = ClimbingChallenge.values[json['challengeResult']].obs;
+    isRobotDisabled = RxBool(json['isRobotDisabled']);
 
     if (json.containsKey("hasSavedToCloud")) {
       hasSavedToCloud = RxBool(json['hasSavedToCloud']);
@@ -98,5 +100,6 @@ class MatchData {
         'autoChallengeResult': autoChallengeResult.value.index,
         'challengeResult': challengeResult.value.index,
         if (includeUploadStatus) 'hasSavedToCloud': hasSavedToCloud.isTrue,
+        'isRobotDisabled': isRobotDisabled.value,
       };
 }

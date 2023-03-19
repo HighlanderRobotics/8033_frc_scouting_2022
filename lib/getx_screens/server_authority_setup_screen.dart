@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../models/settings_screen_variables.dart';
 import 'scan_qrcode_screen.dart';
 import 'settings_screen.dart';
 

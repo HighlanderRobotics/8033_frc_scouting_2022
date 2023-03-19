@@ -42,6 +42,8 @@ class PostGameScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       robotRoleDropdown(),
                       const SizedBox(height: 20),
+                      robotDisabled(),
+                      const SizedBox(height: 20),
                       TextField(
                         decoration: const InputDecoration(
                           labelText: "Notes",
@@ -125,6 +127,19 @@ class PostGameScreen extends StatelessWidget {
           filled: true,
         ),
       ),
+    );
+  }
+
+  Widget robotDisabled() {
+    return Row(
+      children: [
+        const Text("Robot Disabled"),
+        Checkbox(
+          value: controller.matchData.isRobotDisabled.value,
+          onChanged: (value) =>
+              controller.matchData.isRobotDisabled.value = value ?? false,
+        ),
+      ],
     );
   }
 

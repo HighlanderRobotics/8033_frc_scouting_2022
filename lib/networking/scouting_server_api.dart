@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/tournament.dart';
 import 'package:get/get.dart';
 
@@ -12,7 +11,7 @@ import 'package:http/http.dart' as http;
 import '../models/match_event.dart';
 import '../models/match_scouted.dart';
 import '../models/scout_schedule.dart';
-import 'package:collection/collection.dart';
+import '../models/settings_screen_variables.dart';
 
 class ScoutingServerAPI {
   static final shared = ScoutingServerAPI();
@@ -24,7 +23,7 @@ class ScoutingServerAPI {
   Future<List<String>> getScouters() async {
     try {
       var response = await http.get(Uri.parse(
-          'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getScouters'));
+          'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getScouters'));
 
       if (response.statusCode == 200) {
         return (jsonDecode(response.body) as List<dynamic>)
@@ -43,7 +42,7 @@ class ScoutingServerAPI {
   Future<ScoutersSchedule> getScoutersSchedule() async {
     try {
       var response = await http.get(Uri.parse(
-          'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getScoutersSchedule'));
+          'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getScoutersSchedule'));
 
       if (response.statusCode == 200) {
         return ScoutersSchedule.fromJson(jsonDecode(response.body));
@@ -61,8 +60,8 @@ class ScoutingServerAPI {
     try {
       final response = await http.post(
         Uri.http(
-            (await SharedPreferencesHelper.shared
-                .getString("serverAuthority"))!,
+            (await SharedPreferencesHelper.shared.getString(
+                SharedPreferenceKeys.serverAuthority.toShortString()))!,
             '/API/manager/addScoutReport'),
         headers: <String, String>{
           'Content-Type': 'application/json',
@@ -86,7 +85,7 @@ class ScoutingServerAPI {
 
   Future<List<MatchEvent>> getMatches() async {
     final response = await http.get(Uri.parse(
-        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getMatches/?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}'));
+        'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getMatches/?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}'));
 
     if (response.statusCode == 200) {
       try {
@@ -120,7 +119,7 @@ class ScoutingServerAPI {
 
     try {
       response = await http.get(Uri.parse(
-          "http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/isMatchesScouted?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
+          "http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/isMatchesScouted?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
     } catch (e) {
       print("Failed isMatchesScouted - network response error: $e");
       throw Exception("Failed isMatchesScouted - network response error: $e");
@@ -143,7 +142,7 @@ class ScoutingServerAPI {
 
   Future<List<Tournament>> getTournaments() async {
     final response = await http.get(Uri.parse(
-        'http://${await SharedPreferencesHelper.shared.getString("serverAuthority")}/API/manager/getTournaments'));
+        'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getTournaments'));
 
     if (response.statusCode == 200) {
       try {

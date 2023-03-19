@@ -50,7 +50,7 @@ class BusinessLogicController extends GetxController {
     matchData.tournament = Tournament.fromJson(jsonDecode(
         await SharedPreferencesHelper.shared.getString(
                 SharedPreferenceKeys.selectedTournamentKey.toShortString()) ??
-            ""));
+            jsonEncode(Constants.shared.tournamentKeys.first.toJson())));
 
     try {
       MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: false);

@@ -5,6 +5,7 @@ import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
 import 'package:frc_scouting/models/alliance_color.dart';
 import 'package:get/get.dart';
 
+import '../models/settings_screen_variables.dart';
 import 'game_screen.dart';
 import 'service_status_screen.dart';
 import 'settings_screen.dart';
