@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frc_scouting/getx_screens/game_configuration_screen.dart';
 import 'package:frc_scouting/getx_screens/scan_qrcode_screen.dart';
 import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
+import 'package:frc_scouting/helpers/tournaments_helper.dart';
 import 'package:frc_scouting/models/constants.dart';
 import 'package:frc_scouting/models/scout_schedule.dart';
 import 'package:frc_scouting/models/tournament.dart';
@@ -95,9 +96,10 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Obx(
                   () => DropdownSearch<Tournament>(
-                    items: Constants.shared.tournamentKeys,
-                    asyncItems: (_) =>
-                        ScoutingServerAPI.shared.getTournaments(),
+                    items: [
+                      ...Constants.shared.tournamentKeys,
+                      ...TournamentsHelper.shared.tournaments.toList()
+                    ],
                     dropdownBuilder: (context, selectedItem) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +109,8 @@ class SettingsScreen extends StatelessWidget {
                           Text(
                             selectedItem?.key ?? "",
                             style: TextStyle(
-                                color: Theme.of(context).colorScheme.outline, fontSize: 14),
+                                color: Theme.of(context).colorScheme.outline,
+                                fontSize: 14),
                           ),
                         ],
                       );
@@ -124,6 +127,7 @@ class SettingsScreen extends StatelessWidget {
                     popupProps: PopupProps.modalBottomSheet(
                       errorBuilder: (context, searchEntry, exception) {
                         Navigator.of(context).pop();
+                        Fluttertoast.cancel();
                         Fluttertoast.showToast(
                           msg: "Failed to fetch server tournaments: $exception",
                           gravity: ToastGravity.TOP,

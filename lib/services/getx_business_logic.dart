@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 
 import '../getx_screens/home_screen.dart';
 import '../helpers/shared_preferences_helper.dart';
+import '../helpers/tournaments_helper.dart';
 import '../models/constants.dart';
 import '../persistence/files_helper.dart';
 import '../models/event.dart';
@@ -36,24 +37,26 @@ class BusinessLogicController extends GetxController {
   late MatchData matchData;
   final FilesHelper documentsHelper = FilesHelper();
   var matchFilterType = MatchFilterType.date.obs;
-  final ServiceHelper serviceHelper = ServiceHelper();
+  final serviceHelper = ServiceHelper();
 
   @override
   void onInit() async {
     matchData = MatchData();
 
-    matchData.scouterName.value =
-        await SharedPreferencesHelper.shared.getString("scouterName") ?? "";
+    matchData.scouterName.value = await SharedPreferencesHelper.shared
+            .getString(SharedPreferenceKeys.scouterName.toShortString()) ??
+        "";
 
     matchData.tournament = Tournament.fromJson(jsonDecode(
-        await SharedPreferencesHelper.shared
-                .getString("selectedTournamentKey") ??
+        await SharedPreferencesHelper.shared.getString(
+                SharedPreferenceKeys.selectedTournamentKey.toShortString()) ??
             ""));
 
     try {
       MatchScheduleHelper.shared.getMatchSchedule(networkRefresh: false);
       ScoutersHelper.shared.getAllScouters(networkRefresh: false);
       ScoutersScheduleHelper.shared.getScoutersSchedule(networkRefresh: false);
+      TournamentsHelper.shared.getTournaments(networkRefresh: false);
     } catch (e) {}
 
     try {
@@ -72,6 +75,12 @@ class BusinessLogicController extends GetxController {
       ScoutersScheduleHelper.shared.getScoutersSchedule(networkRefresh: true);
     } catch (e) {
       print("Error getting scouters schedule: $e");
+    }
+
+    try {
+      TournamentsHelper.shared.getTournaments(networkRefresh: true);
+    } catch (e) {
+      print("Error getting tournaments: $e");
     }
 
     resetOrientation();

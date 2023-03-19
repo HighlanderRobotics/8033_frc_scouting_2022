@@ -56,7 +56,9 @@ class MatchScheduleHelper extends ServiceClass {
     return matches;
   }
 
-  Future getMatchSchedule({bool networkRefresh = false}) async {
+  Future getMatchSchedule({
+    bool networkRefresh = false,
+  }) async {
     service.value
         .updateStatus(ServiceStatus.inProgress, "Fetching from localStorage");
     final localStorageSchedule = await _getParsedLocalStorageSchedule();
@@ -89,7 +91,7 @@ class MatchScheduleHelper extends ServiceClass {
             .map((e) => MatchEvent.fromJson(e))
             .toList();
       } catch (e) {
-        print("Failed to parse localStorage schedule: $e");
+        print("Failed to parse Match Schedule from localStorage schedule: $e");
         return [];
       }
     } else {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:frc_scouting/application/color_schemes.g.dart';
 import 'package:frc_scouting/getx_screens/home_screen.dart';
 import 'package:frc_scouting/getx_screens/settings_screen.dart';
@@ -37,6 +38,8 @@ class ResetScreenOrientationObserver extends GetObserver {
     ];
 
     if (routes.contains(route.settings.name)) {
+      Fluttertoast.cancel();
+      
       SystemChrome.setPreferredOrientations(
         [
           DeviceOrientation.portraitUp,

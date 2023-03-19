@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../helpers/match_schedule_helper.dart';
 import '../helpers/scouters_helper.dart';
 import '../helpers/scouters_schedule_helper.dart';
+import '../helpers/tournaments_helper.dart';
 
 enum ServiceStatus { error, inProgress, up, unknown }
 
@@ -64,6 +65,7 @@ class ServiceHelper {
     MatchScheduleHelper.shared,
     ScoutersHelper.shared,
     ScoutersScheduleHelper.shared,
+    TournamentsHelper.shared
   ].obs;
 
   void refreshAll({bool networkRefresh = false}) {
