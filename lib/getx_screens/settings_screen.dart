@@ -106,16 +106,11 @@ class SettingsScreen extends StatelessWidget {
                           Text(selectedItem?.name ?? ""),
                           Text(
                             selectedItem?.key ?? "",
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 14),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline, fontSize: 14),
                           ),
                         ],
                       );
-                    },
-                    onChanged: (value) {
-                      if (value != null) {
-                        variables.selectedTournamentKey = value.obs;
-                      }
                     },
                     compareFn: (item1, item2) => item1.key == item2.key,
                     selectedItem: variables.selectedTournamentKey.value,
@@ -133,7 +128,8 @@ class SettingsScreen extends StatelessWidget {
                           msg: "Failed to fetch server tournaments: $exception",
                           gravity: ToastGravity.TOP,
                           timeInSecForIosWeb: 5,
-                          backgroundColor: Colors.grey,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.outline,
                           fontSize: 15.0,
                         );
                         return Container();
@@ -149,7 +145,8 @@ class SettingsScreen extends StatelessWidget {
                           title: Text(item.name),
                           subtitle: Text(
                             item.key,
-                            style: const TextStyle(color: Colors.grey),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline),
                           ),
                           onTap: () => Navigator.of(context).pop(),
                         );
@@ -164,7 +161,7 @@ class SettingsScreen extends StatelessWidget {
                       },
                       modalBottomSheetProps: ModalBottomSheetProps(
                           backgroundColor:
-                              Theme.of(Get.context!).scaffoldBackgroundColor),
+                              Theme.of(context).scaffoldBackgroundColor),
                       containerBuilder: (context, popupWidget) {
                         return SafeArea(
                           child: Padding(
