@@ -72,7 +72,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 ## Driver Ability
 ### Localized Description to Index to Long Localized Description
 
-| Localized Description | Index | Localized Long Description                                                                                                |
+| Localized Description | Index | Long Localized Description                                                                                                |
 |-----------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
 | Terrible              | 0     | This driver cannot control the robot at all. They are a danger to everyone around them.                                   |
 | Poor                  | 1     | This driver struggles to keep the robot under control. They make many mistakes and are not very reliable.                 |
