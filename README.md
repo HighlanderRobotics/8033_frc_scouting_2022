@@ -68,3 +68,14 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 2 = Feeder
 3 = Immobile
 ```
+
+## Driver Ability
+### Localized Description to Index to Long Localized Description
+
+| Localized Description | Index | Localized Long Description                                                                                                |
+|-----------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
+| Terrible              | 0     | This driver cannot control the robot at all. They are a danger to everyone around them.                                   |
+| Poor                  | 1     | This driver struggles to keep the robot under control. They make many mistakes and are not very reliable.                 |
+| Average               | 2     | This driver can operate the robot competently. However, they are not particularly skilled or exceptional.                 |
+| Good                  | 3     | This driver can operate the robot with skill and precision. They are reliable and make few mistakes.                      |
+| Great                 | 4     | This driver can operate the robot with mastery. They are highly skilled, precise, and efficient and they can think ahead. |
