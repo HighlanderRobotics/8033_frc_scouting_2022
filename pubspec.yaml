@@ -46,12 +46,18 @@ dependencies:
   image_size_getter: ^2.1.2
   http: ^0.13.5
   shared_preferences: ^2.0.0-nullsafety
-  mobile_scanner: ^2.1.0
+  mobile_scanner: ^3.0.0
   flutter_svg: ^1.1.6
   protobuf: ^2.1.0
-  implicitly_animated_reorderable_list: ^0.4.2
-  flutter_dotenv: ^5.0.2
+  implicitly_animated_reorderable_list_2: ^0.5.0
   dropdown_search: ^5.0.5
+  holding_gesture: ^1.1.0
+  frc_8033_scouting_shared:
+    git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
+  material_design_icons_flutter: ^6.0.7096
+  lzstring: ^2.0.0+2
+  connectivity_plus: ^3.0.3
+  fluttertoast: ^8.2.1
 
 dev_dependencies:
   flutter_test:
@@ -78,7 +84,6 @@ flutter:
 
   assets:
     - assets/
-    - .env
     
   # To add assets to your application, add an assets section, like this:
   # assets:

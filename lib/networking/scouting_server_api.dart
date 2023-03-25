@@ -1,25 +1,33 @@
 import 'dart:convert';
 
+import 'package:frc_scouting/models/tournament.dart';
+import 'package:get/get.dart';
+
+import '../getx_screens/settings_screen.dart';
+import '../helpers/shared_preferences_helper.dart';
 import '../models/match_data.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/match_event.dart';
+import '../models/match_scouted.dart';
 import '../models/scout_schedule.dart';
+import '../models/settings_screen_variables.dart';
 
 class ScoutingServerAPI {
+  static final shared = ScoutingServerAPI();
   // An Internal function to make a network request and decode the json
   // into a List of Scouter objects
 
-  static const String _host = "https://08d0-2600-387-f-4817-00-2.ngrok.io";
+  // ignore: prefer_final_fields
 
-  static Future<List<String>> getScouters() async {
+  Future<List<String>> getScouters() async {
     try {
-      var response =
-          await http.get(Uri.parse('$_host/API/manager/getScouters'));
+      var response = await http.get(Uri.parse(
+          'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getScouters'));
 
       if (response.statusCode == 200) {
         return (jsonDecode(response.body) as List<dynamic>)
-            .map((e) => e.toString())
+            .map((jsonString) => jsonString.toString())
             .toList();
       } else {
         print("HTTP ${response.statusCode} response");
@@ -31,10 +39,10 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<ScoutersSchedule> getScoutersSchedule() async {
+  Future<ScoutersSchedule> getScoutersSchedule() async {
     try {
-      var response =
-          await http.get(Uri.parse('$_host/API/manager/getScoutersSchedule'));
+      var response = await http.get(Uri.parse(
+          'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getScoutersSchedule'));
 
       if (response.statusCode == 200) {
         return ScoutersSchedule.fromJson(jsonDecode(response.body));
@@ -43,26 +51,31 @@ class ScoutingServerAPI {
         throw Exception("HTTP ${response.statusCode} response");
       }
     } catch (e) {
-      print("Failed decoding scouters schedule - network response error $e");
+      print("Failed decoding scouters schedule - network response error: $e");
       throw Exception(e);
     }
   }
 
-  static Future addScoutReport(MatchData matchData) async {
+  Future addScoutReport(MatchData matchData) async {
     try {
       final response = await http.post(
-        Uri.parse('$_host/API/manager/addScoutReport'),
+        Uri.http(
+            (await SharedPreferencesHelper.shared.getString(
+                SharedPreferenceKeys.serverAuthority.toShortString()))!,
+            '/API/manager/addScoutReport'),
         headers: <String, String>{
           'Content-Type': 'application/json',
         },
-        body: jsonEncode(matchData.toJson(includesCloudStatus: false)),
+        body: jsonEncode(
+            matchData.toJson(includeUploadStatus: false, usesTBAKey: true)),
       );
 
       if (response.statusCode == 200) {
         print("Successfully added scout report");
       } else {
-        print("HTTP ${response.statusCode} response");
-        throw Exception("HTTP ${response.statusCode} response");
+        print("HTTP ${response.statusCode} response ${response.reasonPhrase}");
+        throw Exception(
+            "HTTP ${response.statusCode} response ${response.reasonPhrase}");
       }
     } catch (e) {
       print("Failed adding scout report - network response error $e");
@@ -70,10 +83,9 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<List<MatchEvent>> getMatches(
-      {required String tournamentKey}) async {
+  Future<List<MatchEvent>> getMatches() async {
     final response = await http.get(Uri.parse(
-        '$_host/API/manager/getMatches/?tournamentKey=$tournamentKey'));
+        'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getMatches/?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}'));
 
     if (response.statusCode == 200) {
       try {
@@ -99,20 +111,54 @@ class ScoutingServerAPI {
     }
   }
 
-  static Future<List<bool>> isMatchesScouted(
-      {required String tournamentKey,
-      required String scouterName,
-      required List<String> matchKeys}) async {
-    final response = await http.get(Uri.parse(
-        "$_host/API/manager/isMatchesScouted?tournamentKey=2022cc&scouterName=Jacob Trentini&matchKeys=['2022cc_qm1', '2022cc_qm2', '2022cc_qm3'"));
+  Future<List<MatchScouted>> isMatchesScouted({
+    required String scouterName,
+    required List<String> matchKeys,
+  }) async {
+    http.Response response;
+
+    try {
+      response = await http.get(Uri.parse(
+          "http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/isMatchesScouted?tournamentKey=${Get.find<SettingsScreenVariables>().selectedTournamentKey.value.key}&scouterName=$scouterName&matchKeys=[${matchKeys.map((e) => '"$e"').join(",")}]"));
+    } catch (e) {
+      print("Failed isMatchesScouted - network response error: $e");
+      throw Exception("Failed isMatchesScouted - network response error: $e");
+    }
 
     if (response.statusCode == 200) {
       try {
         return (jsonDecode(response.body) as List<dynamic>)
-            .map((match) => match["status"] as bool)
+            .map((jsonObject) => MatchScouted.fromJson(jsonObject))
             .toList();
       } catch (e) {
         print("Failed decoding isMatchesScouted - network response error: $e");
+        throw Exception(e);
+      }
+    } else {
+      print("HTTP ${response.statusCode} response");
+      throw Exception("HTTP ${response.statusCode} response");
+    }
+  }
+
+  Future<List<Tournament>> getTournaments() async {
+    final response = await http.get(Uri.parse(
+        'http://${await SharedPreferencesHelper.shared.getString(SharedPreferenceKeys.serverAuthority.toShortString())}/API/manager/getTournaments'));
+
+    if (response.statusCode == 200) {
+      try {
+        var tournaments = <Tournament>[];
+
+        for (final jsonObject in (jsonDecode(response.body) as List<dynamic>)) {
+          try {
+            tournaments.add(Tournament.fromJson(jsonObject));
+          } catch (e) {
+            print(e.toString());
+          }
+        }
+
+        return tournaments;
+      } catch (e) {
+        print("Failed decoding tournaments - network response error: $e");
         throw Exception(e);
       }
     } else {

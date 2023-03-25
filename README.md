@@ -1,71 +1,97 @@
-# 8033 FRC Scouting for 2022
-
-## TODO
-- Convert to Template app
-- Protobuf Serializer
-   - Switch from JSON to Custom Schema
+# 8033 FRC Collection App 2023
 
 To build, open folder in VSCode or Android Studio. Make sure to build using dart and flutter dev tools (Use flutter doctor to check status of flutter). 
 
-# ScoutReport Enum Conversions
+# ScoutReport Objects
 
-## GameScreenPosition
+
+## Charge Station
+
+| Index | Localized Description | Long Localized Description                                                                           |
+|-------|-----------------------|------------------------------------------------------------------------------------------------------|
+| 0     | No Climb              | Did not attempt to climb                                                                             |
+| 1     | Docked                | The robot is securely attached to the Charge Station and is not touching any other part of the field |
+| 2     | Engaged               | The robot is securely attached to the Charge Station and is touching another part of the field.      |
+| 3     | Failed                | The robot was attempting to Dock or Engage with the Charge Station but was unsuccessful              |
+| 4     | In Community          | The robot did not attempt to climb, but still was in the community                                   |
+
+## Robot Actions
+
+| Index | Localized Description  |
+|-------|------------------------|
+| 0     | Picked Up Cube         |
+| 1     | Picked Up Cone         |
+| 2     | Placed Object          |
+| 3     | Dropped Object         |
+| 4     | Delivered to Team      |
+| 5     | Start Defense          |
+| 6     | End Defense            |
+| 7     | Crossed Community Line |
+| 8     | Starting Position      |
+
+## Positions
+
 ```dart
-hub = 0
-tarmac = 1
-launchpad = 2
-fieldEnd = 3
-field = 4
+7, 8, 9
+4, 5, 6
+1, 2, 3
 ```
 
-## EventType
+#### Auto-Specific Positions
 
+| Index | Localized Description |
+|-------|-----------------------|
+| 10    | Crossed Cable         |
+| 11    | Crossed Charge Pad    |
+| 12    | Crossed Near Barrier  |
+
+#### Middle Cargo
 ```dart
-shotSuccess          = 0
-shotMiss             = 1
-robotBecomesImmobile = 2
-robotBecomesMobile   = 3
+13 |
+14 |
+15 |
+16 |
 ```
 
-## CompetitionKey
+#### Field Starting Positions
 
-```dart
-chezyChamps2022 ("Chezy Champs 2022")
-- Event Code: "2022cc"
-```
+| Index | Localized Description |
+|-------|-----------------------|
+| 17    | tag id 3              |
+| 18    | tag id 2              |
+| 19    | tag id 1              |
 
-## Climbing Challenge
-```dart
-didntClimb  = 0
-failedClimb = 1
-bottomBar   = 2
-middleBar   = 3
-highBar     = 4
-traversal   = 5
-```
+## Field Orientation Direction
+
+| Index | Localized Description |
+|-------|-----------------------|
+| 0     | left                  |
+| 1     | right                 |
 
 ## Robot Role
-```dart
-offense = 0
-defense = 1
-mix     = 2
-```
 
-## Overall Defense and Defense Frequency Rating
-```dart
-0
-1
-2
-3
-4
-5
-```
-NOTE: 0 means there was no defense played (indicated by RobotRole as set to offense)
+| Index | Localized Description |
+|-------|-----------------------|
+| 0     | Offense               |
+| 1     | Defense               |
+| 2     | Feeder                |
+| 3     | Immobile              |
 
-# Screenshots
+## Driver Ability
+### Localized Description to Index to Long Localized Description
 
-#### Game Screen Screenshots (red boxes shown for clarification of the positional data gathered)
+| Index | Localized Description | Long Localized Description                                                                                                |
+|-------|-----------------------|---------------------------------------------------------------------------------------------------------------------------|
+| 0     | Terrible              | This driver cannot control the robot at all. They are a danger to everyone around them.                                   |
+| 1     | Poor                  | This driver struggles to keep the robot under control. They make many mistakes and are not very reliable.                 |
+| 2     | Average               | This driver can operate the robot competently. However, they are not particularly skilled or exceptional.                 |
+| 3     | Good                  | This driver can operate the robot with skill and precision. They are reliable and make few mistakes.                      |
+| 4     | Great                 | This driver can operate the robot with mastery. They are highly skilled, precise, and efficient and they can think ahead. |
 
-<img width="901" alt="image" src="https://user-images.githubusercontent.com/70717139/201489938-9de6d19c-629d-4abf-a06c-9c3018b653df.png">
-<img width="888" alt="image" src="https://user-images.githubusercontent.com/70717139/201489940-bd8c7620-f1d5-470a-a196-85ac27dacdb1.png">
-<img width="977" alt="image" src="https://user-images.githubusercontent.com/70717139/201489942-8aba9ced-1e46-439d-abb2-141b5fff9e94.png">
+## Penalty Cards
+
+| Index | Localized Description |
+|-------|-----------------------|
+| 0     | No Card               |
+| 1     | Yellow Card           |
+| 2     | Red Card              |

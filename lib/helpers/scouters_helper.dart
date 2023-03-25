@@ -33,7 +33,7 @@ class ScoutersHelper extends ServiceClass {
       final localStorageScouters = await _getParsedLocalStorageScouters();
 
       if (networkRefresh || localStorageScouters.isEmpty) {
-        scouters.value = await ScoutingServerAPI.getScouters();
+        scouters.value = await ScoutingServerAPI.shared.getScouters();
         _saveParsedLocalStorageScouters(scouters.toList());
         service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
       } else {
@@ -52,7 +52,8 @@ class ScoutersHelper extends ServiceClass {
   // Then it parses the JSON and returns a list of Scouter objects
   Future<List<String>> _getParsedLocalStorageScouters() async {
     final scouterJson = await SharedPreferencesHelper.shared
-        .getString(SharedPreferenceKeys.scouters.toShortString());
+            .getString(SharedPreferenceKeys.scouters.toShortString()) ??
+        "";
 
     if (scouterJson.isNotEmpty) {
       try {

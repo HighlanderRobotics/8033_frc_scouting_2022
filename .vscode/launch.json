@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "jacob_8033_frc_scouting_2022",
+            "name": "Collection App 2023 (Debug)",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "jacob_8033_frc_scouting_2022 (profile mode)",
+            "name": "Collection App 2023 (Profile)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "jacob_8033_frc_scouting_2022 (release mode)",
+            "name": "Collection App 2023",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

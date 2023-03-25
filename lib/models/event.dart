@@ -1,23 +1,31 @@
-import 'package:frc_scouting/models/game_screen_positions.dart';
-
-import 'event_types.dart';
+import 'robot_action.dart';
 
 class Event {
-  late int timeSince;
-  late EventType type;
-  late GameScreenPosition position;
+  Duration timeSince;
+  RobotAction action;
+  int position;
 
-  Event({required this.timeSince, required this.type, required this.position});
+  Event({
+    required this.timeSince,
+    required this.action,
+    required this.position,
+  });
 
-  List<dynamic> toJson() => [timeSince, type.numericalValue, position.index];
-
-  Event.fromJson(List<dynamic> json) {
-    timeSince = json[0];
-    type = EventType.values[1];
-    position = GameScreenPosition.values[(json[2])];
+  factory Event.fromJson(List<dynamic> json) {
+    return Event(
+      timeSince: Duration(seconds: json[0]),
+      action: RobotAction.values[1],
+      position: json[2],
+    );
   }
 
-  void printEvent() {
-    print('Event: $type, $position, ${timeSince}ms');
+  List<dynamic> toJson() => [
+        timeSince.inSeconds,
+        action.index,
+        position,
+      ];
+
+  void debugLogDescription() {
+    print("timeSince: $timeSince, action: ${action.name}, position: $position");
   }
 }

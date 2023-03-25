@@ -1,54 +1,93 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frc_scouting/getx_screens/game_screen.dart';
-import 'package:frc_scouting/helpers/match_schedule_helper.dart';
-import 'package:frc_scouting/helpers/scouters_helper.dart';
-import 'package:frc_scouting/helpers/scouters_schedule_helper.dart';
-import 'package:frc_scouting/models/match_event.dart';
-import 'package:frc_scouting/models/match_key.dart';
-import 'package:frc_scouting/services/getx_business_logic.dart';
+import 'package:frc_scouting/helpers/shared_preferences_helper.dart';
+import 'package:frc_scouting/models/alliance_color.dart';
 import 'package:get/get.dart';
 
-import '../models/match_type.dart';
+import '../models/settings_screen_variables.dart';
+import 'game_screen.dart';
 import 'service_status_screen.dart';
+import 'settings_screen.dart';
+import '../helpers/match_schedule_helper.dart';
+import '../helpers/scouters_helper.dart';
+import '../helpers/scouters_schedule_helper.dart';
+import '../models/match_event.dart';
+import '../models/match_key.dart';
+import '../services/getx_business_logic.dart';
+
+import '../models/match_type.dart';
 import 'previous_matches_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  final teamTxtFieldController = TextEditingController();
-
   late BusinessLogicController controller;
+  final SettingsScreenVariables variables = Get.put(SettingsScreenVariables());
 
   var isCustomMatchSelected = false.obs;
 
-  final matchNumberTxtFieldController = TextEditingController();
+  var matchNumberTxtController = TextEditingController();
+  var teamNumberTxtController = TextEditingController();
+
+  var alliance = Alliance.blue;
+
+  HomeScreen() {
+    matchNumberTxtController.addListener(() {
+      controller.matchData.matchKey.value.ordinalMatchNumber = int.parse(
+          matchNumberTxtController.text.isEmpty
+              ? "0"
+              : matchNumberTxtController.text);
+    });
+
+    teamNumberTxtController.addListener(() {
+      controller.matchData.teamNumber.value = int.parse(
+          teamNumberTxtController.text.isEmpty
+              ? "0"
+              : teamNumberTxtController.text);
+    });
+
+    controller = Get.put(BusinessLogicController());
+  }
 
   @override
   Widget build(BuildContext context) {
-    controller = Get.put(BusinessLogicController());
-    controller.resetOrientation();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Collection App 2022"),
-        actions: [
-          Obx(
-            () => IconButton(
-              icon: Icon(
-                Icons.bolt,
-                color: controller.serviceHelper.isAllUp
-                    ? Colors.green
-                    : Colors.red,
+    return Obx(
+      () => Scaffold(
+        appBar: AppBar(
+          title: const Text("Collection App 2023"),
+          backgroundColor:
+              ScoutersScheduleHelper.shared.matchSchedule.value.getVersionColor,
+          foregroundColor: Colors.white,
+          actions: [
+            Obx(
+              () => IconButton(
+                icon: Icon(
+                  Icons.bolt,
+                  color: controller.serviceHelper.isAllUp
+                      ? Colors.green
+                      : Colors.red,
+                  shadows: const [Shadow(blurRadius: 10)],
+                ),
+                onPressed: () => Get.to(() => ServiceStatusScreen()),
               ),
-              onPressed: () {
-                Get.to(() => ServiceStatusScreen());
-              },
             ),
-          ),
-        ],
-      ),
-      body: Obx(
-        () => Column(
+            IconButton(
+                onPressed: () => Get.to(() => SettingsScreen()),
+                icon: const Icon(Icons.settings,
+                    shadows: [Shadow(blurRadius: 10)])),
+          ],
+        ),
+        backgroundColor:
+            (Theme.of(context).colorScheme.brightness == Brightness.dark
+                    ? HSLColor.fromColor(ScoutersScheduleHelper
+                            .shared.matchSchedule.value.getVersionColor)
+                        .withSaturation(0.5)
+                        .withLightness(0.2)
+                    : HSLColor.fromColor(ScoutersScheduleHelper
+                            .shared.matchSchedule.value.getVersionColor)
+                        .withSaturation(0.5)
+                        .withLightness(0.8))
+                .toColor(),
+        body: Column(
           children: [
             Expanded(
               child: SingleChildScrollView(
@@ -63,51 +102,13 @@ class HomeScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(10.0),
                             child: Column(
                               children: [
-                                Obx(
-                                  () => scouterNameDropdown(),
-                                ),
+                                Obx(() => scouterNameDropdown(context)),
                                 const SizedBox(height: 20),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: const [
-                                          Text("Match Builder"),
-                                          Text(
-                                            "Use only when there is no upcoming matches available to choose from.",
-                                            maxLines: 2,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Obx(
-                                      () => Switch(
-                                          value: isCustomMatchSelected.value,
-                                          onChanged: (bool switchState) {
-                                            HapticFeedback.lightImpact();
-                                            isCustomMatchSelected.value =
-                                                switchState;
-
-                                            if (!switchState) {
-                                              controller.matchData.matchKey =
-                                                  null.obs;
-                                            }
-                                          }),
-                                    ),
-                                  ],
-                                ),
+                                matchBuilderRow(context),
                                 const SizedBox(height: 20),
                                 Obx(
                                   () => isCustomMatchSelected.isFalse
-                                      ? matchKeyDropdown()
+                                      ? matchKeyDropdown(context)
                                       : Column(
                                           children: [
                                             matchTypeDropdown(),
@@ -118,6 +119,12 @@ class HomeScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 20),
                                 teamNumberTextField(),
+                                const SizedBox(height: 20),
+                                Obx(
+                                  () => isCustomMatchSelected.isTrue
+                                      ? allianceDropdown()
+                                      : Container(),
+                                ),
                               ],
                             ),
                           ),
@@ -133,42 +140,20 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    ElevatedButton(
-                      onPressed: !(controller.matchData.matchKey != null.obs &&
-                              controller.matchData.scouterName.isNotEmpty &&
-                              controller.matchData.teamNumber.value != 0)
-                          ? null
-                          : () async {
-                              if (controller.currentOrientation !=
-                                  Orientation.landscape) {
-                                controller.setLandscapeOrientation();
-                                await Future.delayed(
-                                    const Duration(milliseconds: 700));
-                              }
-
-                              Get.to(() => GameScreen());
-                            },
-                      child: const Text(
-                        "Start",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                    Obx(() => startButton()),
                     ElevatedButton(
                       child: const Text("Previous Matches"),
                       onPressed: () async {
-                        final matches =
-                            controller.documentsHelper.getPreviousMatches();
-                        Get.to(
-                          () => PreviousMatchesScreen(
-                            previousMatches: matches,
-                          ),
-                        );
+                        final matches = await controller.documentsHelper
+                            .getPreviousMatches();
+                        Get.to(() => PreviousMatchesScreen(
+                            previousMatchesInfo: matches));
                         if (matches.numberOfInvalidFiles > 0) {
-                          Get.snackbar(
-                            "Ignored Invalid Files",
-                            "There were ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 1 ? "s" : ""} found",
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Ignored ${matches.numberOfInvalidFiles} invalid file${matches.numberOfInvalidFiles == 0 ? "s" : ""}"),
+                            behavior: SnackBarBehavior.floating,
+                          ));
                         }
                       },
                     ),
@@ -182,15 +167,104 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget matchKeyDropdown() {
+  Row matchBuilderRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Match Builder"),
+              Text(
+                "Use only when there is no upcoming matches available to choose from.",
+                maxLines: 2,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.brightness ==
+                          Brightness.dark
+                      ? Colors.grey
+                      : Colors.grey[700],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Obx(
+          () => Switch(
+              value: isCustomMatchSelected.value,
+              activeColor: Theme.of(context).colorScheme.primary,
+              onChanged: (bool switchState) {
+                HapticFeedback.lightImpact();
+                isCustomMatchSelected.value = switchState;
+
+                if (!switchState) {
+                  controller.matchData.matchKey = MatchKey(
+                          matchType: MatchType.qualifierMatch,
+                          ordinalMatchNumber: 0,
+                          rawShortMatchKey: "")
+                      .obs;
+                }
+              }),
+        ),
+      ],
+    );
+  }
+
+  Widget startButton() {
+    return ElevatedButton(
+      onPressed: controller.matchData.isPreliminaryDataValid
+          ? () async {
+              controller.setLandscapeOrientation();
+              controller.matchData.tournament =
+                  variables.selectedTournamentKey.value;
+
+              Future.delayed(700.milliseconds, () {
+                Get.to(() => GameScreen(
+                      isInteractive: true,
+                      alliance: isCustomMatchSelected.isTrue
+                          ? alliance
+                          : ((int.tryParse(controller.matchData.matchKey.value
+                                          .rawShortMatchKey
+                                          .substring(controller
+                                                  .matchData
+                                                  .matchKey
+                                                  .value
+                                                  .rawShortMatchKey
+                                                  .length -
+                                              1)) ??
+                                      0) <=
+                                  2)
+                              ? Alliance.red
+                              : Alliance.blue,
+                    ));
+              });
+            }
+          : null,
+      child: const Text("Start", style: TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget matchKeyDropdown(BuildContext context) {
     return Obx(
       () => DropdownSearch<MatchKey>(
         dropdownDecoratorProps: const DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(
             labelText: "Match",
-            border: OutlineInputBorder(),
             filled: true,
           ),
+        ),
+        popupProps: PopupProps.modalBottomSheet(
+          searchDelay: 0.seconds,
+          emptyBuilder: (context, searchEntry) {
+            return const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                  "No Matches Found. Try selecting your name first. If you are using a Backup Scouter or internet is unavailable, try using Match Builder. To refresh data, click the bolt icon and press Network Refresh All"),
+            );
+          },
+          modalBottomSheetProps: ModalBottomSheetProps(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor),
         ),
         items:
             matchesFromShifts.map((matchEvent) => matchEvent.matchKey).toList(),
@@ -201,16 +275,12 @@ class HomeScreen extends StatelessWidget {
                 .shared.matchSchedule
                 .firstWhereOrNull((match) => match.matchKey == matchKey);
 
-            if (controller.matchData.matchKey.value == null) {
-              controller.matchData.matchKey = matchKey.obs;
-            }
-
             if (matchScheduleAndMatchKey != null) {
-              teamTxtFieldController.text =
-                  "${matchScheduleAndMatchKey.teamNumber}";
-              matchNumberTxtFieldController.text = "${matchKey.matchNumber}";
-              controller.matchData.teamNumber.value =
-                  matchScheduleAndMatchKey.teamNumber;
+              controller.matchData.matchKey.value = matchKey;
+              controller.matchData.matchKey.value.ordinalMatchNumber =
+                  matchKey.ordinalMatchNumber;
+              teamNumberTxtController.text =
+                  matchScheduleAndMatchKey.teamNumber.toString();
             }
           }
         },
@@ -230,7 +300,6 @@ class HomeScreen extends StatelessWidget {
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Match Type",
-          border: OutlineInputBorder(),
           filled: true,
         ),
       ),
@@ -240,21 +309,11 @@ class HomeScreen extends StatelessWidget {
       items: MatchType.values,
       onChanged: (matchType) {
         if (matchType != null) {
-          // ignore: prefer_conditional_assignment
-          if (controller.matchData.matchKey.value == null) {
-            controller.matchData.matchKey = MatchKey(
-                    matchNumber:
-                        int.tryParse(matchNumberTxtFieldController.text) ?? 0,
-                    matchType: matchType)
-                .obs;
-          } else {
-            controller.matchData.matchKey.value!.matchType = matchType;
-          }
-          controller.update();
+          controller.matchData.matchKey.value.matchType = matchType;
         }
       },
       itemAsString: (item) => item.localizedDescription,
-      selectedItem: controller.matchData.matchKey.value?.matchType,
+      selectedItem: controller.matchData.matchKey.value.matchType,
     );
 
     // return DropdownButton<MatchType>(
@@ -273,61 +332,91 @@ class HomeScreen extends StatelessWidget {
 
   Widget matchNumberTextField() {
     return TextField(
+      controller: matchNumberTxtController,
       decoration: const InputDecoration(
-        hintText: "Match Number",
+        labelText: "Match Number",
         filled: true,
       ),
-      controller: matchNumberTxtFieldController,
       keyboardType: TextInputType.number,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
       ],
-      onChanged: (String matchNumberString) {
-        final matchNumber = int.parse(matchNumberString);
-
-        if (matchNumber > 65) {
-          return;
-        }
-
-        controller.matchData.matchKey.value ??= MatchKey(
-            matchNumber: matchNumber,
-            matchType: controller.matchData.matchKey.value?.matchType ??
-                MatchType.quarterFinals);
-      },
+      onChanged: (String matchNumberString) => controller.matchData.matchKey
+          .value.ordinalMatchNumber = int.tryParse(matchNumberString) ?? 0,
     );
   }
 
   TextField teamNumberTextField() {
     return TextField(
+      controller: teamNumberTxtController,
       decoration: const InputDecoration(
-        hintText: "Team Number",
+        labelText: "Team Number",
         filled: true,
       ),
-      controller: teamTxtFieldController,
       keyboardType: TextInputType.number,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
       ],
-      onChanged: (String teamNumber) {
-        controller.matchData.teamNumber.value = int.tryParse(teamNumber) ?? 0;
-      },
+      onChanged: (String teamNumber) =>
+          controller.matchData.teamNumber.value = int.tryParse(teamNumber) ?? 0,
     );
   }
 
-  DropdownSearch<String> scouterNameDropdown() {
+  Widget allianceDropdown() {
+    return DropdownSearch<Alliance>(
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Alliance Color",
+          filled: true,
+        ),
+      ),
+      items: Alliance.values,
+      onChanged: (alliance) {
+        if (alliance != null) {
+          this.alliance = alliance;
+        }
+      },
+      itemAsString: (item) => item.localizedDescription,
+      selectedItem: alliance,
+    );
+  }
+
+  Widget scouterNameDropdown(BuildContext context) {
     return DropdownSearch<String>(
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Scouter Name",
-          border: OutlineInputBorder(),
           filled: true,
         ),
       ),
-      popupProps: PopupProps.dialog(
+      popupProps: PopupProps.modalBottomSheet(
+        searchDelay: 0.seconds,
         emptyBuilder: (context, searchEntry) {
           return const Padding(
             padding: EdgeInsets.all(20),
-            child: Text("No Scouter Found"),
+            child: Text("No Scouters Found"),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+        containerBuilder: (context, popupWidget) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Stack(children: [
+                Column(children: [
+                  const SizedBox(height: 40),
+                  Expanded(child: popupWidget),
+                ]),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                )
+              ]),
+            ),
           );
         },
         fit: FlexFit.loose,
@@ -335,19 +424,25 @@ class HomeScreen extends StatelessWidget {
         searchFieldProps: const TextFieldProps(
           padding: EdgeInsets.all(20),
           decoration: InputDecoration(
-            label: Text("Search"),
-            border: OutlineInputBorder(),
+            labelText: "Search Scouters",
             filled: true,
           ),
+          autofocus: true,
         ),
       ),
-      items: ScoutersHelper.shared.scouters,
+      items: [
+        ...ScoutersHelper.shared.scouters,
+        "Backup Scouter 1",
+        "Backup Scouter 2",
+        "Backup Scouter 3",
+        "Backup Scouter 4",
+        "Backup Scouter 5",
+        "Backup Scouter 6",
+      ],
       selectedItem: controller.matchData.scouterName.value,
       onChanged: (value) {
         controller.matchData.scouterName.value = value ?? "";
-        controller.matchData.teamNumber = 0.obs;
-
-        teamTxtFieldController.text = "";
+        SharedPreferencesHelper.shared.setString("scouterName", value ?? "");
       },
     );
   }

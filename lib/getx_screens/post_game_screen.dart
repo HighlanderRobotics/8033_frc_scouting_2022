@@ -1,199 +1,283 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
 import 'package:frc_scouting/models/climbing_challenge.dart';
+import 'package:frc_scouting/models/penalty_card.dart';
 import 'package:frc_scouting/models/robot_roles.dart';
 import 'package:get/get.dart';
 
+import '../models/driver_ability.dart';
 import '../services/getx_business_logic.dart';
 
 class PostGameScreen extends StatelessWidget {
   final notesController = TextEditingController();
 
-  final BusinessLogicController controller = Get.find();
+  final controller = Get.find<BusinessLogicController>();
+
+  PostGameScreen() {
+    controller.resetOrientation();
+    controller.setPortraitOrientation();
+  }
 
   @override
   Widget build(BuildContext context) {
-    controller.resetOrientation();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Post Game"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: SafeArea(
-          child: Obx(
-            (() => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        climbingChallengeDropdown(),
-                        const SizedBox(width: 20),
-                        roleDropdownButton(),
-                      ],
-                    ),
-                    if (controller.matchData.robotRole.value ==
-                            RobotRole.defense ||
-                        controller.matchData.robotRole.value == RobotRole.mix)
-                      defenseRatingRadioButtons(),
-                    TextField(
-                      decoration: const InputDecoration(hintText: "Notes"),
-                      controller: notesController,
-                      onChanged: (value) =>
-                          controller.matchData.notes.value = value,
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: showQrCodeButton(),
-                      ),
-                    ),
-                  ],
-                )),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget roleDropdownButton() {
-    return Obx(() => DropdownButton(
-          items: [
-            for (var role in [
-              RobotRole.offense,
-              RobotRole.defense,
-              RobotRole.mix
-            ])
-              DropdownMenuItem(
-                value: role,
-                child: Text(role.localizedDescription),
-                onTap: () => controller.matchData.robotRole.value = role,
-              ),
-          ],
-          onChanged: (newValue) {
-            if (newValue is RobotRole) {
-              controller.matchData.robotRole.value = newValue;
-            }
-
-            if (newValue == RobotRole.offense) {
-              controller.matchData.overallDefenseRating.value = 0;
-              controller.matchData.defenseFrequencyRating.value = 0;
-            }
-          },
-          value: controller.matchData.robotRole.value,
-        ));
-  }
-
-  Padding defenseRatingRadioButtons() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: Obx(
-        () => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Overall Defense",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ),
-            SizedBox(
-              height: 100,
-              child: GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 1,
-                crossAxisCount: 5,
-                children: [
-                  for (int radioElement in [1, 2, 3, 4, 5])
-                    Column(
-                      children: [
-                        Radio(
-                            value: radioElement,
-                            groupValue:
-                                controller.matchData.overallDefenseRating.value,
-                            onChanged: (value) => controller.matchData
-                                .overallDefenseRating.value = value as int),
-                        Text("$radioElement"),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Defense Frequency",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ),
-            SizedBox(
-              height: 100,
-              child: GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 1,
-                crossAxisCount: 5,
-                children: [
-                  for (int radioElement in [1, 2, 3, 4, 5])
-                    Column(
-                      children: [
-                        Radio(
-                            value: radioElement,
-                            groupValue: controller
-                                .matchData.defenseFrequencyRating.value,
-                            onChanged: (value) => controller.matchData
-                                .defenseFrequencyRating.value = value as int),
-                        Text("$radioElement")
-                      ],
-                    ),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  DropdownButton<String> climbingChallengeDropdown() {
-    return DropdownButton(
-      items: [
-        for (var challenge in ClimbingChallenge.values)
-          DropdownMenuItem(
-            value: challenge.localizedDescription,
-            child: Text(
-              challenge.localizedDescription,
-            ),
-          ),
-      ],
-      onChanged: (newValue) => controller.matchData.challengeResult.value =
-          ClimbingChallengeExtension.fromLocalizedDescription(
-              newValue ?? ClimbingChallenge.didntClimb.localizedDescription),
-      value: controller.matchData.challengeResult.value.localizedDescription,
-    );
-  }
-
-  ElevatedButton showQrCodeButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        final uploadResult = await controller.documentsHelper
-            .saveMatchData(controller.matchData);
-
-        Get.snackbar(
-          "Upload ${uploadResult ? "Successful" : "Unsuccessful"}",
-          uploadResult
-              ? "The match has been uploaded to the server"
-              : "The match could not be uploaded to the server. Please try again later in the Previous Matches Screen",
-          snackPosition: SnackPosition.BOTTOM,
-        );
-
-        Get.to(() => QrCodeScreen(
-            matchQrCodes:
-                controller.separateEventsToQrCodes(controller.matchData),
-            canGoBack: false));
+    return WillPopScope(
+      onWillPop: () async {
+        controller.setLandscapeOrientation();
+        return true;
       },
-      child: const Text("Show QR Code"),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Post Game"),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: SafeArea(
+            child: Obx(
+              (() => Column(
+                    children: [
+                      autonClimbingChallengeDropdown(context),
+                      const SizedBox(height: 15),
+                      climbingChallengeDropdown(context),
+                      const SizedBox(height: 15),
+                      robotRoleDropdown(context),
+                      const SizedBox(height: 15),
+                      driverAbilityDropdown(context),
+                      const SizedBox(height: 15),
+                      penaltyCardDropdown(context),
+                      const SizedBox(height: 15),
+                      TextField(
+                        decoration: const InputDecoration(
+                          labelText: "Notes",
+                          filled: true,
+                        ),
+                        controller: notesController,
+                        onChanged: (text) =>
+                            controller.matchData.notes.value = text,
+                        maxLines: null,
+                      ),
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: showQrCodeButton(context),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DropdownSearch<ClimbingChallenge> climbingChallengeDropdown(
+      BuildContext context) {
+    return DropdownSearch<ClimbingChallenge>(
+      items: ClimbingChallenge.values,
+      itemAsString: (climbingChallenge) =>
+          climbingChallenge.localizedDescription,
+      selectedItem: controller.matchData.challengeResult.value,
+      onChanged: (climbingChallenge) {
+        if (climbingChallenge != null) {
+          controller.matchData.challengeResult.value = climbingChallenge;
+        }
+      },
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Climbing Challenge",
+          filled: true,
+        ),
+      ),
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(
+                item.localizedDescription,
+              ),
+              subtitle: Text(item.longLocalizedDescription),
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
+    );
+  }
+
+  DropdownSearch<ClimbingChallenge> autonClimbingChallengeDropdown(
+      BuildContext context) {
+    return DropdownSearch<ClimbingChallenge>(
+      items: ClimbingChallenge.values,
+      itemAsString: (climbingChallenge) =>
+          climbingChallenge.localizedDescription,
+      selectedItem: controller.matchData.autoChallengeResult.value,
+      onChanged: (climbingChallenge) {
+        if (climbingChallenge != null) {
+          controller.matchData.autoChallengeResult.value = climbingChallenge;
+        }
+      },
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Auton Climbing Challenge",
+          filled: true,
+        ),
+      ),
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(
+                item.localizedDescription,
+              ),
+              subtitle: Text(item.longLocalizedDescription),
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
+    );
+  }
+
+  DropdownSearch<RobotRole> robotRoleDropdown(BuildContext context) {
+    return DropdownSearch<RobotRole>(
+      items: RobotRole.values,
+      itemAsString: (robotRole) => robotRole.localizedDescription,
+      selectedItem: controller.matchData.robotRole.value,
+      onChanged: (robotRole) {
+        if (robotRole != null) {
+          controller.matchData.robotRole.value = robotRole;
+        }
+      },
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(item.localizedDescription),
+              subtitle: Text(item.longLocalizedDescription),
+              selected: isSelected,
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Robot Role",
+          filled: true,
+        ),
+      ),
+    );
+  }
+
+  DropdownSearch<DriverAbility> driverAbilityDropdown(BuildContext context) {
+    return DropdownSearch<DriverAbility>(
+      items: DriverAbility.values,
+      itemAsString: (driverAbility) => driverAbility.localizedDescription,
+      selectedItem: controller.matchData.driverAbility.value,
+      onChanged: (driverAbility) {
+        if (driverAbility != null) {
+          controller.matchData.driverAbility.value = driverAbility;
+        }
+      },
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(
+                item.localizedDescription,
+                style: TextStyle(color: item.color),
+              ),
+              subtitle: Text(item.longLocalizedDescription),
+              selected: isSelected,
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Driver Ability",
+          filled: true,
+        ),
+      ),
+    );
+  }
+
+  DropdownSearch<PenaltyCard> penaltyCardDropdown(BuildContext context) {
+    return DropdownSearch<PenaltyCard>(
+      items: PenaltyCard.values,
+      itemAsString: (penaltyCard) => penaltyCard.localizedDescription,
+      selectedItem: controller.matchData.penaltyCard.value,
+      onChanged: (penaltyCard) {
+        if (penaltyCard != null) {
+          controller.matchData.penaltyCard.value = penaltyCard;
+        }
+      },
+      popupProps: PopupProps.menu(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(
+                item.localizedDescription,
+                style: TextStyle(color: item.color),
+              ),
+            ),
+          );
+        },
+      ),
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Penalty Card",
+          filled: true,
+        ),
+      ),
+    );
+  }
+
+  ElevatedButton showQrCodeButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        controller.documentsHelper
+            .saveAndUploadMatchData(controller.matchData)
+            .then((uploadResult) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Upload ${uploadResult ? "Successful" : "Failed"}"),
+            behavior: SnackBarBehavior.floating,
+          ));
+        });
+
+        Get.to(
+          () => QrCodeScreen(
+              matchQrCodes: controller.separateEventsToQrCodes(
+                matchData: controller.matchData,
+              ),
+              canPopScope: false),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(7.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Icon(Icons.qr_code),
+            SizedBox(width: 10),
+            Text("Show QR Code"),
+          ],
+        ),
+      ),
     );
   }
 }

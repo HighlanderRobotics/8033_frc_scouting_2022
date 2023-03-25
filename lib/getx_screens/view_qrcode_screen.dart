@@ -7,12 +7,18 @@ class QrCodeScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   var pageNumber = 0.obs;
   late final List<String> matchQrCodes;
-  var canGoBack = false;
+  var canPopScope = false;
 
-  QrCodeScreen({required this.matchQrCodes, required this.canGoBack});
+  QrCodeScreen({
+    required this.matchQrCodes,
+    required this.canPopScope,
+  });
 
   void nextPage() => pageNumber.value =
       (pageNumber.value < matchQrCodes.length - 1) ? pageNumber.value + 1 : 0;
+
+  void previousPage() => pageNumber.value =
+      (pageNumber.value > 0) ? pageNumber.value - 1 : matchQrCodes.length - 1;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +27,7 @@ class QrCodeScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: const Text("QR Code"),
-          automaticallyImplyLeading: canGoBack,
+          automaticallyImplyLeading: canPopScope,
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -57,16 +63,19 @@ class QrCodeScreen extends StatelessWidget {
                     onPressed: nextPage,
                     child: const Text("Next Page"),
                   ),
-                ElevatedButton(
-                  child: Text(canGoBack ? "Back" : "Finish"),
-                  onPressed: () {
-                    Get.closeCurrentSnackbar();
-                    if (canGoBack) {
-                      Get.back();
-                    } else {
-                      controller.reset();
-                    }
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Get.closeCurrentSnackbar();
+                      if (canPopScope) {
+                        previousPage();
+                      } else {
+                        controller.reset();
+                      }
+                    },
+                    child: Text(canPopScope ? "Back" : "Finish"),
+                  ),
                 ),
               ],
             ),

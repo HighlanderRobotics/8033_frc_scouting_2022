@@ -4,5 +4,8 @@ class MatchScoutShiftTime {
   final MatchKey matchKey;
   final int rawMatchNumber;
 
-  MatchScoutShiftTime({required this.matchKey, required this.rawMatchNumber});
+  MatchScoutShiftTime({
+    required this.matchKey,
+    required this.rawMatchNumber,
+  });
 }

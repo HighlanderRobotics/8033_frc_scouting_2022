@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_scouting/models/match_data.dart';
+import 'package:frc_scouting/models/match_scouted.dart';
 import 'package:frc_scouting/models/previous_matches_info.dart';
 import 'package:get/get.dart';
+import 'package:implicitly_animated_reorderable_list_2/implicitly_animated_reorderable_list_2.dart';
+import 'package:implicitly_animated_reorderable_list_2/transitions.dart';
 import 'package:intl/intl.dart';
 
-import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
-import 'package:implicitly_animated_reorderable_list/transitions.dart';
-
 import '../models/match_key.dart';
+import '../networking/scouting_server_api.dart';
 import 'view_qrcode_screen.dart';
 import '../services/getx_business_logic.dart';
 
@@ -16,35 +17,75 @@ class PreviousMatchesScreen extends StatelessWidget {
   final BusinessLogicController controller = Get.find();
   final txtEditingController = TextEditingController();
 
-  PreviousMatchesInfo previousMatches;
+  late Rx<PreviousMatchesInfo> previousMatchesInfo;
   late final RxList<MatchData> filteredMatches = <MatchData>[].obs;
 
   var isDismissThresholdReached = false.obs;
 
-  PreviousMatchesScreen({required this.previousMatches});
+  PreviousMatchesScreen({required PreviousMatchesInfo previousMatchesInfo}) {
+    this.previousMatchesInfo = previousMatchesInfo.obs;
+
+    if (this.previousMatchesInfo.value.validMatches.isNotEmpty) {
+      try {
+        ScoutingServerAPI.shared
+            .isMatchesScouted(
+                scouterName: controller.matchData.scouterName.value,
+                matchKeys: previousMatchesInfo.validMatches
+                    .map((e) => e.matchKey.value
+                        .longMatchKeyForTournament(e.tournament))
+                    .toList())
+            .then((value) {
+          // first, we find a local match that we think has not been uploaded
+          // then, we check it against the server results
+          // lastly, update it if it has been uploaded
+
+          for (final validMatch in previousMatchesInfo.validMatches) {
+            if (validMatch.hasSavedToCloud.isFalse &&
+                value.firstWhereOrNull((element) =>
+                        element.matchKey ==
+                        validMatch.matchKey.value.longMatchKeyForTournament(
+                            validMatch.tournament)) !=
+                    null) {
+              validMatch.hasSavedToCloud.value = true;
+              controller.documentsHelper
+                  .saveAndUploadMatchData(validMatch)
+                  .then((uploadStatus) {
+                validMatch.hasSavedToCloud.value = true;
+                filterSearchResultsAndUpdateList();
+              });
+            }
+          }
+        });
+      } on Exception catch (e) {
+        print("Error: $e");
+
+        ScaffoldMessenger.of(Get.context!).showSnackBar(
+          SnackBar(
+            content: Text("Error: $e"),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(3.seconds, () {
-      print("Files Directory: ${controller.documentsHelper.directory.path}");
-      print(
-          "Number of valid matches: ${previousMatches.validMatches.length} out of ${previousMatches.validMatches.length + previousMatches.numberOfInvalidFiles}");
+    print("Files Directory: ${controller.documentsHelper.directory.path}");
+    print(
+        "Number of valid matches: ${previousMatchesInfo.value.validMatches.length} out of ${previousMatchesInfo.value.validMatches.length + previousMatchesInfo.value.numberOfInvalidFiles}");
+    controller.resetOrientation();
 
-      filteredMatches.value = previousMatches.validMatches;
-
-      controller.resetOrientation();
-
-      filterSearchResultsAndUpdateList();
-    });
+    filterSearchResultsAndUpdateList();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Previous Matches"),
       ),
-      body:
-          previousMatches.validMatches.isNotEmpty || filteredMatches.isNotEmpty
-              ? previousMatchesListView()
-              : noMatchesView(),
+      body: previousMatchesInfo.value.validMatches.isNotEmpty ||
+              filteredMatches.isNotEmpty
+          ? previousMatchesListView()
+          : noMatchesView(),
     );
   }
 
@@ -81,24 +122,25 @@ class PreviousMatchesScreen extends StatelessWidget {
   }
 
   Widget previousMatchesListView() {
-    return WillPopScope(
-      onWillPop: () async {
-        Get.closeCurrentSnackbar();
-        return true;
-      },
-      child: Column(children: [
+    return Column(
+      children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: TextField(
             onChanged: (_) => filterSearchResultsAndUpdateList(),
             controller: txtEditingController,
             decoration: InputDecoration(
-                labelText: "Search",
-                hintText: "Search by Match or Team ",
-                suffixIcon: filterPopupMenu(),
-                prefixIcon: const Icon(Icons.search),
+                labelText: "Search by Match or Team",
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.only(right: 18.0),
+                  child: filterPopupMenu(),
+                ),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.all(18.0),
+                  child: Icon(Icons.search, size: 24),
+                ),
                 border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)))),
+                    borderRadius: BorderRadius.all(Radius.circular(30)))),
           ),
         ),
         Obx(
@@ -133,14 +175,15 @@ class PreviousMatchesScreen extends StatelessWidget {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content:
-                                  Text("Deleted ${matchData.matchKey.value}"),
+                              behavior: SnackBarBehavior.floating,
+                              content: Text(
+                                  "Deleted ${matchData.matchKey.value.localizedDescription}"),
                               action: SnackBarAction(
                                 label: "Undo",
-                                onPressed: () {
-                                  controller.documentsHelper
-                                      .saveMatchData(matchData);
-                                  controller.documentsHelper
+                                onPressed: () async {
+                                  await controller.documentsHelper
+                                      .saveAndUploadMatchData(matchData);
+                                  await controller.documentsHelper
                                       .getPreviousMatches();
                                   filterSearchResultsAndUpdateList();
                                 },
@@ -148,15 +191,6 @@ class PreviousMatchesScreen extends StatelessWidget {
                               duration: 3.seconds,
                             ),
                           );
-
-                          // Get.snackbar(
-                          //   "Match Deleted",
-                          //   "Match ${item.matchNumber} has been deleted",
-                          //   duration: const Duration(seconds: 2),
-                          //   snackPosition: SnackPosition.BOTTOM,
-                          //   backgroundColor: Colors.deepPurple,
-                          //   colorText: Colors.white,
-                          // );
                         },
                         background: Container(
                           color: Colors.red[900],
@@ -179,8 +213,8 @@ class PreviousMatchesScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child:
-                            matchRowView(matchData, matchData.matchKey.value!),
+                        child: matchRowView(
+                            context, matchData, matchData.matchKey.value),
                       )),
                 );
               },
@@ -189,17 +223,19 @@ class PreviousMatchesScreen extends StatelessWidget {
             ),
           ),
         ),
-      ]),
+      ],
     );
   }
 
-  Widget matchRowView(MatchData matchData, MatchKey matchKey) {
+  Widget matchRowView(
+      BuildContext context, MatchData matchData, MatchKey matchKey) {
     return InkWell(
       child: ListTile(
         onTap: () => Get.to(
           () => QrCodeScreen(
-            matchQrCodes: controller.separateEventsToQrCodes(matchData),
-            canGoBack: true,
+            matchQrCodes:
+                controller.separateEventsToQrCodes(matchData: matchData),
+            canPopScope: true,
           ),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -213,7 +249,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                   Text(matchKey.localizedDescription,
                       style: const TextStyle(fontSize: 18)),
                   Text(
-                    "Team: ${matchData.teamNumber.value}",
+                    "Team ${matchData.teamNumber.value}",
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   Text(
@@ -228,9 +264,35 @@ class PreviousMatchesScreen extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(matchData.hasSavedToCloud.isTrue
-                ? Icons.cloud_done
-                : Icons.cloud_off),
+            Obx(
+              () => IconButton(
+                icon: Icon(matchData.hasSavedToCloud.isTrue
+                    ? Icons.cloud_done
+                    : Icons.cloud_off),
+                onPressed: () async {
+                  await controller.documentsHelper.deleteFile(matchData.uuid);
+                  await controller.documentsHelper.writeToFile(matchData);
+                  if (matchData.hasSavedToCloud.isTrue) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          "Match ${matchData.matchKey.value.localizedDescription} has already been uploaded to the server"),
+                      behavior: SnackBarBehavior.floating,
+                    ));
+                  } else {
+                    controller.documentsHelper
+                        .saveAndUploadMatchData(matchData)
+                        .then((uploadStatus) {
+                      filterSearchResultsAndUpdateList();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                            "Match ${matchData.matchKey.value.localizedDescription} has ${uploadStatus ? "uploaded" : "failed to upload"} to the server"),
+                        behavior: SnackBarBehavior.floating,
+                      ));
+                    });
+                  }
+                },
+              ),
+            ),
             const SizedBox(width: 10),
             const Icon(Icons.arrow_forward_ios_rounded),
           ],
@@ -249,15 +311,15 @@ class PreviousMatchesScreen extends StatelessWidget {
   }
 
   void filterSearchResultsAndUpdateList() {
-    // List<MatchData> searchList = <MatchData>[];
+    filteredMatches.value = previousMatchesInfo.value.validMatches;
 
     if (txtEditingController.text.isNotEmpty) {
-      filteredMatches.value = previousMatches.validMatches
+      filteredMatches.value = previousMatchesInfo.value.validMatches
           .where((element) =>
               element.matchKey.toString().contains(txtEditingController.text))
           .toList();
     } else {
-      filteredMatches.value = previousMatches.validMatches;
+      filteredMatches.value = previousMatchesInfo.value.validMatches;
     }
 
     switch (controller.matchFilterType.value) {

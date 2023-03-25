@@ -16,7 +16,7 @@ class MatchScheduleHelper extends ServiceClass {
   @override
   void refresh({bool networkRefresh = false}) {
     try {
-      getMatchSchedule(tournamentKey: "2022cc", networkRefresh: networkRefresh);
+      getMatchSchedule(networkRefresh: networkRefresh);
     } catch (_) {}
   }
 
@@ -25,15 +25,17 @@ class MatchScheduleHelper extends ServiceClass {
     service = Service(name: "Match Schedule").obs;
   }
 
-  List<MatchEvent> getMatchesFromShifts(
-      {required List<ScoutShift> shifts, required String scouterName}) {
+  List<MatchEvent> getMatchesFromShifts({
+    required List<ScoutShift> shifts,
+    required String scouterName,
+  }) {
     var matches = <MatchEvent>[];
 
     for (var match in matchSchedule) {
       for (var shift in shifts) {
         if (match.key.contains("_${shift.scouterPlacement(scouterName)}") &&
             shift.matchShiftDuration.range
-                .contains(match.matchKey.matchNumber)) {
+                .contains(match.matchKey.ordinalMatchNumber)) {
           matches.add(match);
           break;
         }
@@ -44,8 +46,8 @@ class MatchScheduleHelper extends ServiceClass {
       final filteredMatches = matches
           .where((match) => match.matchKey.matchType == matchType)
           .toList();
-      filteredMatches.sort(
-          (a, b) => a.matchKey.matchNumber.compareTo(b.matchKey.matchNumber));
+      filteredMatches.sort((a, b) => a.matchKey.ordinalMatchNumber
+          .compareTo(b.matchKey.ordinalMatchNumber));
 
       matches.removeWhere((match) => match.matchKey.matchType == matchType);
       matches.addAll(filteredMatches);
@@ -54,16 +56,16 @@ class MatchScheduleHelper extends ServiceClass {
     return matches;
   }
 
-  Future getMatchSchedule(
-      {bool networkRefresh = false, required String tournamentKey}) async {
+  Future getMatchSchedule({
+    bool networkRefresh = false,
+  }) async {
     service.value
         .updateStatus(ServiceStatus.inProgress, "Fetching from localStorage");
     final localStorageSchedule = await _getParsedLocalStorageSchedule();
 
     if (localStorageSchedule.isEmpty || networkRefresh) {
       try {
-        matchSchedule.value =
-            await ScoutingServerAPI.getMatches(tournamentKey: tournamentKey);
+        matchSchedule.value = await ScoutingServerAPI.shared.getMatches();
         matchSchedule.sort((a, b) => a.key.compareTo(b.key));
         _saveParsedLocalStorageSchedule(matchSchedule.toList());
         service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
@@ -80,7 +82,8 @@ class MatchScheduleHelper extends ServiceClass {
 
   Future<List<MatchEvent>> _getParsedLocalStorageSchedule() async {
     final scheduleJson = await SharedPreferencesHelper.shared
-        .getString(SharedPreferenceKeys.matchSchedule.toShortString());
+            .getString(SharedPreferenceKeys.matchSchedule.toShortString()) ??
+        "";
 
     if (scheduleJson.isNotEmpty) {
       try {
@@ -88,7 +91,7 @@ class MatchScheduleHelper extends ServiceClass {
             .map((e) => MatchEvent.fromJson(e))
             .toList();
       } catch (e) {
-        print("Failed to parse localStorage schedule: $e");
+        print("Failed to parse Match Schedule from localStorage schedule: $e");
         return [];
       }
     } else {
@@ -102,9 +105,11 @@ class MatchScheduleHelper extends ServiceClass {
         SharedPreferenceKeys.matchSchedule.toShortString(), scheduleJson);
   }
 
-  MatchEvent getMatchEvent(
-          {required int matchNumber, required int scouterId}) =>
+  MatchEvent getMatchEvent({
+    required int matchNumber,
+    required int scouterId,
+  }) =>
       matchSchedule[matchSchedule.indexWhere(
-              (element) => element.matchKey.matchNumber == matchNumber) +
+              (element) => element.matchKey.ordinalMatchNumber == matchNumber) +
           scouterId];
 }

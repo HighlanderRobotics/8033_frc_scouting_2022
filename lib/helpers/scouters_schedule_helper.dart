@@ -12,7 +12,7 @@ class ScoutersScheduleHelper extends ServiceClass {
   late Rx<ScoutersSchedule> matchSchedule;
 
   ScoutersScheduleHelper() {
-    matchSchedule = ScoutersSchedule(0, RxList.empty()).obs;
+    matchSchedule = ScoutersSchedule(0.obs, RxList.empty()).obs;
     service = Service(name: "Scouters Schedule").obs;
   }
 
@@ -30,8 +30,9 @@ class ScoutersScheduleHelper extends ServiceClass {
 
     if (localStorageSchedule == null || networkRefresh) {
       try {
-        matchSchedule.value = await ScoutingServerAPI.getScoutersSchedule();
-        _saveParsedLocalStorageSchedule(matchSchedule.value);
+        matchSchedule.value =
+            await ScoutingServerAPI.shared.getScoutersSchedule();
+        saveParsedLocalStorageSchedule(matchSchedule.value);
         service.value.updateStatus(ServiceStatus.up, "Retrieved from network");
       } catch (e) {
         service.value.updateStatus(
@@ -46,7 +47,8 @@ class ScoutersScheduleHelper extends ServiceClass {
 
   static Future<ScoutersSchedule?> _getParsedLocalStorageSchedule() async {
     final scheduleJson = await SharedPreferencesHelper.shared
-        .getString(SharedPreferenceKeys.scoutersSchedule.toShortString());
+            .getString(SharedPreferenceKeys.scoutersSchedule.toShortString()) ??
+        "";
 
     if (scheduleJson.isNotEmpty) {
       try {
@@ -60,7 +62,7 @@ class ScoutersScheduleHelper extends ServiceClass {
     }
   }
 
-  static Future _saveParsedLocalStorageSchedule(
+  static Future saveParsedLocalStorageSchedule(
       ScoutersSchedule schedule) async {
     final prefs = await SharedPreferencesHelper.shared.sharedPreferences;
     final scheduleJson = jsonEncode(schedule);
