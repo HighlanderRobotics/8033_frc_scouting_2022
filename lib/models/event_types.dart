@@ -4,9 +4,3 @@ enum EventType {
   robotBecomesImmobile,
   robotBecomesMobile,
 }
-
-extension EventTypeExtension on EventType {
-  int get numericalValue {
-    return EventType.values.indexOf(this);
-  }
-}

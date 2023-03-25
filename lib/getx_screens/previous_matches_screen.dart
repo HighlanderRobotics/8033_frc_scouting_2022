@@ -249,7 +249,7 @@ class PreviousMatchesScreen extends StatelessWidget {
                   Text(matchKey.localizedDescription,
                       style: const TextStyle(fontSize: 18)),
                   Text(
-                    "Team: ${matchData.teamNumber.value}",
+                    "Team ${matchData.teamNumber.value}",
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   Text(

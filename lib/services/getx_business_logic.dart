@@ -35,7 +35,7 @@ extension MatchFilterTypeExtension on MatchFilterType {
 
 class BusinessLogicController extends GetxController {
   late MatchData matchData;
-  final FilesHelper documentsHelper = FilesHelper();
+  final documentsHelper = FilesHelper();
   var matchFilterType = MatchFilterType.date.obs;
   final serviceHelper = ServiceHelper();
 

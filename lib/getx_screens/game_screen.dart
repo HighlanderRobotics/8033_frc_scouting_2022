@@ -31,16 +31,13 @@ class GameScreenObject {
 }
 
 class GameScreen extends StatelessWidget {
-  final BusinessLogicController controller = Get.find();
-  final SettingsScreenVariables variables = Get.find();
+  final controller = Get.find<BusinessLogicController>();
+  final variables = Get.find<SettingsScreenVariables>();
 
   GameScreen({
     required this.isInteractive,
     this.alliance = AllianceColor.blue,
-  }) {
-    controller.matchData.startTime = DateTime.now();
-    controller.matchData.events.value = [];
-  }
+  });
 
   final bool isInteractive;
   final AllianceColor alliance;
@@ -53,6 +50,8 @@ class GameScreen extends StatelessWidget {
   final GlobalKey draggableFABParentKey = GlobalKey();
 
   void resetAndStartTimer() {
+    controller.matchData.startTime = DateTime.now();
+
     print("Resetting and Starting Auto Timer");
 
     presentPostGameScreenTimer.cancel();
@@ -139,7 +138,7 @@ class GameScreen extends StatelessWidget {
           // keep the bottom and top safe area insets the same
           bottom: true,
           top: true,
-          child: Obx(() => paintWidget()),
+          child: Obx(() => paintWidget(context)),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: !isInteractive
@@ -148,8 +147,7 @@ class GameScreen extends StatelessWidget {
                 () => Row(
                   children: [
                     const SizedBox(width: 15),
-                    if (isAutoInProgress.isFalse)
-                      previousFloatingActionButton(),
+                    if (isAutoInProgress.isFalse) backFloatingActionButton(),
                     const Spacer(),
                     nextFloatingActionButton(),
                     const SizedBox(width: 15),
@@ -160,19 +158,14 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  FloatingActionButton previousFloatingActionButton() {
+  FloatingActionButton backFloatingActionButton() {
     return FloatingActionButton(
       onPressed: null,
       mini: true,
       child: GestureDetector(
         child: const Icon(Icons.arrow_back),
         onLongPress: () {
-          if (isInteractive && isAutoInProgress.isFalse) {
-            print("Reverting and resetting auton timer");
-            HapticFeedback.mediumImpact();
-            isAutoInProgress.value = true;
-            controller.matchData.startTime = DateTime.now();
-          }
+          Get.back();
         },
       ),
     );
@@ -191,13 +184,15 @@ class GameScreen extends StatelessWidget {
             autoTimer.cancel();
             HapticFeedback.heavyImpact();
             Get.to(() => PostGameScreen());
+          } else {
+            print("Not Interactive");
           }
         },
       ),
     );
   }
 
-  Widget paintWidget() {
+  Widget paintWidget(BuildContext context) {
     return Transform.rotate(
       angle: variables.rotation.value == GameConfigurationRotation.standard
           ? 0
@@ -233,16 +228,16 @@ class GameScreen extends StatelessWidget {
                     child: Container(color: Colors.red)),
               ),
             for (final index in gridRectangleValues)
-              createGridRectangle(index: index),
+              createGridRectangle(index: index, context: context),
             if (isAutoInProgress.isTrue &&
                 isInteractive == true &&
                 isUserSelectingStartPosition.isFalse)
               for (final index in communityEntranceRectangleValues)
                 createCommunityEntranceMethodRectangle(object: index),
             for (final index in midCargoRotatonValues)
-              createFieldCargoCircle(index),
+              createFieldCargoCircle(object: index, context: context),
             if (isInteractive && isAutoInProgress.isFalse)
-              createSubstationRectangle(),
+              createSubstationRectangle(context),
             Transform.rotate(
               angle:
                   variables.rotation.value == GameConfigurationRotation.standard
@@ -277,11 +272,12 @@ class GameScreen extends StatelessWidget {
                           isRobotCarryingCargo.value = false;
                         } else {
                           showDialog(
-                            context: Get.context!,
+                            context: context,
                             builder: (context) => createGameImmersiveDialog(
                               widgets: ObjectType.values
-                                  .map((objectType) =>
-                                      objectDialogRectangle(objectType))
+                                  .map((objectType) => objectDialogRectangle(
+                                      objectType,
+                                      context: context))
                                   .toList(),
                               context: context,
                             ),
@@ -314,11 +310,12 @@ class GameScreen extends StatelessWidget {
                           isRobotCarryingCargo.value = false;
                         } else {
                           showDialog(
-                            context: Get.context!,
+                            context: context,
                             builder: (context) => createGameImmersiveDialog(
                               widgets: ObjectType.values
-                                  .map((objectType) =>
-                                      objectDialogRectangle(objectType))
+                                  .map((objectType) => objectDialogRectangle(
+                                      objectType,
+                                      context: context))
                                   .toList(),
                               context: context,
                             ),
@@ -377,7 +374,7 @@ class GameScreen extends StatelessWidget {
                         child: Text(
                           isUserSelectingStartPosition.isTrue
                               ? "Select Start Position"
-                              : "Team: ${controller.matchData.teamNumber.toString()} • ${isAutoInProgress.isTrue ? "Auton" : "Teleop"}",
+                              : "Team ${controller.matchData.teamNumber.toString()} • ${isAutoInProgress.isTrue ? "Auton" : "Teleop"}",
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -428,7 +425,10 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  Positioned createFieldCargoCircle(GameScreenObject object) {
+  Positioned createFieldCargoCircle({
+    required GameScreenObject object,
+    required BuildContext context,
+  }) {
     return Positioned(
       left: boxDecorationSize.width * object.size.width - 4,
       bottom: getBottomToBoxDecorationHeight() +
@@ -446,13 +446,11 @@ class GameScreen extends StatelessWidget {
         onTap: () {
           if (isRobotCarryingCargo.isFalse || isInteractive == false) {
             showDialog(
-              context: Get.context!,
+              context: context,
               builder: (context) => createGameImmersiveDialog(
                 widgets: ObjectType.values
-                    .map((objectType) => objectDialogRectangle(
-                          objectType,
-                          position: object.position,
-                        ))
+                    .map((objectType) => objectDialogRectangle(objectType,
+                        position: object.position, context: context))
                     .toList(),
                 context: context,
               ),
@@ -463,7 +461,7 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  Positioned createSubstationRectangle() {
+  Positioned createSubstationRectangle(BuildContext context) {
     return Positioned(
       left: alliance == AllianceColor.red ? 0 : null,
       right: alliance == AllianceColor.blue ? 0 : null,
@@ -480,10 +478,11 @@ class GameScreen extends StatelessWidget {
         onTap: () {
           if (isRobotCarryingCargo.isFalse && isInteractive == true) {
             showDialog(
-              context: Get.context!,
+              context: context,
               builder: (context) => createGameImmersiveDialog(
                 widgets: ObjectType.values
-                    .map((objectType) => objectDialogRectangle(objectType))
+                    .map((objectType) =>
+                        objectDialogRectangle(objectType, context: context))
                     .toList(),
                 context: context,
               ),
@@ -496,7 +495,10 @@ class GameScreen extends StatelessWidget {
 
   final List<int> gridRectangleValues = [0, 1, 2];
 
-  Positioned createGridRectangle({required int index}) {
+  Positioned createGridRectangle({
+    required int index,
+    required BuildContext context,
+  }) {
     return Positioned(
       bottom: getBottomToBoxDecorationHeight() +
           boxDecorationSize.height * index * 0.22,
@@ -514,34 +516,24 @@ class GameScreen extends StatelessWidget {
         onTap: () {
           if (isUserSelectingStartPosition.isTrue && isInteractive == true) {
             showDialog(
-              context: Get.context!,
+              context: context,
               builder: (context) => createGameImmersiveDialog(
                 widgets: [...ObjectType.values, null]
                     .map((objectType) => objectType == null
-                        ? noStartingObjectDialogRectangle(Get.context!)
+                        ? noStartingObjectDialogRectangle(
+                            index: index,
+                            context: context,
+                          )
                         : objectDialogRectangle(
                             objectType,
+                            context: context,
                             onTapAction: () {
                               HapticFeedback.mediumImpact();
-
-                              final positions = {
-                                0: 19,
-                                1: 18,
-                                2: 17,
-                              };
-
-                              controller.addEventToTimeline(
-                                robotAction: RobotAction.startingPosition,
-                                position: positions[index]!,
-                              );
+                              resetAndStartTimer();
 
                               isRobotCarryingCargo.value = true;
-
-                              controller.matchData.events.last.timeSince =
-                                  0.seconds;
+                              controller.matchData.startTime = DateTime.now();
                               isUserSelectingStartPosition.value = false;
-
-                              resetAndStartTimer();
                             },
                           ))
                     .toList(),
@@ -550,10 +542,11 @@ class GameScreen extends StatelessWidget {
             );
           } else if (isRobotCarryingCargo.isTrue && isInteractive == true) {
             showDialog(
-              context: Get.context!,
+              context: context,
               builder: (context) => createGameImmersiveDialog(
                 widgets: Level.values
-                    .map((level) => levelDialogRectangle(level, index + 1))
+                    .map((level) => levelDialogRectangle(level, index + 1,
+                        context: context))
                     .toList(),
                 context: context,
               ),
@@ -564,7 +557,26 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  Widget noStartingObjectDialogRectangle(BuildContext context) {
+  void addStartingPosition({
+    required RobotAction cargoType,
+    required int index,
+  }) {
+    final positions = {
+      0: 19,
+      1: 18,
+      2: 17,
+    };
+
+    controller.addEventToTimeline(
+      robotAction: cargoType,
+      position: positions[index]!,
+    );
+  }
+
+  Widget noStartingObjectDialogRectangle({
+    required int index,
+    required BuildContext context,
+  }) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -576,11 +588,14 @@ class GameScreen extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(20.0),
           onTap: () {
+            resetAndStartTimer();
+            addStartingPosition(
+              cargoType: RobotAction.startingPosition,
+              index: index,
+            );
             isRobotCarryingCargo.value = false;
             isUserSelectingStartPosition.value = false;
             Navigator.of(context).pop();
-
-            resetAndStartTimer();
             HapticFeedback.mediumImpact();
           },
           child: Container(
@@ -680,11 +695,8 @@ class GameScreen extends StatelessWidget {
 }
 
 extension GameScreenDialogs on GameScreen {
-  Widget levelDialogRectangle(
-    Level level,
-    int index, {
-    void Function()? additionalOnTapAction,
-  }) {
+  Widget levelDialogRectangle(Level level, int index,
+      {void Function()? additionalOnTapAction, required BuildContext context}) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -705,7 +717,7 @@ extension GameScreenDialogs on GameScreen {
 
             if (additionalOnTapAction != null) additionalOnTapAction();
 
-            Navigator.of(Get.context!).pop();
+            Navigator.of(context).pop();
 
             isRobotCarryingCargo.value = false;
           },
@@ -746,11 +758,10 @@ extension GameScreenDialogs on GameScreen {
     );
   }
 
-  Widget objectDialogRectangle(
-    ObjectType objectType, {
-    int position = 0,
-    void Function()? onTapAction,
-  }) {
+  Widget objectDialogRectangle(ObjectType objectType,
+      {int position = 0,
+      void Function()? onTapAction,
+      required BuildContext context}) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -764,6 +775,10 @@ extension GameScreenDialogs on GameScreen {
           onTap: () {
             HapticFeedback.mediumImpact();
 
+            if (isUserSelectingStartPosition.isTrue) {
+              resetAndStartTimer();
+            }
+
             controller.addEventToTimeline(
               robotAction: objectType == ObjectType.cube
                   ? RobotAction.pickedUpCube
@@ -773,7 +788,7 @@ extension GameScreenDialogs on GameScreen {
 
             isRobotCarryingCargo.value = true;
 
-            Navigator.of(Get.context!).pop();
+            Navigator.of(context).pop();
 
             if (onTapAction != null) onTapAction();
           },

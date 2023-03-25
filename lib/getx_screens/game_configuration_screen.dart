@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/game_screen.dart';
-import 'package:frc_scouting/getx_screens/settings_screen.dart';
 import 'package:get/get.dart';
 import '../models/settings_screen_variables.dart';
 import '../models/game_configuration_rotation.dart';

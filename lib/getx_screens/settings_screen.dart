@@ -32,7 +32,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 8.0),
-            child: saveConfigurationButton(),
+            child: saveConfigurationButton(context),
           ),
         ],
       ),
@@ -199,7 +199,7 @@ class SettingsScreen extends StatelessWidget {
                     label: const Text("Edit Game Configuration")),
                 const SizedBox(height: 10),
                 const SizedBox(height: 30),
-                deleteConfigurationButton(),
+                deleteConfigurationButton(context),
               ],
             ),
           ),
@@ -208,12 +208,12 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget deleteConfigurationButton() {
+  Widget deleteConfigurationButton(BuildContext context) {
     return ElevatedButton.icon(
       icon: const Icon(Icons.delete),
       onPressed: () {
         showDialog(
-          context: Get.context!,
+          context: context,
           builder: (context) => AlertDialog(
             title: const Text("Delete configuration?"),
             content: const Text(
@@ -250,15 +250,15 @@ class SettingsScreen extends StatelessWidget {
       style: ButtonStyle(
         elevation: MaterialStateProperty.all(0),
         backgroundColor: MaterialStateProperty.resolveWith(
-            (states) => Theme.of(Get.context!).colorScheme.error),
+            (states) => Theme.of(context).colorScheme.error),
         foregroundColor: MaterialStateProperty.resolveWith(
-            (states) => Theme.of(Get.context!).colorScheme.onError),
+            (states) => Theme.of(context).colorScheme.onError),
       ),
       label: const Text("Delete Configuration"),
     );
   }
 
-  Widget saveConfigurationButton() {
+  Widget saveConfigurationButton(BuildContext context) {
     return Obx(
       () => IconButton(
         icon: Icon(
@@ -273,16 +273,16 @@ class SettingsScreen extends StatelessWidget {
 
             controller.serviceHelper.refreshAll(networkRefresh: true);
 
-            ScaffoldMessenger.of(Get.context!).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text("Saved Configuration"),
                 behavior: SnackBarBehavior.floating,
               ),
             );
 
-            Navigator.of(Get.context!).pop();
+            Navigator.of(context).pop();
           } else {
-            ScaffoldMessenger.of(Get.context!).showSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text("Invalid Configuration"),
                 behavior: SnackBarBehavior.floating,

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_scouting/getx_screens/view_qrcode_screen.dart';
@@ -7,12 +5,13 @@ import 'package:frc_scouting/models/climbing_challenge.dart';
 import 'package:frc_scouting/models/robot_roles.dart';
 import 'package:get/get.dart';
 
+import '../models/driver_ability.dart';
 import '../services/getx_business_logic.dart';
 
 class PostGameScreen extends StatelessWidget {
   final notesController = TextEditingController();
 
-  final BusinessLogicController controller = Get.find();
+  final controller = Get.find<BusinessLogicController>();
 
   PostGameScreen() {
     controller.resetOrientation();
@@ -36,14 +35,14 @@ class PostGameScreen extends StatelessWidget {
             child: Obx(
               (() => Column(
                     children: [
-                      autonClimbingChallengeDropdown(),
-                      const SizedBox(height: 20),
-                      climbingChallengeDropdown(),
-                      const SizedBox(height: 20),
-                      robotRoleDropdown(),
-                      const SizedBox(height: 20),
-                      robotDisabled(),
-                      const SizedBox(height: 20),
+                      autonClimbingChallengeDropdown(context),
+                      const SizedBox(height: 15),
+                      climbingChallengeDropdown(context),
+                      const SizedBox(height: 15),
+                      robotRoleDropdown(context),
+                      const SizedBox(height: 15),
+                      driverAbilityDropdown(context),
+                      const SizedBox(height: 15),
                       TextField(
                         decoration: const InputDecoration(
                           labelText: "Notes",
@@ -52,6 +51,7 @@ class PostGameScreen extends StatelessWidget {
                         controller: notesController,
                         onChanged: (text) =>
                             controller.matchData.notes.value = text,
+                        maxLines: null,
                       ),
                       Center(
                         child: Padding(
@@ -71,7 +71,8 @@ class PostGameScreen extends StatelessWidget {
     );
   }
 
-  DropdownSearch<ClimbingChallenge> climbingChallengeDropdown() {
+  DropdownSearch<ClimbingChallenge> climbingChallengeDropdown(
+      BuildContext context) {
     return DropdownSearch<ClimbingChallenge>(
       items: ClimbingChallenge.values,
       itemAsString: (climbingChallenge) =>
@@ -88,10 +89,26 @@ class PostGameScreen extends StatelessWidget {
           filled: true,
         ),
       ),
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(
+                item.localizedDescription,
+              ),
+              subtitle: Text(item.longLocalizedDescription),
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
     );
   }
 
-  DropdownSearch<ClimbingChallenge> autonClimbingChallengeDropdown() {
+  DropdownSearch<ClimbingChallenge> autonClimbingChallengeDropdown(
+      BuildContext context) {
     return DropdownSearch<ClimbingChallenge>(
       items: ClimbingChallenge.values,
       itemAsString: (climbingChallenge) =>
@@ -108,10 +125,25 @@ class PostGameScreen extends StatelessWidget {
           filled: true,
         ),
       ),
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(
+                item.localizedDescription,
+              ),
+              subtitle: Text(item.longLocalizedDescription),
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
     );
   }
 
-  DropdownSearch<RobotRole> robotRoleDropdown() {
+  DropdownSearch<RobotRole> robotRoleDropdown(BuildContext context) {
     return DropdownSearch<RobotRole>(
       items: RobotRole.values,
       itemAsString: (robotRole) => robotRole.localizedDescription,
@@ -121,6 +153,20 @@ class PostGameScreen extends StatelessWidget {
           controller.matchData.robotRole.value = robotRole;
         }
       },
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(item.localizedDescription),
+              subtitle: Text(item.longLocalizedDescription),
+              selected: isSelected,
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Robot Role",
@@ -130,16 +176,39 @@ class PostGameScreen extends StatelessWidget {
     );
   }
 
-  Widget robotDisabled() {
-    return Row(
-      children: [
-        const Text("Robot Disabled"),
-        Checkbox(
-          value: controller.matchData.isRobotDisabled.value,
-          onChanged: (value) =>
-              controller.matchData.isRobotDisabled.value = value ?? false,
+  DropdownSearch<DriverAbility> driverAbilityDropdown(BuildContext context) {
+    return DropdownSearch<DriverAbility>(
+      items: DriverAbility.values,
+      itemAsString: (driverAbility) => driverAbility.localizedDescription,
+      selectedItem: controller.matchData.driverAbility.value,
+      onChanged: (driverAbility) {
+        if (driverAbility != null) {
+          controller.matchData.driverAbility.value = driverAbility;
+        }
+      },
+      popupProps: PopupProps.modalBottomSheet(
+        itemBuilder: (context, item, isSelected) {
+          return Padding(
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 5),
+            child: ListTile(
+              title: Text(
+                item.localizedDescription,
+                style: TextStyle(color: item.color),
+              ),
+              subtitle: Text(item.longLocalizedDescription),
+              selected: isSelected,
+            ),
+          );
+        },
+        modalBottomSheetProps: ModalBottomSheetProps(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor),
+      ),
+      dropdownDecoratorProps: const DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: "Driver Ability",
+          filled: true,
         ),
-      ],
+      ),
     );
   }
 

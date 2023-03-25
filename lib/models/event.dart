@@ -26,7 +26,6 @@ class Event {
       ];
 
   void debugLogDescription() {
-    print(
-        "timeSince: $timeSince, action: ${action.index}, position: $position");
+    print("timeSince: $timeSince, action: ${action.name}, position: $position");
   }
 }

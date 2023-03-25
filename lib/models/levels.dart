@@ -2,11 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/services.dart';
 
-enum Level {
-  bottomRow,
-  middleRow,
-  topRow,
-}
+enum Level { bottomRow, middleRow, topRow }
 
 extension LevelExtension on Level {
   String get localizedDescription {

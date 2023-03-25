@@ -1,17 +1,15 @@
-import 'package:frc_scouting/getx_screens/settings_screen.dart';
-import 'package:frc_scouting/helpers/match_schedule_helper.dart';
-import 'package:frc_scouting/models/constants.dart';
-import 'package:frc_scouting/models/match_key.dart';
-import 'package:frc_scouting/models/match_type.dart';
-import 'package:frc_scouting/models/tournament.dart';
+import 'package:frc_scouting/models/driver_ability.dart';
+import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
+
+import '../helpers/match_schedule_helper.dart';
+import 'constants.dart';
+import 'match_key.dart';
+import 'match_type.dart';
 
 import 'climbing_challenge.dart';
 import 'event.dart';
-
-import 'package:get/get.dart';
-import 'package:uuid/uuid.dart';
-
 import 'robot_roles.dart';
 
 class MatchData {
@@ -31,7 +29,7 @@ class MatchData {
   var challengeResult = ClimbingChallenge.noClimb.obs;
   var hasSavedToCloud = false.obs;
   var tournament = Constants.shared.tournamentKeys.first;
-  var isRobotDisabled = RxBool(false);
+  var driverAbility = DriverAbility.average.obs;
 
   String get tbaKey {
     if (matchKey != null.obs) {
@@ -69,7 +67,7 @@ class MatchData {
     autoChallengeResult =
         ClimbingChallenge.values[json['autoChallengeResult']].obs;
     challengeResult = ClimbingChallenge.values[json['challengeResult']].obs;
-    isRobotDisabled = RxBool(json['isRobotDisabled']);
+    driverAbility = DriverAbility.values[json['driverAbility']].obs;
 
     if (json.containsKey("hasSavedToCloud")) {
       hasSavedToCloud = RxBool(json['hasSavedToCloud']);
@@ -99,7 +97,7 @@ class MatchData {
         'notes': notes.value,
         'autoChallengeResult': autoChallengeResult.value.index,
         'challengeResult': challengeResult.value.index,
+        'driverAbility': driverAbility.value.index,
         if (includeUploadStatus) 'hasSavedToCloud': hasSavedToCloud.isTrue,
-        'isRobotDisabled': isRobotDisabled.value,
       };
 }

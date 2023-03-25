@@ -104,11 +104,11 @@ class HomeScreen extends StatelessWidget {
                               children: [
                                 Obx(() => scouterNameDropdown(context)),
                                 const SizedBox(height: 20),
-                                matchBuilderRow(),
+                                matchBuilderRow(context),
                                 const SizedBox(height: 20),
                                 Obx(
                                   () => isCustomMatchSelected.isFalse
-                                      ? matchKeyDropdown()
+                                      ? matchKeyDropdown(context)
                                       : Column(
                                           children: [
                                             matchTypeDropdown(),
@@ -167,7 +167,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Row matchBuilderRow() {
+  Row matchBuilderRow(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -181,7 +181,7 @@ class HomeScreen extends StatelessWidget {
                 maxLines: 2,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Theme.of(Get.context!).colorScheme.brightness ==
+                  color: Theme.of(context).colorScheme.brightness ==
                           Brightness.dark
                       ? Colors.grey
                       : Colors.grey[700],
@@ -193,7 +193,7 @@ class HomeScreen extends StatelessWidget {
         Obx(
           () => Switch(
               value: isCustomMatchSelected.value,
-              activeColor: Theme.of(Get.context!).colorScheme.primary,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (bool switchState) {
                 HapticFeedback.lightImpact();
                 isCustomMatchSelected.value = switchState;
@@ -245,7 +245,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget matchKeyDropdown() {
+  Widget matchKeyDropdown(BuildContext context) {
     return Obx(
       () => DropdownSearch<MatchKey>(
         dropdownDecoratorProps: const DropDownDecoratorProps(
@@ -264,7 +264,7 @@ class HomeScreen extends StatelessWidget {
             );
           },
           modalBottomSheetProps: ModalBottomSheetProps(
-              backgroundColor: Theme.of(Get.context!).scaffoldBackgroundColor),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor),
         ),
         items:
             matchesFromShifts.map((matchEvent) => matchEvent.matchKey).toList(),
