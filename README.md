@@ -81,3 +81,11 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 | Average               | 2     | This driver can operate the robot competently. However, they are not particularly skilled or exceptional.                 |
 | Good                  | 3     | This driver can operate the robot with skill and precision. They are reliable and make few mistakes.                      |
 | Great                 | 4     | This driver can operate the robot with mastery. They are highly skilled, precise, and efficient and they can think ahead. |
+
+## Penalty Cards
+
+```dart
+0 = No Card
+1 = Yellow Card
+2 = Red Card
+```
