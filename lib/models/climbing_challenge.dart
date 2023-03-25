@@ -13,8 +13,6 @@ extension ClimbingChallengeExtension on ClimbingChallenge {
         return "Failed";
       case ClimbingChallenge.inCommunity:
         return "In Community";
-      default:
-        return "Unknown";
     }
   }
 
@@ -30,8 +28,6 @@ extension ClimbingChallengeExtension on ClimbingChallenge {
         return "The robot was attempting to Dock or Engage with the Charge Station but was unsuccessful";
       case ClimbingChallenge.inCommunity:
         return "The robot did not attempt to climb, but still was in the community";
-      default:
-        return "Unknown";
     }
   }
 }

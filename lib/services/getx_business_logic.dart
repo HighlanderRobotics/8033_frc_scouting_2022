@@ -27,8 +27,6 @@ extension MatchFilterTypeExtension on MatchFilterType {
         return "Date";
       case MatchFilterType.hasNotUploaded:
         return "Not Uploaded";
-      default:
-        return "Unknown";
     }
   }
 }
