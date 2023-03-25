@@ -7,28 +7,30 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 ## Charge Station
 
-| Localized Description | Index | Long Localized Description                                                                                                |
-|-----------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
-| No Climb              | 0     | Did not attempt to climb                                   |
-| Docked                | 1     | The robot is securely attached to the Charge Station and is not touching any other part of the field                 |
-| Engaged               | 2     | The robot is securely attached to the Charge Station and is touching another part of the field.                 |
-| Failed                | 3     | The robot was attempting to Dock or Engage with the Charge Station but was unsuccessful                      |
-| In Community          | 4     | The robot did not attempt to climb, but still was in the community |
+| Index | Localized Description | Long Localized Description                                                                           |
+|-------|-----------------------|------------------------------------------------------------------------------------------------------|
+| 0     | No Climb              | Did not attempt to climb                                                                             |
+| 1     | Docked                | The robot is securely attached to the Charge Station and is not touching any other part of the field |
+| 2     | Engaged               | The robot is securely attached to the Charge Station and is touching another part of the field.      |
+| 3     | Failed                | The robot was attempting to Dock or Engage with the Charge Station but was unsuccessful              |
+| 4     | In Community          | The robot did not attempt to climb, but still was in the community                                   |
 
 ## Robot Actions
-```dart
-0 = Picked up Cube
-1 = Picked up Cone
-2 = Placed Object
-3 = Dropped Object
-4 = Delivered to Team
-5 = Start Defense
-6 = End Defense
-7 = Crossed Community Line
-8 = Starting Position
-```
+
+| Index | Localized Description  |
+|-------|------------------------|
+| 0     | Picked Up Cube         |
+| 1     | Picked Up Cone         |
+| 2     | Placed Object          |
+| 3     | Dropped Object         |
+| 4     | Delivered to Team      |
+| 5     | Start Defense          |
+| 6     | End Defense            |
+| 7     | Crossed Community Line |
+| 8     | Starting Position      |
 
 ## Positions
+
 ```dart
 7, 8, 9
 4, 5, 6
@@ -36,11 +38,12 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 ```
 
 #### Auto-Specific Positions
-```dart
-10 = Crossed Cable
-11 = Crossed Charge Pad
-12 = Crossed Near Barrier
-```
+
+| Index | Localized Description |
+|-------|-----------------------|
+| 10    | Crossed Cable         |
+| 11    | Crossed Charge Pad    |
+| 12    | Crossed Near Barrier  |
 
 #### Middle Cargo
 ```dart
@@ -51,25 +54,28 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 ```
 
 #### Field Starting Positions
-```dart
-17 = tag id 3
-18 = tag id 2
-19 = tag id 1
-```
+
+| Index | Localized Description |
+|-------|-----------------------|
+| 17    | tag id 3              |
+| 18    | tag id 2              |
+| 19    | tag id 1              |
 
 ## Field Orientation Direction
-```dart
-0 = left
-1 = right
-```
+
+| Index | Localized Description |
+|-------|-----------------------|
+| 0     | left                  |
+| 1     | right                 |
 
 ## Robot Role
-```dart
-0 = Offense
-1 = Defense
-2 = Feeder
-3 = Immobile
-```
+
+| Index | Localized Description |
+|-------|-----------------------|
+| 0     | Offense               |
+| 1     | Defense               |
+| 2     | Feeder                |
+| 3     | Immobile              |
 
 ## Driver Ability
 ### Localized Description to Index to Long Localized Description
@@ -84,8 +90,8 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 ## Penalty Cards
 
-```dart
-0 = No Card
-1 = Yellow Card
-2 = Red Card
-```
+| Index | Localized Description |
+|-------|-----------------------|
+| 0     | No Card               |
+| 1     | Yellow Card           |
+| 2     | Red Card              |
