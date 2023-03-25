@@ -4,14 +4,16 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 # ScoutReport Objects
 
-## Climbing Result
-```dart
-0 = No Climb
-1 = Supported
-2 = Charged
-3 = Failed
-4 = In Community
-```
+
+## Charge Station
+
+| Localized Description | Index | Long Localized Description                                                                                                |
+|-----------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
+| No Climb              | 0     | Did not even attempt to climb                                   |
+| Docked                | 1     | The robot is securely attached to the Charge Station and is not touching any other part of the field                 |
+| Engaged               | 2     | The robot is securely attached to the Charge Station and is touching another part of the field.                 |
+| Failed                | 3     | The robot was attempting to Dock or Engage with the Charge Station but was unsuccessful                      |
+| In Community          | 4     | The robot did not attempt to climb, but still was in the community |
 
 ## Robot Actions
 ```dart
