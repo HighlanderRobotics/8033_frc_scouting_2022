@@ -80,13 +80,13 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 ## Driver Ability
 ### Localized Description to Index to Long Localized Description
 
-| Localized Description | Index | Long Localized Description                                                                                                |
-|-----------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
-| Terrible              | 0     | This driver cannot control the robot at all. They are a danger to everyone around them.                                   |
-| Poor                  | 1     | This driver struggles to keep the robot under control. They make many mistakes and are not very reliable.                 |
-| Average               | 2     | This driver can operate the robot competently. However, they are not particularly skilled or exceptional.                 |
-| Good                  | 3     | This driver can operate the robot with skill and precision. They are reliable and make few mistakes.                      |
-| Great                 | 4     | This driver can operate the robot with mastery. They are highly skilled, precise, and efficient and they can think ahead. |
+| Index | Localized Description | Long Localized Description                                                                                                |
+|-------|-----------------------|---------------------------------------------------------------------------------------------------------------------------|
+| 0     | Terrible              | This driver cannot control the robot at all. They are a danger to everyone around them.                                   |
+| 1     | Poor                  | This driver struggles to keep the robot under control. They make many mistakes and are not very reliable.                 |
+| 2     | Average               | This driver can operate the robot competently. However, they are not particularly skilled or exceptional.                 |
+| 3     | Good                  | This driver can operate the robot with skill and precision. They are reliable and make few mistakes.                      |
+| 4     | Great                 | This driver can operate the robot with mastery. They are highly skilled, precise, and efficient and they can think ahead. |
 
 ## Penalty Cards
 
