@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
   var matchNumberTxtController = TextEditingController();
   var teamNumberTxtController = TextEditingController();
 
-  var allianceColor = AllianceColor.blue;
+  var alliance = Alliance.blue;
 
   HomeScreen() {
     matchNumberTxtController.addListener(() {
@@ -122,7 +122,7 @@ class HomeScreen extends StatelessWidget {
                                 const SizedBox(height: 20),
                                 Obx(
                                   () => isCustomMatchSelected.isTrue
-                                      ? allianceColorDropdown()
+                                      ? allianceDropdown()
                                       : Container(),
                                 ),
                               ],
@@ -223,7 +223,7 @@ class HomeScreen extends StatelessWidget {
                 Get.to(() => GameScreen(
                       isInteractive: true,
                       alliance: isCustomMatchSelected.isTrue
-                          ? allianceColor
+                          ? alliance
                           : ((int.tryParse(controller.matchData.matchKey.value
                                           .rawShortMatchKey
                                           .substring(controller
@@ -235,8 +235,8 @@ class HomeScreen extends StatelessWidget {
                                               1)) ??
                                       0) <=
                                   2)
-                              ? AllianceColor.red
-                              : AllianceColor.blue,
+                              ? Alliance.red
+                              : Alliance.blue,
                     ));
               });
             }
@@ -362,22 +362,22 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget allianceColorDropdown() {
-    return DropdownSearch<AllianceColor>(
+  Widget allianceDropdown() {
+    return DropdownSearch<Alliance>(
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: "Alliance Color",
           filled: true,
         ),
       ),
-      items: AllianceColor.values,
-      onChanged: (allianceColor) {
-        if (allianceColor != null) {
-          this.allianceColor = allianceColor;
+      items: Alliance.values,
+      onChanged: (alliance) {
+        if (alliance != null) {
+          this.alliance = alliance;
         }
       },
       itemAsString: (item) => item.localizedDescription,
-      selectedItem: allianceColor,
+      selectedItem: alliance,
     );
   }
 

@@ -36,11 +36,11 @@ class GameScreen extends StatelessWidget {
 
   GameScreen({
     required this.isInteractive,
-    this.alliance = AllianceColor.blue,
+    this.alliance = Alliance.blue,
   });
 
   final bool isInteractive;
-  final AllianceColor alliance;
+  final Alliance alliance;
 
   var isUserSelectingStartPosition = true.obs;
   var isRobotCarryingCargo = true.obs;
@@ -118,7 +118,7 @@ class GameScreen extends StatelessWidget {
   ].obs;
 
   List<GameScreenObject> get midCargoRotatonValues {
-    return alliance == AllianceColor.blue
+    return alliance == Alliance.blue
         ? midFieldCargoValues.take(4).toList()
         : midFieldCargoValues.skip(4).toList();
   }
@@ -255,7 +255,7 @@ class GameScreen extends StatelessWidget {
                         color: Colors.white,
                       ),
                       initialOffset: Offset(
-                        alliance == AllianceColor.blue
+                        alliance == Alliance.blue
                             ? 70
                             : boxDecorationSize.width - 150,
                         0,
@@ -323,24 +323,27 @@ class GameScreen extends StatelessWidget {
                         }
                       },
                       initialOffset: Offset(
-                        alliance == AllianceColor.blue
+                        alliance == Alliance.blue
                             ? 140
                             : boxDecorationSize.width - 80,
                         0,
                       ),
                     ),
                   if (isInteractive && isUserSelectingStartPosition.isFalse)
-                    HoldTimeoutDetector(
+                    HoldDetector(
                       enableHapticFeedback: true,
-                      onTimeout: () {},
-                      onTap: () => {},
-                      onTimerInitiated: () {
-                        isRobotDefending.value = true;
-                        controller.addEventToTimeline(
-                          robotAction: RobotAction.startDefense,
-                          position: 0,
-                        );
-                        HapticFeedback.mediumImpact();
+                      onTap: () => {print("On Tap!")},
+                      onHold: () {
+                        if (isRobotDefending.isFalse) {
+                          isRobotDefending.value = true;
+
+                          controller.addEventToTimeline(
+                            robotAction: RobotAction.startDefense,
+                            position: 0,
+                          );
+
+                          HapticFeedback.mediumImpact();
+                        }
                       },
                       onCancel: () {
                         isRobotDefending.value = false;
@@ -397,12 +400,8 @@ class GameScreen extends StatelessWidget {
     return Positioned(
       top: getTopToBoxDecorationHeight() +
           boxDecorationSize.height * object.size.width,
-      left: alliance == AllianceColor.blue
-          ? boxDecorationSize.width * 0.185
-          : null,
-      right: alliance == AllianceColor.red
-          ? boxDecorationSize.width * 0.185
-          : null,
+      left: alliance == Alliance.blue ? boxDecorationSize.width * 0.185 : null,
+      right: alliance == Alliance.red ? boxDecorationSize.width * 0.185 : null,
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(
@@ -443,9 +442,9 @@ class GameScreen extends StatelessWidget {
             isDisabled: isRobotCarryingCargo.isTrue,
           ),
         ),
-        onTap: () {
+        onTap: () async {
           if (isRobotCarryingCargo.isFalse || isInteractive == false) {
-            showDialog(
+            await showDialog(
               context: context,
               builder: (context) => createGameImmersiveDialog(
                 widgets: ObjectType.values
@@ -453,8 +452,12 @@ class GameScreen extends StatelessWidget {
                         position: object.position, context: context))
                     .toList(),
                 context: context,
+                onCloseButtonPressed: () {
+                  midFieldCargoValues.add(object);
+                },
               ),
             );
+            midFieldCargoValues.remove(object);
           }
         },
       ),
@@ -463,8 +466,8 @@ class GameScreen extends StatelessWidget {
 
   Positioned createSubstationRectangle(BuildContext context) {
     return Positioned(
-      left: alliance == AllianceColor.red ? 0 : null,
-      right: alliance == AllianceColor.blue ? 0 : null,
+      left: alliance == Alliance.red ? 0 : null,
+      right: alliance == Alliance.blue ? 0 : null,
       top: getTopToBoxDecorationHeight(),
       child: InkWell(
         child: Obx(
@@ -502,8 +505,8 @@ class GameScreen extends StatelessWidget {
     return Positioned(
       bottom: getBottomToBoxDecorationHeight() +
           boxDecorationSize.height * index * 0.22,
-      left: alliance == AllianceColor.blue ? 0 : null,
-      right: alliance == AllianceColor.red ? 0 : null,
+      left: alliance == Alliance.blue ? 0 : null,
+      right: alliance == Alliance.red ? 0 : null,
       child: InkWell(
         child: Obx(
           () => createCustomEventWidget(
@@ -676,6 +679,7 @@ class GameScreen extends StatelessWidget {
   Dialog createGameImmersiveDialog({
     required List<Widget> widgets,
     required BuildContext context,
+    Function? onCloseButtonPressed,
     bool showsCloseButton = true,
   }) {
     return Dialog(
@@ -684,7 +688,10 @@ class GameScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8, right: 8),
             child: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                onCloseButtonPressed?.call();
+                Navigator.of(context).pop();
+              },
               icon: const Icon(Icons.close, size: 50),
             ),
           ),
@@ -715,7 +722,7 @@ extension GameScreenDialogs on GameScreen {
               position: indexToLevelAssociations[index]![level.index],
             );
 
-            if (additionalOnTapAction != null) additionalOnTapAction();
+            additionalOnTapAction?.call();
 
             Navigator.of(context).pop();
 
@@ -790,7 +797,7 @@ extension GameScreenDialogs on GameScreen {
 
             Navigator.of(context).pop();
 
-            if (onTapAction != null) onTapAction();
+            onTapAction?.call();
           },
           child: Container(
             decoration: BoxDecoration(
