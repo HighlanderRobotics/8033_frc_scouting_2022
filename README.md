@@ -9,7 +9,7 @@ To build, open folder in VSCode or Android Studio. Make sure to build using dart
 
 | Localized Description | Index | Long Localized Description                                                                                                |
 |-----------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
-| No Climb              | 0     | Did not even attempt to climb                                   |
+| No Climb              | 0     | Did not attempt to climb                                   |
 | Docked                | 1     | The robot is securely attached to the Charge Station and is not touching any other part of the field                 |
 | Engaged               | 2     | The robot is securely attached to the Charge Station and is touching another part of the field.                 |
 | Failed                | 3     | The robot was attempting to Dock or Engage with the Charge Station but was unsuccessful                      |
